@@ -7,6 +7,7 @@ flowchart LR
     Page --> Aside[Sidebar<br/>site title + nav]
     Page --> Main[Content<br/>template.HTML]
     Main --> Mermaid[mermaid.min.js<br/>only when needed]
+    Main --> Edges[barnacle-edges.js<br/>only with edge links]
     click Data href "#pagedata"
     click Main href "render.go.md"
     click Aside href "nav.go.md"
@@ -24,6 +25,7 @@ The template's data:
 - `Nav` — `template.HTML` sidebar navigation from `renderNav` (see [nav.go.md](nav.go.md)).
 - `RelPrefix` — `"../"` repeated per level of nesting (`""` for top-level pages, `"../"` for `parser/parser.html`); prefixes the `assets/barnacle.css` and `assets/mermaid.min.js` URLs so relative links work from any depth. Computed by `relPrefix` in [site.go.md](site.go.md).
 - `HasMermaid` — when true, the shell adds `<script src="{{.RelPrefix}}assets/mermaid.min.js">` and calls `mermaid.initialize({ startOnLoad: true, securityLevel: 'strict' })`.
+- `HasEdgeLinks` — when true, the shell additionally adds `<script src="{{.RelPrefix}}assets/barnacle-edges.js">`, which wires `%% barnacle: link` directives (see [render.go.md](render.go.md)) into clickable SVG edges in the browser.
 
 ## The shell
 
@@ -31,7 +33,7 @@ A fixed `<!DOCTYPE html>` document: `<meta name="generator" content="barnacle">`
 
 Page content is inserted as `template.HTML` — it is trusted HTML produced by the renderer (goldmark with `WithUnsafe`), not user input from the browser. Everything else (titles, nav) is escaped by `html/template` or `html.EscapeString` upstream.
 
-`securityLevel: 'strict'` is deliberate: `click` links and tooltips still work (relative `href` targets pass Mermaid's URL sanitizer), but JavaScript callbacks in `click` directives are not attached, and all diagram text goes through the sanitizer.
+`securityLevel: 'strict'` is deliberate: `click` links and tooltips still work (relative `href` targets pass Mermaid's URL sanitizer), but JavaScript callbacks in `click` directives are not attached, and all diagram text goes through the sanitizer. Edge links rendered by barnacle-edges.js navigate on user interaction, the same way node clicks do.
 
 ## Where it is used
 
@@ -41,6 +43,6 @@ Page content is inserted as `template.HTML` — it is trusted HTML produced by t
 
 - [The site generator](site.go.md) — executes the template via `renderPage`
 - [Navigation and landing page](nav.go.md) — produces `Nav` and the index content
-- [The renderer](render.go.md) — produces `Content` and reports `HasMermaid`
+- [The renderer](render.go.md) — produces `Content` and reports `HasMermaid` / `HasEdgeLinks`
 - [Configuration](config.go.md) — supplies `SiteTitle`
 - [README.md](README.md) — package hub

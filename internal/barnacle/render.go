@@ -2,6 +2,7 @@ package barnacle
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html"
 	"regexp"
@@ -90,23 +91,26 @@ var preMermaidRe = regexp.MustCompile(`(?s)<pre class="mermaid">(.*?)</pre>`)
 // <pre class="mermaid"> elements, which mermaid.js renders in the browser.
 // The block contents stay HTML-escaped; mermaid reads them via textContent,
 // which unescapes the entities. Documentation targets in `click` directives
-// are rewritten to the generated .html pages (see rewriteMermaidLinks),
-// exactly once per block — fenced or hand-authored alike.
+// and `%% barnacle: link` directives are rewritten to the generated .html
+// pages (see rewriteMermaidLinks), exactly once per block — fenced or
+// hand-authored alike. Blocks with `%% barnacle: link` directives are
+// followed by a JSON manifest the page template uses to wire the clicks.
 func rewriteMermaidBlocks(rendered string) string {
 	rendered = mermaidBlockRe.ReplaceAllString(rendered, `<pre class="mermaid">$1</pre>`)
 	return preMermaidRe.ReplaceAllStringFunc(rendered, func(block string) string {
 		body := html.UnescapeString(preMermaidRe.FindStringSubmatch(block)[1])
-		body = rewriteMermaidLinks(body)
-		return `<pre class="mermaid">` + escapeMermaidText(body) + `</pre>`
+		body, directives := rewriteMermaidLinks(body)
+		return `<pre class="mermaid">` + escapeMermaidText(body) + `</pre>` + edgeLinksScript(directives)
 	})
 }
 
 // MermaidPageHTML renders a standalone .mmd file as a page body with a
 // heading and the diagram source in a <pre class="mermaid"> block.
 func MermaidPageHTML(title string, source []byte) string {
-	src := rewriteMermaidLinks(string(source))
+	src, directives := rewriteMermaidLinks(string(source))
 	return `<h1>` + html.EscapeString(title) + `</h1>` + "\n" +
-		`<pre class="mermaid">` + escapeMermaidText(src) + `</pre>` + "\n"
+		`<pre class="mermaid">` + escapeMermaidText(src) + `</pre>` + "\n" +
+		edgeLinksScript(directives)
 }
 
 // escapeMermaidText escapes the characters goldmark escapes inside code
@@ -124,13 +128,14 @@ func escapeMermaidText(s string) string {
 }
 
 // rewriteMermaidLinks rewrites documentation targets (.md/.markdown/.mmd) in
-// Mermaid `click` directives so clickable diagram nodes navigate to the
-// generated .html pages, mirroring what rewriteDocLinks does for Markdown.
-// Clicking a node is a relative navigation resolved against the page URL, and
-// the generated site mirrors the source tree, so swapping the extension is
-// enough — the same invariant Markdown links rely on.
+// Mermaid `click` directives and `%% barnacle: link` directives so clickable
+// diagram shapes navigate to the generated .html pages, mirroring what
+// rewriteDocLinks does for Markdown. Clicking a node is a relative navigation
+// resolved against the page URL, and the generated site mirrors the source
+// tree, so swapping the extension is enough — the same invariant Markdown
+// links rely on.
 //
-// Two forms are supported, matching Mermaid's flowchart syntax:
+// Two node-click forms are supported, matching Mermaid's flowchart syntax:
 //
 //	click NodeId href "target.md" ["tooltip"] [_blank]
 //	click NodeId "target.md" ["tooltip"] [_blank]
@@ -140,12 +145,138 @@ func escapeMermaidText(s string) string {
 // shorthand form is rewritten only when it contains no whitespace. Targets
 // are rewritten only for documentation extensions, so tooltips and external
 // links are never touched.
-func rewriteMermaidLinks(src string) string {
+//
+// The .md/.mmd targets of `%% barnacle: link` directives are rewritten the
+// same way, and the directives are returned as edgeLinkDirective values so
+// the caller can emit the JSON manifest barnacle-edges.js reads. The
+// directive lines stay in the diagram source (mermaid renders them as
+// comments).
+func rewriteMermaidLinks(src string) (string, []edgeLinkDirective) {
 	lines := strings.Split(src, "\n")
+	var directives []edgeLinkDirective
 	for i, line := range lines {
-		lines[i] = rewriteMermaidClickLine(line)
+		line = rewriteMermaidClickLine(line)
+		if d, ok := parseEdgeLinkDirective(line); ok {
+			d.Href = RewriteDocLink(d.Href)
+			line = formatEdgeLinkDirective(d)
+			directives = append(directives, d)
+		}
+		lines[i] = line
 	}
-	return strings.Join(lines, "\n")
+	return strings.Join(lines, "\n"), directives
+}
+
+// edgeLinkDirective is a `%% barnacle: link` directive from a Mermaid
+// diagram. The directive is a mermaid comment (mermaid renders nothing for
+// it); barnacle parses it at build time, rewrites the target, and emits a
+// JSON manifest the page template places next to the diagram for
+// barnacle-edges.js to wire up in the browser.
+//
+// Syntax:
+//
+//	%% barnacle: link e1 href "target.md" ["tooltip"] [_blank]
+//	%% barnacle: link "send(cmd)" href "target.md" ["tooltip"] [_blank]
+//
+// A bare key matches the edge's data-id (the explicit `e1` from
+// `A e1@--> B`, or the auto-assigned id like `edge0`/`L_A_B_0`); a quoted
+// key matches the edge's label text. Targets ending in .md/.markdown/.mmd
+// are rewritten to .html like everything else.
+type edgeLinkDirective struct {
+	Key     string `json:"key"`
+	By      string `json:"by"`
+	Href    string `json:"href"`
+	Tooltip string `json:"tooltip,omitempty"`
+	Blank   bool   `json:"blank,omitempty"`
+}
+
+var edgeLinkRe = regexp.MustCompile(`^(\s*%%\s*barnacle:\s*link\s+)(?:"([^"]*)"|'([^']*)'|([^\s"']+))\s+href\s+(?:"([^"]*)"|'([^']*)'|([^\s"']+))(?:\s+(?:"([^"]*)"|'([^']*)'))?(?:\s+(_blank|_self))?\s*$`)
+
+func parseEdgeLinkDirective(line string) (edgeLinkDirective, bool) {
+	m := edgeLinkRe.FindStringSubmatch(line)
+	if m == nil {
+		return edgeLinkDirective{}, false
+	}
+	var d edgeLinkDirective
+	switch {
+	case m[2] != "":
+		d.By, d.Key = "label", m[2]
+	case m[3] != "":
+		d.By, d.Key = "label", m[3]
+	default:
+		d.By, d.Key = "id", m[4]
+	}
+	switch {
+	case m[5] != "":
+		d.Href = m[5]
+	case m[6] != "":
+		d.Href = m[6]
+	default:
+		d.Href = m[7]
+	}
+	switch {
+	case m[8] != "":
+		d.Tooltip = m[8]
+	case m[9] != "":
+		d.Tooltip = m[9]
+	}
+	if strings.EqualFold(m[10], "_blank") {
+		d.Blank = true
+	}
+	if d.Key == "" || d.Href == "" {
+		return edgeLinkDirective{}, false
+	}
+	return d, true
+}
+
+// formatEdgeLinkDirective renders a directive back into the mermaid source.
+// The directive is a comment to mermaid; keeping it in the output keeps the
+// diagram self-describing when the page source is viewed.
+func formatEdgeLinkDirective(d edgeLinkDirective) string {
+	norm := func(s string) string {
+		s = strings.ReplaceAll(s, "\r", " ")
+		s = strings.ReplaceAll(s, "\n", " ")
+		s = strings.ReplaceAll(s, `"`, `'`)
+		return s
+	}
+	key := norm(d.Key)
+	if d.By == "label" {
+		key = `"` + key + `"`
+	}
+	var b strings.Builder
+	b.WriteString("%% barnacle: link ")
+	b.WriteString(key)
+	fmt.Fprintf(&b, ` href "%s"`, norm(d.Href))
+	if d.Tooltip != "" {
+		fmt.Fprintf(&b, ` "%s"`, norm(d.Tooltip))
+	}
+	if d.Blank {
+		b.WriteString(" _blank")
+	}
+	return b.String()
+}
+
+// edgeLinksScript renders the JSON manifest barnacle-edges.js consumes into
+// a <script> element placed right after the diagram. "<" is escaped so the
+// manifest can never break out of the script element.
+func edgeLinksScript(directives []edgeLinkDirective) string {
+	if len(directives) == 0 {
+		return ""
+	}
+	data, err := json.Marshal(edgeLinksManifest{Edges: directives})
+	if err != nil {
+		return ""
+	}
+	data = bytes.ReplaceAll(data, []byte("<"), []byte(`\u003c`))
+	return `<script type="application/json" class="barnacle-edge-links">` + string(data) + "</script>\n"
+}
+
+type edgeLinksManifest struct {
+	Edges []edgeLinkDirective `json:"edges"`
+}
+
+// HasEdgeLinks reports whether rendered HTML contains an edge-links manifest.
+func HasEdgeLinks(rendered string) bool {
+	return strings.Contains(rendered, `class="barnacle-edge-links"`)
 }
 
 var (

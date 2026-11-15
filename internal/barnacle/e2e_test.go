@@ -48,6 +48,8 @@ The landing page of the fixture.
 
 `+"```mermaid\nflowchart LR\n  A[usage] --> B[api]\n  click A href \"guide/usage.md\"\n  click B href \"guide/api.go.md\" \"API docs\"\n```"+`
 
+`+"```mermaid\nstateDiagram-v2\n  [*] --> Idle\n  Idle --> Waiting : send(cmd)\n  Waiting --> Done : ack\n  Waiting --> Error : timeout\n  %% barnacle: link \"send(cmd)\" href \"guide/usage.md\" \"Usage docs\"\n  %% barnacle: link \"ack\" href \"guide/api.go.md\"\n```"+`
+
 Browse [usage](guide/usage.md), [the API](guide/api.go.md), and
 [the reference](reference.mmd). External links like
 [external](https://example.com/docs/scan.md) and fragment links like
@@ -56,7 +58,7 @@ Browse [usage](guide/usage.md), [the API](guide/api.go.md), and
 
 	writeFile(t, root, "guide/usage.md", `# Usage
 
-`+"```mermaid\nflowchart TD\n  R[read] --> W[write]\n  click R href \"usage.cpp.md\"\n  click W \"api.go.md\" \"tooltip text\"\n  click R callback \"callback with scan.md\"\n```"+`
+`+"```mermaid\nflowchart TD\n  R[read] --> W[write]\n  R e1@--> Done\n  click R href \"usage.cpp.md\"\n  click W \"api.go.md\" \"tooltip text\"\n  click R callback \"callback with scan.md\"\n  %% barnacle: link e1 href \"api.go.md\"\n```"+`
 
 See <a href="api.go.md">the API</a> and <a href="../README.md">home</a>.
 
@@ -96,13 +98,15 @@ func generateFixture(t *testing.T) (site string, pages int) {
 }
 
 var (
-	hrefSrcRe      = regexp.MustCompile(`(?:href|src|xlink:href)="([^"]*)"`)
-	mermaidRe      = regexp.MustCompile(`(?s)<pre class="mermaid">(.*?)</pre>`)
-	mermaidHrefRe  = regexp.MustCompile(`(?i)href\s+(?:"([^"\s]*)"|'([^'\s]*)'|([^\s"']+))`)
-	mermaidShortRe = regexp.MustCompile(`(?i)^\s*click\s+([^"\s]+(?:\s+[^"\s]+)*?)\s+"([^"\s]*)"`)
-	schemeRe2      = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9+.-]*:`)
-	externalRel    = regexp.MustCompile(`^([A-Za-z][A-Za-z0-9+.-]*:|//|#)`)
-	docExtRe       = regexp.MustCompile(`(?i)\.(md|markdown|mmd)$`)
+	hrefSrcRe           = regexp.MustCompile(`(?:href|src|xlink:href)="([^"]*)"`)
+	mermaidRe           = regexp.MustCompile(`(?s)<pre class="mermaid">(.*?)</pre>`)
+	mermaidHrefRe       = regexp.MustCompile(`(?i)href\s+(?:"([^"\s]*)"|'([^'\s]*)'|([^\s"']+))`)
+	mermaidShortRe      = regexp.MustCompile(`(?i)^\s*click\s+([^"\s]+(?:\s+[^"\s]+)*?)\s+"([^"\s]*)"`)
+	edgeLinksManifestRe = regexp.MustCompile(`(?s)<script type="application/json" class="barnacle-edge-links">.*?</script>`)
+	edgeLinksKeyRe      = regexp.MustCompile(`"key"\s*:`)
+	schemeRe2           = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9+.-]*:`)
+	externalRel         = regexp.MustCompile(`^([A-Za-z][A-Za-z0-9+.-]*:|//|#)`)
+	docExtRe            = regexp.MustCompile(`(?i)\.(md|markdown|mmd)$`)
 )
 
 // hasDocExt reports whether dest's path (before any query/fragment)
@@ -201,16 +205,17 @@ func TestE2EGeneratedSiteAnchorsResolve(t *testing.T) {
 			}
 		}
 
-		// Mermaid blocks: no .md/.mmd click targets may remain either.
-		// Block bodies are HTML-escaped in the output, so unescape first.
+		// Mermaid blocks: no .md/.mmd click or barnacle-directive targets
+		// may remain either. Block bodies are HTML-escaped in the output,
+		// so unescape first.
 		for _, m := range mermaidRe.FindAllStringSubmatch(text, -1) {
 			body := html.UnescapeString(m[1])
 			for _, line := range strings.Split(body, "\n") {
 				trimmed := strings.TrimLeft(line, " \t")
-				if len(trimmed) < 5 || !strings.EqualFold(trimmed[:5], "click") {
-					continue
-				}
-				if len(trimmed) > 5 && trimmed[5] != ' ' && trimmed[5] != '\t' {
+				lower := strings.ToLower(trimmed)
+				isClick := strings.HasPrefix(lower, "click") && (len(lower) == 5 || lower[5] == ' ' || lower[5] == '\t')
+				isDirective := strings.HasPrefix(lower, "%%") && strings.Contains(lower, "barnacle:")
+				if !isClick && !isDirective {
 					continue
 				}
 				for _, mm := range mermaidHrefRe.FindAllStringSubmatch(line, -1) {
@@ -350,6 +355,21 @@ func TestE2EBrowserNavigation(t *testing.T) {
 				targets[target] = page
 			}
 		}
+		// After mermaid renders, every edge in a page's manifests must be
+		// wired into a clickable SVG anchor. A regression in the injection
+		// would leave this count short.
+		manifests := edgeLinksManifestRe.FindAllString(dom, -1)
+		expectedEdges := 0
+		for _, m := range manifests {
+			expectedEdges += len(edgeLinksKeyRe.FindAllStringIndex(m, -1))
+		}
+		if expectedEdges > 0 {
+			anchors := strings.Count(dom, `class="barnacle-edge-link"`)
+			if anchors != expectedEdges {
+				t.Errorf("%s: %d edge anchors injected for %d manifest edges", page, anchors, expectedEdges)
+			}
+		}
+
 		if strings.Contains(dom, `<pre class="mermaid"`) {
 			if !strings.Contains(dom, `data-processed="true"`) {
 				t.Errorf("%s: mermaid diagram did not render (data-processed missing)", page)
