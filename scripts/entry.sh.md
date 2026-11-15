@@ -1,8 +1,18 @@
 # The script entry point (`scripts/entry.sh`)
 
+```mermaid
+flowchart LR
+    Script[Any scripts/*.sh] --> Entry[entry.sh]
+    Entry --> Env[env.sh — cascade<br/>VERSIONER_BIN · LOGAMUFFIN_BIN · ...]
+    Entry --> Log[log LEVEL MESSAGE]
+    Log -->|binary present| Logamuffin[logamuffin]
+    Log -->|missing / fresh clone| Fallback[printf fallback]
+    click Env href "env.sh.md"
+```
+
 Every repository script sources `scripts/entry.sh` instead of the individual cascade files, because it does two jobs at once:
 
-1. **It loads the environment** — it sources [env.md](env.md), which sources the hidden cascade (`.common.env` plus the platform file selected from `uname`).
+1. **It loads the environment** — it sources [env.sh.md](env.sh.md), which sources the hidden cascade (`.common.env` plus the platform file selected from `uname`).
 2. **It defines `log()`** — the shared logging function used by the scripts and by the `tools/*/update.sh` refresh scripts.
 
 ## `log()` semantics
@@ -22,7 +32,7 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 ## Related pages
 
-- [env.md](env.md) — the cascade `entry.sh` loads
-- [version.md](version.md) — the version script that sources `entry.sh`
-- [build.md](build.md) · [release.md](release.md) — consumers of `log()` and the cascade
+- [env.sh.md](env.sh.md) — the cascade `entry.sh` loads
+- [version.sh.md](version.sh.md) — the version script that sources `entry.sh`
+- [build.sh.md](build.sh.md) · [release.sh.md](release.sh.md) — consumers of `log()` and the cascade
 - [README.md](README.md) — the scripts hub

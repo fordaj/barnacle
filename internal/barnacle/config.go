@@ -26,6 +26,17 @@ type Config struct {
 	// IncludeHidden allows scanning dot-directories and dot-files other
 	// than .git, which is always excluded.
 	IncludeHidden bool `json:"includeHidden"`
+
+	// WarnMissingMermaid controls the non-fatal note barnacle prints for
+	// pages that contain no Mermaid diagram. Defaults to true; set to
+	// false to silence the note entirely.
+	WarnMissingMermaid *bool `json:"warnMissingMermaid"`
+}
+
+// MermaidWarningEnabled reports whether barnacle should note pages that
+// contain no Mermaid diagram. The default (unset) is true.
+func (c Config) MermaidWarningEnabled() bool {
+	return c.WarnMissingMermaid == nil || *c.WarnMissingMermaid
 }
 
 // defaultExcludes are directory and file base names always skipped.

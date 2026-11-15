@@ -1,8 +1,20 @@
 # The versioner bundle (`tools/versioner/`)
 
+```mermaid
+flowchart LR
+    Gh[fordaj/* release] --> Resolve[resolve tag]
+    Resolve --> Download[gh release download]
+    Download --> Check{checksums present?}
+    Check -->|yes| Verify[verify — mismatch is fatal]
+    Check -->|no| Warn[warn and continue]
+    Verify --> Stage[stage in temp dir]
+    Warn --> Stage
+    Stage --> Swap[atomic swap · delete superseded v*]
+```
+
 [Versioner](https://github.com/fordaj/Versioner) computes the version of this repository from its Git history, under the rules in `.versioner.json` (`defaultBranchVersion: 254`, `exemptBranches: { main: 0 }`, `tagPattern: v[0-9]*`). The release pipeline asks versioner for the next version, stamps it into every cross-compiled binary, tags the commit, and creates the GitHub release.
 
-The pinned binary selection goes through the [env cascade](../../scripts/env.md) (`VERSIONER_VERSION_DIR`/`VERSIONER_BIN`); `scripts/version.sh` prints what it computes, and `cmd/barnacle` resolves `--version` from the stamp it produces at build time.
+The pinned binary selection goes through the [env cascade](../../scripts/env.sh.md) (`VERSIONER_VERSION_DIR`/`VERSIONER_BIN`); `scripts/version.sh` prints what it computes, and `cmd/barnacle` resolves `--version` from the stamp it produces at build time.
 
 ## Bundled platforms
 
@@ -15,6 +27,6 @@ Refreshes from `fordaj/Versioner` releases: archives whose stems carry the `<os>
 ## Related pages
 
 - [../README.md](../README.md) — the bundle index
-- [../../scripts/version.md](../../scripts/version.md) — the wrapper that prints versioner's output
-- [../../scripts/release.md](../../scripts/release.md) — the release pipeline built on it
-- [../../scripts/env.md](../../scripts/env.md) — the cascade selecting `VERSIONER_BIN`
+- [../../scripts/version.sh.md](../../scripts/version.sh.md) — the wrapper that prints versioner's output
+- [../../scripts/release.sh.md](../../scripts/release.sh.md) — the release pipeline built on it
+- [../../scripts/env.sh.md](../../scripts/env.sh.md) — the cascade selecting `VERSIONER_BIN`

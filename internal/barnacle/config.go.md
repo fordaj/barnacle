@@ -1,5 +1,19 @@
 # Configuration (`config.go`)
 
+```mermaid
+flowchart TD
+    Start[LoadConfig] --> Exists{File readable?}
+    Exists -- "no, default path" --> Defaults[Defaults]
+    Exists -- "no, --config" --> Error[Error → exit 1]
+    Exists -- yes --> Parse{Valid JSON?}
+    Parse -- no --> Error
+    Parse -- yes --> Check{Blank exclude entry?}
+    Check -- yes --> Error
+    Check -- no --> Cfg[Config]
+    click Error href "../../cmd/barnacle/main.go.md"
+    click Cfg href "site.go.md"
+```
+
 `LoadConfig` reads and validates the repository-level configuration file (`.barnacle.json`) and produces the `Config` value the rest of the pipeline uses.
 
 ## The `Config` struct
@@ -7,6 +21,7 @@
 - `Title` — shown in the sidebar, the landing page, and page titles. Defaults to the base name of the repository root; `.`, a bare separator, or empty falls back to `Documentation`.
 - `Exclude` — directories or files to skip. An entry without a slash matches the base name of every path on the walk; an entry with a slash is matched as a glob against the slash-separated path relative to the root, and everything beneath it is skipped too. An empty exclusion entry is a config error. (`**` is not supported; use `docs/archive` to skip a directory.)
 - `IncludeHidden` — allow scanning dot-directories and dot-files other than `.git`, which is always excluded.
+- `WarnMissingMermaid` — `*bool`; `warnMissingMermaid` in JSON. Controls the non-fatal note barnacle prints listing pages that contain no Mermaid diagram. Unset or `true` enables it; `false` silences it (see `MermaidWarningEnabled`). Missing diagrams are never an error.
 
 `defaultExcludes` always skips `.git`, `node_modules`, `vendor`, and `dist`, on top of anything configured here.
 
@@ -18,12 +33,12 @@ The configuration is read once at startup; `root` is always the current working 
 
 ## Where it is used
 
-`cmd/barnacle/main.go` calls `LoadConfig`; the resulting `Config` flows into `Generate` (page titles) and `Scan` (exclusions and hidden-file policy). See [the scanner](scan.md) and [the site generator](site.md).
+`cmd/barnacle/main.go.md` calls `LoadConfig`; the resulting `Config` flows into `Generate` (page titles) and `Scan` (exclusions and hidden-file policy). See [the scanner](scan.go.md) and [the site generator](site.go.md).
 
 ## Related pages
 
-- [The scanner](scan.md) — consumes `Exclude` and `IncludeHidden`
-- [The site generator](site.md) — consumes `Title` for the landing page
-- [The page template](template.md) — what ends up on screen
+- [The scanner](scan.go.md) — consumes `Exclude` and `IncludeHidden`
+- [The site generator](site.go.md) — consumes `Title` for the landing page
+- [The page template](template.go.md) — what ends up on screen
 - [README.md](README.md) — package hub
-- [cmd/barnacle/main.md](../../cmd/barnacle/main.md) — calls `LoadConfig` at startup
+- [cmd/barnacle/main.go.md](../../cmd/barnacle/main.go.md) — calls `LoadConfig` at startup

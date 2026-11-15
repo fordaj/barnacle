@@ -15,6 +15,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/fordaj/barnacle/internal/barnacle"
 )
@@ -33,6 +34,15 @@ Options:
   --version        Print the version and exit
   --help           Show this help and exit
 `
+
+// truncate returns at most n items from the front, appending an
+// "and N more" marker when anything was dropped.
+func truncate(items []string, n int) []string {
+	if len(items) <= n {
+		return items
+	}
+	return append(append([]string{}, items[:n]...), fmt.Sprintf("and %d more", len(items)-n))
+}
 
 func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
@@ -91,10 +101,16 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 1
 	}
 
-	pages, err := barnacle.Generate(root, site, cfg)
+	pages, missingMermaid, err := barnacle.Generate(root, site, cfg)
 	if err != nil {
 		fmt.Fprintf(stderr, "barnacle: %v\n", err)
 		return 1
+	}
+
+	if cfg.MermaidWarningEnabled() && len(missingMermaid) > 0 {
+		fmt.Fprintf(stderr, "barnacle: note: %d page(s) have no Mermaid diagram: %s\n",
+			len(missingMermaid), strings.Join(truncate(missingMermaid, 10), ", "))
+		fmt.Fprintf(stderr, "barnacle: best practice is a diagram at the top of every page — it gives new readers a map of what they are looking at (set \"warnMissingMermaid\": false in .barnacle.json to silence this note)\n")
 	}
 
 	absSite, err := filepath.Abs(site)

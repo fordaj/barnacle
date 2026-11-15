@@ -1,5 +1,24 @@
 # The environment cascade (`scripts/env.sh` + the hidden `.*.env` files)
 
+```mermaid
+flowchart TD
+    Uname[uname -s : -m] --> Check{platform?}
+    Check -->|Darwin:arm64| MacArm[.macos-arm64.env]
+    Check -->|Darwin:x86_64| Mac86[.macos-x86_64.env]
+    Check -->|Linux:aarch64| LinArm[.linux-arm64.env]
+    Check -->|Linux:x86_64| Lin86[.linux-x86_64.env]
+    Check -->|Windows:x86_64| Win86[.windows-x86_64.env]
+    Check -->|Windows:arm64| WinArm[.windows-arm64.env]
+    Check -->|other| Error[Error → return 1]
+    MacArm --> Anchor[Anchor *_BIN to repo root]
+    Mac86 --> Anchor
+    LinArm --> Anchor
+    Lin86 --> Anchor
+    Win86 --> Anchor
+    WinArm --> Anchor
+    Common[.common.env] -.-> Anchor
+```
+
 `scripts/env.sh` is the plumbing that makes the pinned helper tools resolvable from any script, in any working directory, on every supported platform. It is sourced — never executed — and it works from both bash and zsh.
 
 ## What it does
@@ -7,7 +26,9 @@
 1. Locates the cascade files relative to itself (bash via `$BASH_SOURCE`, zsh via `%x`, `eval`-wrapped so bash never parses the zsh-only syntax) so sourcing works from any cwd.
 2. Brings in `.common.env`, then the platform file selected by `uname -s`/`uname -m` (`Darwin:arm64` → `.macos-arm64.env`, `Linux:x86_64` → `.linux-x86_64.env`, `Linux:aarch64` → `.linux-arm64.env`, `MINGW*`/`MSYS*`/`CYGWIN*` on x86_64/arm64 → `.windows-x86_64.env` / `.windows-arm64.env`). Unsupported platforms print an error and return `1`.
 3. **Anchors** every repository-relative `*_BIN` to the repository root (`REPO_ROOT_DIR`), leaving absolute paths untouched. After sourcing, `$VERSIONER_BIN`, `$LOGAMUFFIN_BIN`, `$RUNNER_SPAWNER_BIN`, and `$BARNACLE_BIN` are absolute.
-4. Sets `REPO_ROOT_DIR` for callers that need the repository root (for example [version.md](version.md)).
+4. Sets `REPO_ROOT_DIR` for callers that need the repository root (for example [version.sh.md](version.sh.md)).
+
+A `*_BIN` set by the caller always wins over the pinned default: the platform files expand each path as `${NAME:-${VERSION_DIR}/<platform>/<binary>}`, so `BARNACLE_BIN=dist/macos-arm64/barnacle scripts/docs.sh` renders the site with a locally built barnacle instead of the pinned release. (Before this behaviour existed, the cascade silently overwrote a caller-set `BARNACLE_BIN`.)
 
 Everything is exported with `set -a` while sourcing and un-exported at the end, so the cascade does not leak into the caller's environment beyond the intended variables.
 
@@ -27,6 +48,6 @@ Hidden files are excluded from barnacle's default scan (this repository's `.barn
 
 ## Related pages
 
-- [entry.md](entry.md) — the entry point most scripts source (it loads this file and defines `log()`)
-- [docs.md](docs.md) — the docs generator that resolves `BARNACLE_BIN` through this cascade
+- [entry.sh.md](entry.sh.md) — the entry point most scripts source (it loads this file and defines `log()`)
+- [docs.sh.md](docs.sh.md) — the docs generator that resolves `BARNACLE_BIN` through this cascade
 - [README.md](README.md) — the scripts hub

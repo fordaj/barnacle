@@ -1,27 +1,44 @@
 # The `internal/barnacle` package
 
-All of barnacle's implementation lives in this package: configuration, scanning, rendering, HTML assembly, navigation, and the page template. `cmd/barnacle/main.go` is a two-line shim over `Generate` here.
+```mermaid
+flowchart TD
+    Generate[Generate<br/>site.go.md] --> Scan[Scan<br/>scan.go.md]
+    Generate --> Render[MarkdownToHTML<br/>render.go.md]
+    Generate --> Nav[renderNav<br/>nav.go.md]
+    Generate --> Template[pageTemplate<br/>template.go.md]
+    Render --> Template
+    Nav --> Template
+    Generate -.->|reads once| Config[LoadConfig<br/>config.go.md]
+    click Generate href "site.go.md"
+    click Scan href "scan.go.md"
+    click Render href "render.go.md"
+    click Nav href "nav.go.md"
+    click Template href "template.go.md"
+    click Config href "config.go.md"
+```
 
-If you want the big picture first, open [cmd/barnacle/main.md](../../cmd/barnacle/main.md), then [site.md](site.md). To refresh the pinned helper binaries, see `tools/README.md` (not part of this site); to render this documentation, see [scripts/docs.md](../../scripts/docs.md).
+All of barnacle's implementation lives in this package: configuration, scanning, rendering, HTML assembly, navigation, and the page template. `cmd/barnacle/main.go.md` is a two-line shim over `Generate` here.
+
+If you want the big picture first, open [cmd/barnacle/main.go.md](../../cmd/barnacle/main.go.md), then [site.go.md](site.go.md). To refresh the pinned helper binaries, see `tools/README.md` (not part of this site); to render this documentation, see [scripts/docs.sh.md](../../scripts/docs.sh.md).
 
 ## Pages
 
-- [Configuration — config.go](config.md) — `.barnacle.json` loading and validation
-- [The scanner — scan.go](scan.md) — walk the tree, apply excludes, build `Document`s
-- [The renderer — render.go](render.md) — goldmark → HTML, link rewriting, Mermaid blocks
-- [Navigation and landing page — nav.go](nav.md) — the sidebar tree and the `index.html` body
-- [The page template — template.go](template.md) — the HTML shell shared by every page
-- [The site generator — site.go](site.md) — orchestration: scan → render → write `site/`
-- [cmd/barnacle/main.go](../../cmd/barnacle/main.md) — the process boundary that calls `Generate`
+- [Configuration — config.go](config.go.md) — `.barnacle.json` loading and validation
+- [The scanner — scan.go](scan.go.md) — walk the tree, apply excludes, build `Document`s
+- [The renderer — render.go](render.go.md) — goldmark → HTML, link rewriting (including Mermaid `click` directives), Mermaid blocks
+- [Navigation and landing page — nav.go](nav.go.md) — the sidebar tree and the `index.html` body
+- [The page template — template.go](template.go.md) — the HTML shell shared by every page
+- [The site generator — site.go](site.go.md) — orchestration: scan → render → write `site/`
+- [cmd/barnacle/main.go](../../cmd/barnacle/main.go.md) — the process boundary that calls `Generate`
 
 ## How the pieces fit
 
-`Generate` ([site.md](site.md)) is the single entry point: it `Scan`s the tree ([scan.md](scan.md)), renders each document ([render.md](render.md)), builds the navigation tree ([nav.md](nav.md)), and executes the shared page template ([template.md](template.md)) once per page plus the landing page. `LoadConfig` ([config.md](config.md)) is called once by `main` before `Generate`.
+`Generate` ([site.go.md](site.go.md)) is the single entry point: it `Scan`s the tree ([scan.go.md](scan.go.md)), renders each document ([render.go.md](render.go.md)), builds the navigation tree ([nav.go.md](nav.go.md)), and executes the shared page template ([template.go.md](template.go.md)) once per page plus the landing page. `LoadConfig` ([config.go.md](config.go.md)) is called once by `main` before `Generate`.
 
 ## Assets
 
-`assets/barnacle.css` (the site stylesheet) and `assets/mermaid.min.js` (the Mermaid renderer, copied into `assets/` only on pages that contain a diagram) are embedded with `go:embed` (`assetsFS` in [site.md](site.md)) and written into the output on every generation.
+`assets/barnacle.css` (the site stylesheet) and `assets/mermaid.min.js` (the Mermaid renderer, copied into `assets/` only on pages that contain a diagram) are embedded with `go:embed` (`assetsFS` in [site.go.md](site.go.md)) and written into the output on every generation.
 
 ## Testing
 
-Tests live next to the code as `*_test.go` (`render_test.go`, `site_test.go`) and use only the standard `testing` package. Run them with `go test ./...` (see the README's "Building from source").
+Tests live next to the code as `*_test.go` (`config_test.go`, `render_test.go`, `site_test.go`) and use only the standard `testing` package. Run them with `go test ./...` (see the README's "Building from source").

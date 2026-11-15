@@ -66,12 +66,22 @@ func TestGenerateSite(t *testing.T) {
 	root := sampleProject(t)
 	cfg := Config{Title: "Sample"}
 	site := filepath.Join(root, "site")
-	pages, err := Generate(root, site, cfg)
+	pages, missing, err := Generate(root, site, cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if pages == 0 {
 		t.Fatal("no pages generated")
+	}
+	for _, rel := range missing {
+		if rel == "main.md" {
+			t.Errorf("main.md contains a Mermaid diagram but was reported missing")
+		}
+	}
+	got := strings.Join(missing, ",")
+	wantMissing := "database.md,parser/parser.md"
+	if got != wantMissing {
+		t.Errorf("missing mermaid pages = %q, want %q", got, wantMissing)
 	}
 
 	expected := []string{
@@ -138,7 +148,7 @@ func TestGenerateCollision(t *testing.T) {
 	root := t.TempDir()
 	writeFile(t, root, "dup.md", "# A\n")
 	writeFile(t, root, "dup.mmd", "flowchart TD\n  A --> B\n")
-	_, err := Generate(root, filepath.Join(root, "site"), Config{Title: "x"})
+	_, _, err := Generate(root, filepath.Join(root, "site"), Config{Title: "x"})
 	if err == nil {
 		t.Fatal("expected collision error, got nil")
 	}
@@ -151,14 +161,14 @@ func TestGenerateRegeneratesMarkerSite(t *testing.T) {
 	root := sampleProject(t)
 	cfg := Config{Title: "Sample"}
 	site := filepath.Join(root, "site")
-	if _, err := Generate(root, site, cfg); err != nil {
+	if _, _, err := Generate(root, site, cfg); err != nil {
 		t.Fatal(err)
 	}
 	stale := filepath.Join(site, "stale.html")
 	if err := os.WriteFile(stale, []byte("stale"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := Generate(root, site, cfg); err != nil {
+	if _, _, err := Generate(root, site, cfg); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(stale); !os.IsNotExist(err) {

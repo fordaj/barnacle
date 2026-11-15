@@ -1,5 +1,17 @@
 # The formattington-lite bundle (`tools/formattington-lite/`)
 
+```mermaid
+flowchart LR
+    Gh[fordaj/* release] --> Resolve[resolve tag]
+    Resolve --> Download[gh release download]
+    Download --> Check{checksums present?}
+    Check -->|yes| Verify[verify — mismatch is fatal]
+    Check -->|no| Warn[warn and continue]
+    Verify --> Stage[stage in temp dir]
+    Warn --> Stage
+    Stage --> Swap[atomic swap · delete superseded v*]
+```
+
 Pinned [formattington](https://github.com/fordaj/formattington) `formattington-lite` binaries, refreshed from `fordaj/formattington` releases. Note that nothing in this repository's scripts consumes this bundle — `./scripts/format.sh` and CI (`./ci/format_check.sh`) run formattington through `uv` (pinned commit in `pyproject.toml`/`uv.lock`), not through this directory. The bundle is kept ready for direct use.
 
 ## Layout
@@ -22,5 +34,5 @@ Refreshes from `fordaj/formattington`: consumes only assets whose stem ends in `
 ## Related pages
 
 - [../README.md](../README.md) — the bundle index
-- [../../scripts/format.md](../../scripts/format.md) — how formattington is actually run in this repository
-- [../../scripts/env.md](../../scripts/env.md) — the cascade (which does not select this bundle)
+- [../../scripts/format.sh.md](../../scripts/format.sh.md) — how formattington is actually run in this repository
+- [../../scripts/env.sh.md](../../scripts/env.sh.md) — the cascade (which does not select this bundle)
