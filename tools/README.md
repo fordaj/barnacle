@@ -1,5 +1,13 @@
 # Pinned helper tools (`tools/`)
 
+```mermaid
+flowchart LR
+    Gh[GitHub release<br/>fordaj/*] --> Update[update.sh]
+    Update --> Verify[checksums when present]
+    Verify --> Stage[stage in temp dir]
+    Stage --> Swap[atomic swap<br/>delete superseded v*]
+```
+
 `tools/` carries the repository's pinned helper binaries — formatting, logging, CI-runner and docs tooling — plus one `update.sh` per tool that refreshes them. These are the tools used to build, release, log, format, and document this repository itself; they are not Go dependencies.
 
 These pages are **not part of the generated site** (`.barnacle.json` excludes `tools`); they are maintained as ordinary Markdown for people reading the repository.
@@ -23,13 +31,13 @@ tools/<name>/
 
 | Tool | Used for | Page |
 | --- | --- | --- |
-| [formattington-lite](formattington-lite/update.md) | Pinned `formattington-lite` formatter binaries (not wired into `./scripts/format.sh` or CI — those run formattington via `uv`) | [update.sh](formattington-lite/update.md) |
-| [logamuffin](logamuffin/update.md) | Structured logging backend for `log()` in the scripts | [update.sh](logamuffin/update.md) |
-| [runner-spawner](runner-spawner/update.md) | Manages the self-hosted CI runners (see `.runner-spawner.json` and `.github/workflows/ci.yml`) | [update.sh](runner-spawner/update.md) |
-| [versioner](versioner/update.md) | Computes the repository version for builds and releases | [update.sh](versioner/update.md) |
-| [barnacle](barnacle/update.md) | The pinned barnacle release that renders this documentation site | [update.sh](barnacle/update.md) |
+| [formattington-lite](formattington-lite/update.sh.md) | Pinned `formattington-lite` formatter binaries (not wired into `./scripts/format.sh` or CI — those run formattington via `uv`) | [update.sh](formattington-lite/update.sh.md) |
+| [logamuffin](logamuffin/update.sh.md) | Structured logging backend for `log()` in the scripts | [update.sh](logamuffin/update.sh.md) |
+| [runner-spawner](runner-spawner/update.sh.md) | Manages the self-hosted CI runners (see `.runner-spawner.json` and `.github/workflows/ci.yml`) | [update.sh](runner-spawner/update.sh.md) |
+| [versioner](versioner/update.sh.md) | Computes the repository version for builds and releases | [update.sh](versioner/update.sh.md) |
+| [barnacle](barnacle/update.sh.md) | The pinned barnacle release that renders this documentation site | [update.sh](barnacle/update.sh.md) |
 
-`scripts/.common.env` and `scripts/.<platform>.env` select these via `*_VERSION_DIR`/`*_BIN`; see [scripts/env.md](../scripts/env.md). (Those env files are barnacle-hidden; `scripts/env.md` documents them.)
+`scripts/.common.env` and `scripts/.<platform>.env` select these via `*_VERSION_DIR`/`*_BIN`; see [scripts/env.sh.md](../scripts/env.sh.md). (Those env files are barnacle-hidden; `scripts/env.sh.md` documents them.)
 
 ## Refreshing a pinned tool
 

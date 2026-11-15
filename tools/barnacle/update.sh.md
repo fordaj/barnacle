@@ -1,5 +1,17 @@
 # The barnacle bundle (`tools/barnacle/`)
 
+```mermaid
+flowchart LR
+    Gh[fordaj/* release] --> Resolve[resolve tag]
+    Resolve --> Download[gh release download]
+    Download --> Check{checksums present?}
+    Check -->|yes| Verify[verify — mismatch is fatal]
+    Check -->|no| Warn[warn and continue]
+    Verify --> Stage[stage in temp dir]
+    Warn --> Stage
+    Stage --> Swap[atomic swap · delete superseded v*]
+```
+
 [Barnacle](https://github.com/fordaj/barnacle) is the documentation-site generator this repository produces and also — by pinning its own latest release — the tool that renders *this* documentation. `scripts/docs.sh` runs this bundled binary against the repository to generate `./site/`; the site you may be reading was built by it, not by a binary built from this source tree.
 
 ## Layout
@@ -35,7 +47,7 @@ The script:
 
 ## How the repository uses it
 
-[`scripts/docs.sh`](../../scripts/docs.sh) resolves `BARNACLE_BIN` through the env cascade (`tools/barnacle/v<version>/<platform>/barnacle[.exe]`, pinned as `BARNACLE_VERSION_DIR` = `v0.0.1.0.5` in `scripts/.common.env`) and runs barnacle with the repository root as cwd, so `./.barnacle.json` (which excludes `tools/` and `dist/`) and the default `./site/` output land at the root. The output is git-ignored and barnacle's `.barnacle-site` marker lets a regeneration wipe stale pages.
+[`scripts/docs.sh`](../../scripts/docs.sh.md) resolves `BARNACLE_BIN` through the env cascade (`tools/barnacle/v<version>/<platform>/barnacle[.exe]`, pinned as `BARNACLE_VERSION_DIR` = `v0.0.1.0.5` in `scripts/.common.env`) and runs barnacle with the repository root as cwd, so `./.barnacle.json` (which excludes `tools/` and `dist/`) and the default `./site/` output land at the root. The output is git-ignored and barnacle's `.barnacle-site` marker lets a regeneration wipe stale pages.
 
 Licenses: MIT — see `v0.0.1.0.5/LICENSE`.
 
@@ -43,5 +55,5 @@ Licenses: MIT — see `v0.0.1.0.5/LICENSE`.
 
 - [../README.md](../README.md) — the bundle index
 - [../../scripts/README.md](../../scripts/README.md) — the scripts that consume the bundle
-- [../../scripts/env.md](../../scripts/env.md) — the cascade selecting `BARNACLE_BIN`
-- [../../scripts/docs.md](../../scripts/docs.md) — the site generator that uses this bundle
+- [../../scripts/env.sh.md](../../scripts/env.sh.md) — the cascade selecting `BARNACLE_BIN`
+- [../../scripts/docs.sh.md](../../scripts/docs.sh.md) — the site generator that uses this bundle

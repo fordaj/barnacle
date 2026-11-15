@@ -1,10 +1,21 @@
 # The formatter (`scripts/format.sh`)
 
+```mermaid
+flowchart LR
+    uv[uv run] --> FFT[formattington]
+    Config[.formattington.json] --> FFT
+    FFT --> Prettier[prettier — md/json/yml]
+    FFT --> Black[black — py]
+    FFT --> Shfmt[shfmt -i 2 — sh]
+    FFT --> Taplo[taplo — toml]
+    Check[ci/format_check.sh --check] -.->|same config, exit 1 on diff| FFT
+```
+
 Formats the barnacle repository in place with [formattington](https://github.com/fordaj/formattington). This repository dogfoods it for its own Markdown, Python, shell, and TOML files.
 
 ## What it does
 
-- Resolves its own directory as the repository root and `cd`s there.
+- Resolves the repository root (the parent of `scripts/`) and `cd`s there.
 - Requires `uv` on `PATH` (https://docs.astral.sh/uv/); fails with a clear error otherwise.
 - Runs `uv run formattington --config "$REPO_ROOT/.formattington.json" all` with any extra arguments you pass.
 

@@ -1,5 +1,16 @@
 # barnacle
 
+```mermaid
+flowchart TD
+    Root[barnacle] --> Cmd[cmd/barnacle<br/>process boundary]
+    Root --> Internal[internal/barnacle<br/>the implementation]
+    Root --> Scripts[scripts/<br/>build · release · docs · format]
+    Cmd --> Internal
+    click Cmd href "cmd/barnacle/main.go.md"
+    click Internal href "internal/barnacle/README.md"
+    click Scripts href "scripts/README.md"
+```
+
 **A navigable, diagram-centric documentation site for your codebase.**
 
 Barnacle turns Markdown and Mermaid documentation files scattered throughout a repository into a static, interconnected HTML website.
@@ -17,21 +28,21 @@ For example:
 ```text
 my-project/
 ├── main.cpp
-├── main.md
+├── main.cpp.md
 ├── parser/
 │   ├── parser.cpp
-│   └── parser.mmd
+│   └── parser.cpp.mmd
 ├── networking/
 │   ├── client.py
-│   └── client.md
+│   └── client.py.md
 └── .barnacle.json
 ```
 
 A documentation file can live directly beside its corresponding source file:
 
-- `main.cpp` → `main.md`
-- `parser.cpp` → `parser.mmd`
-- `client.py` → `client.md`
+- `main.cpp` → `main.cpp.md`
+- `parser.cpp` → `parser.cpp.mmd`
+- `client.py` → `client.py.md`
 
 Run Barnacle against your repository to generate a static website containing rendered diagrams and navigable documentation pages.
 
@@ -40,8 +51,10 @@ The result is a visual map of your codebase that developers and coding agents ca
 ## Features
 
 - **Documentation alongside code** — Keep `.md` and `.mmd` files parallel to the source files they describe.
-- **Mermaid-first** — Use Mermaid diagrams to illustrate architecture, control flow, dependencies, and relationships.
+- **Mermaid-forward** — Every page should open with a Mermaid diagram at the top, so a brand-new reader gets a visual map before a wall of prose. Barnacle guides you (and your agents) toward that; it never forces it.
+- **Clickable diagrams** — `click` directives make diagram nodes navigable; Barnacle rewrites documentation targets (`.md`/`.mmd`) inside them to the generated pages. See [Clickable diagrams](#clickable-diagrams).
 - **Navigable documentation** — Generated pages link to one another using relative paths.
+- **Retained suffixes** — `main.py.md`, `main.cpp.md`, `main.rs.md` — documentation files keep the source file's suffix, so different files that share a base name stay individually documentable.
 - **Static HTML output** — No application server or backend required to serve the generated site.
 - **Browser-rendered diagrams** — Mermaid diagrams are rendered by the browser.
 - **Portable** — Generated sites can be hosted anywhere static files can be served.
@@ -54,9 +67,9 @@ Place documentation files alongside the source files they describe:
 ```text
 project/
 ├── main.py
-├── main.md
+├── main.py.md
 ├── database.py
-├── database.mmd
+├── database.py.mmd
 └── .barnacle.json
 ```
 
@@ -103,14 +116,26 @@ Barnacle uses documentation files that live alongside your source code.
 
 Both Markdown (`.md`) and Mermaid (`.mmd`) files can be used.
 
+### Naming a page after a source file
+
+When a documentation file documents a source file, **keep the source file's suffix in the documentation file name**: `main.py` is documented by `main.py.md`, `main.cpp` by `main.cpp.md`, `main.rs` by `main.rs.md`, `parser.cpp` by `parser.cpp.mmd`.
+
+This is guidance, not a rule — Barnacle renders plain names too — but it is the naming convention this project recommends, and the one its own documentation uses. Retaining the suffix:
+
+- keeps different files that share a base name individually documentable (`main.py.md`, `main.cpp.md`, `main.rs.md`),
+- keeps the pairing visible to Git, to editors, and to coding agents scanning the tree,
+- makes the generated page name unambiguous (`main.py.html`, `main.cpp.html`, `main.rs.html`).
+
+Collisions work exactly as before: a `foo.md` and a `foo.mmd` with the same stem both produce `foo.html`, so Barnacle fails with a clear error instead of silently overwriting one — for example `main.py.md` and `main.py.mmd` both describe `main.py` and both generate `main.py.html`.
+
+Free-standing diagrams that do not document one particular file (for example `architecture.mmd`) may keep plain names.
+
 ### Markdown
 
-Markdown files can contain explanatory text, links, and Mermaid diagrams.
+Markdown files can contain explanatory text, links, and Mermaid diagrams. Best practice is a diagram at the very top of the page, right under the `#` heading:
 
 ````markdown
 # Application Entry Point
-
-The application starts here and initializes the major subsystems.
 
 ```mermaid
 flowchart TD
@@ -119,12 +144,12 @@ flowchart TD
     C --> D[Start Application]
 ```
 
-See [Database](database.md) for more information.
+The application starts here and initializes the major subsystems. See [Database](database.py.md) for more information.
 ````
 
 ### Mermaid
 
-Mermaid files provide a dedicated place for diagrams without requiring surrounding Markdown.
+Mermaid files provide a dedicated place for diagrams without requiring surrounding Markdown — useful for larger diagrams or sources that generate them. A `.mmd` file documenting a source file keeps the source suffix (`parser.cpp.mmd`); a free-standing diagram may use a plain name:
 
 ```mermaid
 flowchart TD
@@ -133,6 +158,18 @@ flowchart TD
     C --> D[Interpreter]
 ```
 
+### A diagram at the top of every page
+
+The recommended shape of every page — this is the convention this repository follows and the one coding agents are instructed to follow — is:
+
+1. `# Title` — matches what the page is about,
+2. a Mermaid diagram giving a brand-new reader the map of the territory the page covers,
+3. prose, links, and details.
+
+Think from the perspective of a newcomer clicking their way around the generated site: the diagram answers "what am I looking at, and where does it fit?" before any prose does. It does not have to be a flowchart — a class diagram, a sequence diagram, a state diagram, or a dependency graph all work; whatever communicates the shape of the thing best. Two or three nodes of substance beat a diagram that merely repeats the heading.
+
+Barnacle guides this, it does not force it: pages that contain no Mermaid diagram are reported once per generation as a non-fatal note listing the pages (`barnacle: note: N page(s) have no Mermaid diagram: …`), alongside the best-practice reminder. Nothing fails, nothing is blocked. Set `"warnMissingMermaid": false` in `.barnacle.json` to silence the note.
+
 ### Linking documentation
 
 Documentation files can reference other documentation files using relative Markdown links.
@@ -140,10 +177,33 @@ Documentation files can reference other documentation files using relative Markd
 For example:
 
 ```markdown
-See [the parser](../parser/parser.md) for implementation details.
+See [the parser](../parser/parser.cpp.md) for implementation details.
 ```
 
 Links remain relative in the generated site, allowing documentation to remain portable across directories and hosting environments.
+
+### Clickable diagrams
+
+Mermaid flowcharts natively support `click` directives, which make individual nodes navigable. Barnacle goes one step further: **documentation targets (`.md`, `.markdown`, `.mmd`) inside `click` directives are rewritten to their generated `.html` pages**, exactly like Markdown links — so clicking a diagram node opens the documentation page it points at. Relative targets are resolved against the page URL; because the generated site mirrors the source tree, swapping the extension is all that is needed.
+
+```mermaid
+flowchart LR
+    Src[main.py] --> Doc[main.py.md]
+    Doc --> Barnacle[barnacle]
+    Barnacle --> Site[main.py.html]
+    click Src href "cmd/barnacle/main.go.md" "What the command does"
+    click Barnacle href "internal/barnacle/README.md"
+```
+
+(Above: a real diagram from this repository — nodes link to the pages you are looking at.)
+
+Notes:
+
+- Syntax forms: `click A href "target.md"`, optionally with a tooltip (`"tooltip"`) and `_blank`/`_self` target; the shorthand `click A "target.md"` also works. Multi-node lists (`click A,B href "target.md"`) work.
+- Targets that are not documentation files (absolute URLs, `mailto:`, fragments) are left untouched. Targets are matched case-insensitively by extension; `.md`, `.markdown` and `.mmd` all rewrite to `.html`.
+- Clicking works with Barnacle's default `securityLevel: 'strict'`: relative URLs pass Mermaid's sanitizer, which blocks `javascript:`-style URLs. JavaScript callbacks (`click A callback` / `click A call fn()`) are a Mermaid feature that requires `securityLevel: 'loose'` and remain unavailable — Barnacle deliberately ships strict.
+- Standalone `.mmd` files get the same rewriting.
+- Clicks are relative to the current page, so write targets the same way you would write a Markdown link from that page (`../parser/parser.cpp.md`).
 
 ## Output
 
@@ -154,11 +214,11 @@ The generated site mirrors the documentation structure, providing HTML pages tha
 ```text
 site/
 ├── index.html
-├── main.html
+├── main.cpp.html
 ├── parser/
-│   └── parser.html
+│   └── parser.cpp.html
 └── networking/
-    └── client.html
+    └── client.py.html
 ```
 
 Mermaid diagrams are rendered in the browser. The generated website requires no backend service or application runtime.
@@ -182,7 +242,7 @@ Alternatively, specify a configuration file using `--config`.
 my-project/
 ├── .barnacle.json
 ├── main.cpp
-├── main.md
+├── main.cpp.md
 └── ...
 ```
 
@@ -194,15 +254,17 @@ Configuration allows repository-specific behavior without requiring developers t
 {
   "title": "My Project",
   "exclude": ["tools", "archive"],
-  "includeHidden": false
+  "includeHidden": false,
+  "warnMissingMermaid": true
 }
 ```
 
-| Field           | Description                                                                                                                                            |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `title`         | Site title shown in the sidebar, landing page, and page titles. Defaults to the repository directory name.                                             |
-| `exclude`       | Additional directories or files to skip. Bare names match any path segment; entries with a slash match as globs against the path relative to the root. |
-| `includeHidden` | Scan dot-directories and dot-files other than `.git` (always excluded). Defaults to `false`.                                                           |
+| Field                | Description                                                                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `title`              | Site title shown in the sidebar, landing page, and page titles. Defaults to the repository directory name.                                             |
+| `exclude`            | Additional directories or files to skip. Bare names match any path segment; entries with a slash match as globs against the path relative to the root. |
+| `includeHidden`      | Scan dot-directories and dot-files other than `.git` (always excluded). Defaults to `false`.                                                           |
+| `warnMissingMermaid` | Print a non-fatal note listing pages that contain no Mermaid diagram, as a nudge toward diagram-first pages. Defaults to `true`.                       |
 
 A few rules worth knowing:
 
@@ -261,8 +323,20 @@ Documentation should be:
 
 - **Close to the code** — Developers should be able to find and update documentation without hunting through a separate documentation repository.
 - **Easy to maintain** — Plain-text files work naturally with Git, code review, and automated coding agents.
-- **Visual** — Diagrams communicate architecture and relationships more effectively than walls of prose.
-- **Connected** — A codebase is a network of relationships. Its documentation should be navigable in the same way.
+- **Visual** — Diagrams communicate architecture and relationships more effectively than walls of prose. The recommended page shape is a diagram at the very top, so the reader gets the map before the territory.
+- **Connected** — A codebase is a network of relationships. Its documentation should be navigable in the same way — links, and now clickable diagrams.
+- **Mermaid-forward** — Mermaid is the default medium, not an occasional flourish. Barnacle guides you toward it (a nudge in the output, conventions everywhere) without ever forcing it on you.
 - **Portable** — Documentation should be usable without a running application, database, or specialized infrastructure.
 
 **Barnacle makes your codebase explorable.**
+
+## Proposed: clickable edges
+
+Mermaid natively supports `click` on flowchart **nodes** (wired up above), but not on **edges** — there is no grammar for "click this `-->` link". Edges are often exactly what a newcomer wants to follow ("reads → writes": take me to the writer's page), so this is a proposed future feature, not something Barnacle does today.
+
+Proposed design, in two phases:
+
+- **Phase 1 — Barnacle-side, no Mermaid changes.** Recognize `%% barnacle: link e1 href "target.md"` comment lines in a flowchart (Mermaid already supports edge IDs via `A e1@--> B`). Barnacle rewrites the target like any other doc link, emits a small JSON map per page (`<script type="application/json" class="barnacle-edge-links">`), and ships a tiny companion to `mermaid.min.js` that, after rendering, attaches real click handlers (plus keyboard focus and a focus outline) to the matching edge SVG groups with an invisible fat stroke for hit area.
+- **Phase 2 — Mermaid upstream.** Propose `e1@{ link: "target.md" }` natively, parallel to the existing `e1@{ animate: true }` edge-ID property syntax; Barnacle would then only need the doc-link rewrite and the companion script retires.
+
+Either way the contract matches nodes: relative `.md`/`.mmd` targets rewrite to `.html`, absolute URLs pass through untouched, `securityLevel: 'strict'` is preserved, and nothing about existing diagrams changes.

@@ -1,7 +1,5 @@
 # Command barnacle
 
-The `barnacle` command turns the Markdown and Mermaid files that live alongside source code into a static, interconnected website.
-
 ```mermaid
 flowchart LR
     CLI[cmd/barnacle] --> Config[LoadConfig]
@@ -10,7 +8,13 @@ flowchart LR
     Generate --> Render[MarkdownToHTML]
     Scan --> Site[site/]
     Render --> Site
+    click Config href "../../internal/barnacle/config.go.md"
+    click Generate href "../../internal/barnacle/site.go.md"
+    click Scan href "../../internal/barnacle/scan.go.md"
+    click Render href "../../internal/barnacle/render.go.md"
 ```
+
+The `barnacle` command turns the Markdown and Mermaid files that live alongside source code into a static, interconnected website.
 
 ## Flags
 
@@ -29,11 +33,15 @@ flowchart LR
 - `1` — runtime failure (unreadable or invalid config, scan/render error, unwritable output).
 - `2` — usage error (unknown flag, unexpected positional argument, `--help`).
 
-`version` is `dev` unless stamped by the release scripts (`-ldflags "-X main.version=<v>"`, see `scripts/version.sh` and `scripts/release.sh`).
+`version` is `dev` unless stamped by the release scripts (`-ldflags "-X main.version=<v>"`, see `scripts/version.sh.md` and `scripts/release.sh.md`).
+
+## Best-effort diagram note
+
+After a successful generation, barnacle prints a non-fatal note to stderr listing every page that contains no Mermaid diagram (`barnacle: note: N page(s) have no Mermaid diagram: …`), plus one line of best-practice reminder. Pages are never rejected for lacking a diagram; set `"warnMissingMermaid": false` in `.barnacle.json` to silence the note. Exit code `0` is unaffected either way.
 
 ## Related pages
 
 - [internal/barnacle/README.md](../../internal/barnacle/README.md) — the package that does the work
-- [Configuration](../../internal/barnacle/config.md) — how `.barnacle.json` is loaded
-- [The scanner](../../internal/barnacle/scan.md) — how documentation files are discovered
-- [The site generator](../../internal/barnacle/site.md) — how the output is assembled
+- [Configuration](../../internal/barnacle/config.go.md) — how `.barnacle.json` is loaded
+- [The scanner](../../internal/barnacle/scan.go.md) — how documentation files are discovered
+- [The site generator](../../internal/barnacle/site.go.md) — how the output is assembled

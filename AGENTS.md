@@ -1,5 +1,14 @@
 # AGENTS.md
 
+```mermaid
+flowchart LR
+    Code[Edit source] --> Doc[Update sibling .md<br/>in the same change]
+    Doc --> Regen[scripts/docs.sh]
+    Regen --> Site[./site — git-ignored]
+    Site --> Review[Self-review the<br/>changed pages]
+    Review --> Commit[Commit source + doc together]
+```
+
 ## Project Overview
 
 barnacle is a documentation-site generator written in Go. It turns Markdown (`.md`) and Mermaid (`.mmd`) files scattered through a repository into a static, navigable HTML website — documentation lives next to the code it describes.
@@ -9,10 +18,11 @@ It ships as a single dependency-light binary: the only direct dependency is `git
 ## Core Principles
 
 - **Documentation lives with the code.** Sibling `.md`/`.mmd` files are the contract; the tool reads them in place, never a separate docs tree.
+- **Mermaid-forward.** Every page opens with a Mermaid diagram right under its `#` heading — the reader gets the map before the territory. This is guidance, never a hard rule: barnacle only prints a non-fatal note listing pages without a diagram (`.barnacle.json` key `warnMissingMermaid`, default `true`). When you add or rewrite a page, open it with a diagram — a flowchart, class diagram, sequence diagram, state diagram, dependency graph — whatever best communicates the thing you are documenting to someone who has never seen it.
 - **Static, portable output.** No server, no database; the generated site works from any base URL (`file://`, GitHub Pages, any static host).
 - **Fail loudly.** A missing documented file is an error; a `.md`/`.mmd` stem collision fails the whole build; an explicitly requested config that is missing or invalid is an error.
 - **No magic.** The HTML shell and stylesheet are embedded with `go:embed`; the scan excludes `.git`, `node_modules`, `vendor`, `dist`, and the output directory — nothing else is hidden.
-- **Dogfood the toolchain.** The repository formats itself with formattington via `uv`, releases with versioner, logs with logamuffin, and renders its own documentation with the pinned barnacle release.
+- **Dogfood the toolchain.** The repository formats itself with formattington via `uv`, releases with versioner, logs with logamuffin, and renders its own documentation with the pinned barnacle release. To render the site with changes that have not been released yet, build from source and point `BARNACLE_BIN` at it (`BARNACLE_BIN=dist/macos-arm64/barnacle scripts/docs.sh`; on stderr barnacle notes any pages still missing a diagram).
 
 ## Build and Test
 
@@ -52,21 +62,29 @@ The repository's documentation is a set of Markdown (`.md`) and Mermaid (`.mmd`)
 
 Layout — documentation lives next to the code it describes:
 
-- One sibling `.md` per Go file in `cmd/barnacle/` and `internal/barnacle/` (for example `scan.go` → `scan.md`), plus `internal/barnacle/README.md` as the package hub.
-- One sibling `.md` per bash script (`scripts/entry.sh` → `entry.md`, `scripts/env.sh` → `env.md`, `scripts/version.sh` → `version.md`, `scripts/docs.sh` → `docs.md`, `scripts/build.sh` → `build.md`, `scripts/release.sh` → `release.md`, `scripts/format.sh` → `scripts/format.md`), plus `scripts/README.md` as the hub.
-- One sibling `.md` per bundle in `tools/` (`tools/<name>/update.md`), plus `tools/README.md` as the hub. `tools/` is excluded from the generated site via `.barnacle.json` (the pinned binaries carry their own upstream docs), so these pages exist for the repository, not the site.
+- One sibling `.md` per Go file in `cmd/barnacle/` and `internal/barnacle/` (for example `scan.go` → `scan.go.md`), plus `internal/barnacle/README.md` as the package hub.
+- One sibling `.md` per bash script (`scripts/entry.sh` → `entry.sh.md`, `scripts/env.sh` → `env.sh.md`, `scripts/version.sh` → `version.sh.md`, `scripts/docs.sh` → `docs.sh.md`, `scripts/build.sh` → `build.sh.md`, `scripts/release.sh` → `release.sh.md`, `scripts/format.sh` → `scripts/format.sh.md`), plus `scripts/README.md` as the hub.
+- One sibling `.md` per bundle in `tools/` (`tools/<name>/update.sh.md`), plus `tools/README.md` as the hub. `tools/` is excluded from the generated site via `.barnacle.json` (the pinned binaries carry their own upstream docs), so these pages exist for the repository, not the site.
+
+Naming rules:
+
+- **Retain the documented file's suffix.** A documentation file for `main.py` is `main.py.md`; for `main.cpp` it is `main.cpp.md`; for `parser.cpp` it is `parser.cpp.md` (or `parser.cpp.mmd`). This is the convention for everything in this repository, and it exists so files that share a base name can be documented individually.
+- Free-standing diagrams that do not document one specific file (for example `architecture.mmd`) may use a plain name.
+- Hub pages (`README.md` in each documented directory) keep their plain names.
 
 Rules for keeping these files current:
 
 - When you add, rename, remove, or repurpose a documented file — a Go file, a script, or a bundle — update its sibling `.md` **in the same change**. A new file without its page is incomplete work; a stale page is worse than none.
+- **Every page opens with a Mermaid diagram** under its `#` heading (guidance, not a hard rule): what the thing is and how it fits, in the diagram type that fits best. If a page you touch has no diagram at the top, add one.
 - Source every fact: the `.go`/`.sh`/`.env` file itself, this file (AGENTS.md), and README.md are the accepted sources. Never invent flags, exit codes, extensions, or bundle-platform matrices.
-- Use plain relative links (`scan.md`, `../../README.md`) with the linking file's `.md` path — barnacle rewrites them to `.html`. Do not link to files barnacle does not render (binaries, `.sh`, `LICENSE`); link the related `.md` page (for external references, a full `https://` URL is fine). Pages that are not rendered (`tools/`) may still be linked from other unrendered pages; rendered pages must not hyperlink into `tools/` — refer to those pages as code (for example `tools/barnacle/update.md`), because `.barnacle.json` excludes them from the site.
-- A `foo.md` and a `foo.mmd` may not coexist for the same stem — barnacle fails the whole site rather than overwriting.
+- Use plain relative links (`scan.go.md`, `../../README.md`) with the linking file's `.md` path — barnacle rewrites them to `.html`. Do not link to files barnacle does not render (binaries, `.sh`, `LICENSE`); link the related `.md` page (for external references, a full `https://` URL is fine). Pages that are not rendered (`tools/`) may still be linked from other unrendered pages; rendered pages must not hyperlink into `tools/` — refer to those pages as code (for example `tools/barnacle/update.sh.md`), because `.barnacle.json` excludes them from the site.
+- Mermaid `click` directives are rewritten too (`click Scan href "scan.go.md"`), so diagram nodes may link between pages — prefer this in the top-of-page diagram; it makes the site explorable by diagram alone.
+- A `foo.md` and a `foo.mmd` may not coexist for the same stem — barnacle fails the whole site rather than overwriting. The same applies with retained suffixes: `main.py.md` and `main.py.mmd` both generate `main.py.html`.
 - Hub pages (`README.md` in each documented directory) list their siblings; adding a page means linking it from the hub too, in the same order as the rest of the directory's list.
-- Barnacle skips hidden files by default, so the `.common.env` and `.<platform>.env` cascade is documented inside `scripts/env.md` — keep it accurate there instead of adding hidden doc files.
+- Barnacle skips hidden files by default, so the `.common.env` and `.<platform>.env` cascade is documented inside `scripts/env.sh.md` — keep it accurate there instead of adding hidden doc files.
 - Regenerate and self-review the site before publishing: `scripts/docs.sh`, then click through the changed pages. The generator output must remain free of broken local links.
 
-Definition of Done addition: a change that touches any documented file updates (or creates) its sibling page in the same commit.
+Definition of Done addition: a change that touches any documented file updates (or creates) its sibling page in the same commit — including the diagram at the top.
 
 ## Definition of Done
 

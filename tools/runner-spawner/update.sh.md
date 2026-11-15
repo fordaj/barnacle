@@ -1,5 +1,17 @@
 # The runner-spawner bundle (`tools/runner-spawner/`)
 
+```mermaid
+flowchart LR
+    Gh[fordaj/* release] --> Resolve[resolve tag]
+    Resolve --> Download[gh release download]
+    Download --> Check{checksums present?}
+    Check -->|yes| Verify[verify — mismatch is fatal]
+    Check -->|no| Warn[warn and continue]
+    Verify --> Stage[stage in temp dir]
+    Warn --> Stage
+    Stage --> Swap[atomic swap · delete superseded v*]
+```
+
 [Runner-spawner](https://github.com/fordaj/runner-spawner) manages self-hosted GitHub Actions runners. In this repository it backs the self-hosted CI described in the README ("Formatting and CI"): `.github/workflows/ci.yml` runs `check-formatting` and `test` jobs on `self-hosted` macOS and Windows runners, registered and lifecycle-managed with the bundled `runner-spawner` binary against the committed `.runner-spawner.json`:
 
 ```json
@@ -19,7 +31,7 @@ The runner tree itself (`.runners/`) is machine-local state and is not committed
 
 `v0.0.1.2.6` — `macos-arm64`, `macos-x86_64`, `linux-arm64`, `linux-x86_64`, `windows-arm64`, `windows-x86_64`. Note: runner-spawner reports unsupported on Linux (macOS + Windows only); the Linux binaries are shipped for uniform bundle layout, and the Linux platform env files carry this caveat.
 
-The pinned binary selection goes through the [env cascade](../../scripts/env.md) (`RUNNER_SPAWNER_BIN`). `RUNNER_SPAWNER_TOOL_REPO` is the bundle-refresh slug (`fordaj/runner-spawner`), not a script-selection variable.
+The pinned binary selection goes through the [env cascade](../../scripts/env.sh.md) (`RUNNER_SPAWNER_BIN`). `RUNNER_SPAWNER_TOOL_REPO` is the bundle-refresh slug (`fordaj/runner-spawner`), not a script-selection variable.
 
 ## `update.sh`
 
@@ -28,5 +40,5 @@ Refreshes from `fordaj/runner-spawner` releases: archives whose stems carry the 
 ## Related pages
 
 - [../README.md](../README.md) — the bundle index
-- [../../scripts/env.md](../../scripts/env.md) — the cascade selecting `RUNNER_SPAWNER_BIN`
+- [../../scripts/env.sh.md](../../scripts/env.sh.md) — the cascade selecting `RUNNER_SPAWNER_BIN`
 - [../../README.md](../../README.md) — the CI section of the root README
