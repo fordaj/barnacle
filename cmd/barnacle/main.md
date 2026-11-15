@@ -14,17 +14,26 @@ flowchart LR
 
 ## Flags
 
-| Flag              | Description                                         |
-| ----------------- | --------------------------------------------------- |
-| `--config <path>` | Configuration file. Defaults to `./.barnacle.json`. |
-| `--site <path>`   | Output directory. Defaults to `./site`.             |
-| `--version`       | Print the version (stamped at build time) and exit. |
-| `--help`          | Show usage and exit.                                |
+| Flag              | Description                                                   |
+| ----------------- | ------------------------------------------------------------- |
+| `--config <path>` | Configuration file. Defaults to `./.barnacle.json`.           |
+| `--site <path>`   | Output directory. Defaults to `./site`.                       |
+| `--version`       | Print the version (stamped at build time) and exit.           |
+| `--help`          | Show usage and exit (exit code `2`, like other usage errors). |
+
+`--config` changes only where the configuration is read from; the repository root is always the current working directory, and the scan starts there. Relative `--config` and `--site` paths are resolved against it.
 
 ## Exit codes
 
 - `0` — success.
-- `1` — runtime failure (unreadable config, scan or render error).
-- `2` — usage error (unknown flag, unexpected argument).
+- `1` — runtime failure (unreadable or invalid config, scan/render error, unwritable output).
+- `2` — usage error (unknown flag, unexpected positional argument, `--help`).
 
-The repository root is always the current working directory; `--config` only changes where the configuration is read from. See [the scanner](../../internal/barnacle/scan.md) for how documentation files are discovered and [the site generator](../../internal/barnacle/site.md) for how the output is assembled.
+`version` is `dev` unless stamped by the release scripts (`-ldflags "-X main.version=<v>"`, see `scripts/version.bash` and `scripts/release.sh`).
+
+## Related pages
+
+- [internal/barnacle/README.md](../../internal/barnacle/README.md) — the package that does the work
+- [Configuration](../../internal/barnacle/config.md) — how `.barnacle.json` is loaded
+- [The scanner](../../internal/barnacle/scan.md) — how documentation files are discovered
+- [The site generator](../../internal/barnacle/site.md) — how the output is assembled

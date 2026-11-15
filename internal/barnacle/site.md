@@ -29,3 +29,16 @@ Every page is the same shell: a sidebar with a tree of all documented pages (lin
 Relative links between pages are just relative links between the mirrored directories, so the generated site works from any base URL — open it locally, publish it with GitHub Pages, or host it anywhere static files are served.
 
 `.md`/`.mmd` pairs with the same base name would both produce the same `.html` file, so `Generate` fails with an explicit collision error instead of silently overwriting one of them.
+
+## Where it is used
+
+Called exactly once per run by `main` in [cmd/barnacle/main.go](../../cmd/barnacle/main.md) — nowhere else. It is the assembly point: everything else in the package is a helper it wires together.
+
+## Related pages
+
+- [The scanner](scan.md) — produces the document list
+- [The renderer](render.md) — renders each document's body
+- [Navigation and landing page](nav.md) — sidebar and `index.html` body
+- [The page template](template.md) — the HTML shell every page shares
+- [Configuration](config.md) — what `Generate` receives as `cfg`
+- [README.md](README.md) — package hub
