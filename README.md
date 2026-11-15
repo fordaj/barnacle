@@ -207,38 +207,39 @@ Notes:
 
 ### Clickable edges
 
-Mermaid can click nodes but cannot click edges — there is no edge-`click` grammar (edges are drawn as plain SVG strokes). Barnacle wires them for you with a comment directive, parsed at build time, **and the edges below are live right on this page**:
+Mermaid has no edge-`click` grammar, but its edge labels render as HTML inside the SVG — so **an inline anchor in the label just works**, and barnacle rewrites its `href` like any other doc link:
 
 ```mermaid
 stateDiagram-v2
     [*] --> Idle
-    Idle --> Validating : barnacle(args)
-    Validating --> Scanning : config ok
+    Idle --> Validating : <a href="#configuration">barnacle(args)</a>
+    Validating --> Scanning : <a href="#features">config ok</a>
     Scanning --> Done : site written
-    Validating --> Failed : exit 1
-    %% barnacle: link "barnacle(args)" href "#configuration"
-    %% barnacle: link "config ok" href "#features"
-    %% barnacle: link "exit 1" href "cmd/barnacle/main.go.md"
+    Validating --> Failed : <a href="cmd/barnacle/main.go.md">exit 1</a>
 ```
 
 Try it: `barnacle(args)` and `config ok` jump to the Configuration and Features sections **on this page**; `exit 1` takes you to **another page**.
 
-The directive syntax:
+Syntax notes (mermaid's own quirks, not barnacle's):
 
-```text
-%% barnacle: link <key> href "<target>" ["<tooltip>"] [_blank]
-```
+| Construct                                                | Rule                                                                                                |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `Idle --> Waiting : <a href="dispatch.md">send(cmd)</a>` | State diagrams — the label is free-form, but may **not contain `:`** at all, or the parser gives up |
+| `A -->\|<a href="dispatch.md">sendcmd</a>\| B`           | Flowchart labels without parens are fine as-is                                                      |
+| `A -->\|"<a href='dispatch.md'>send(cmd)</a>"\| B`       | Flowchart labels **with parens** must be quoted; use single quotes inside the double-quoted label   |
+| `<a href="x.md" title="Send the command">…</a>`          | Standard attributes (`href`, `title`, `target="_blank"`, fragments) pass through under `strict`     |
+| `<a href="#local">…</a>`                                 | Fragment-only targets are untouched                                                                 |
+| Markdown                                                 | Not interpreted in plain labels — `**bold**` prints literally; use HTML (`<br/>`, `<strong>`)       |
+| `click A callback`                                       | Still requires `securityLevel: 'loose'`, which barnacle does not enable                             |
 
-- **`<key>` (bare)** matches the edge's `data-id` — the explicit `e1` from `A e1@--> B`, or the auto-assigned id of any other edge (`edge0`, `edge1`, … in state diagrams; `L_A_B_0` in unnamed flowcharts).
-- **`<key>` (quoted)** matches the edge's **label text** — `%% barnacle: link "send(cmd)" href "dispatch.md"` makes the `send(cmd)` transition itself clickable, which is the natural way to document a protocol.
-- Same rules as node clicks: `.md`/`.markdown`/`.mmd` targets rewrite to `.html` (fragments and queries preserved), everything else passes through, and relative targets resolve against the page URL.
-- Keys that match nothing log a `console.warn` and leave the page untouched — never an error.
+Rules for links inside labels (identical to node clicks and everything else):
 
-How it works: the directive is a mermaid comment (it renders nothing). Barnacle parses it at build time, rewrites the target, and emits a JSON manifest next to the `<pre class="mermaid">` block. `assets/barnacle-edges.js` (copied next to `mermaid.min.js` only when a page has manifests) wraps the matching edge stroke — plus an invisible wide copy for a real hit area — in an SVG `<a>` whose keyboard support (`tab`, `Enter`/`Space`) and visible focus outline match any other link. Node clicks and edge links behave identically for `securityLevel: 'strict'`; JS callbacks remain unavailable by design.
+- `.md` / `.markdown` / `.mmd` targets rewrite to `.html` — fragments and queries preserved; relative paths resolve from the page URL.
+- Absolute URLs, fragments and `mailto:` pass through untouched.
+- External and non-doc-fragment targets are never touched.
+- Standalone `.mmd` files are treated the same way.
 
-Like node clicks, the wiring relies on Mermaid's rendered SVG (`path[data-id]`, `g.label[data-id]`) — stable across the versions Barnacle bundles, verified by the end-to-end browser tests on every change, but not a published Mermaid API. If a key ever matches nothing you get a console warning, not a broken page.
-
-Standalone `.mmd` files get the same treatment.
+Node clicks (`click A href "target.md"`) remain the blessed way to make **nodes** navigable; inline anchors are the way to make **transitions** navigable. Both rely on the same label/SVG rendering under `securityLevel: 'strict'`: labels go through DOMPurify, which keeps relative URLs (and strips `javascript:`).
 
 ## Output
 

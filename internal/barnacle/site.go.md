@@ -22,9 +22,9 @@ flowchart TD
 ## Steps
 
 1. **Scan** the root for documentation files (see [the scanner](scan.go.md)).
-2. **Render** each file — Markdown to HTML, or `.mmd` into a Mermaid block (see [the renderer](render.go.md)). Pages that contain a Mermaid diagram pull in `assets/mermaid.min.js`; pages whose diagrams contain `%% barnacle: link` directives pull in `assets/barnacle-edges.js`. It also collects the relative paths of pages with **no** Mermaid diagram and returns them — the caller (`cmd/barnacle/main.go.md`) prints them as a non-fatal stderr note, never an error.
+2. **Render** each file — Markdown to HTML, or `.mmd` into a Mermaid block (see [the renderer](render.go.md)). Pages that contain a Mermaid diagram pull in `assets/mermaid.min.js`. It also collects the relative paths of pages with **no** Mermaid diagram and returns them — the caller (`cmd/barnacle/main.go.md`) prints them as a non-fatal stderr note, never an error.
 3. **Prepare** the output directory. If it holds barnacle's `.barnacle-site` marker, it is wiped first so deleted pages disappear; otherwise it is created and barnacle's files are overwritten one by one.
-4. **Write** `assets/barnacle.css` (and `mermaid.min.js` / `barnacle-edges.js` when needed), every page, a landing `index.html`, and the marker file.
+4. **Write** `assets/barnacle.css` (and `mermaid.min.js` when needed), every page, a landing `index.html`, and the marker file.
 
 ## Return value
 

@@ -3,13 +3,12 @@ package barnacle
 import "html/template"
 
 type pageData struct {
-	SiteTitle    string
-	PageTitle    string
-	Content      template.HTML
-	Nav          template.HTML
-	RelPrefix    string
-	HasMermaid   bool
-	HasEdgeLinks bool
+	SiteTitle  string
+	PageTitle  string
+	Content    template.HTML
+	Nav        template.HTML
+	RelPrefix  string
+	HasMermaid bool
 }
 
 var pageTemplate = template.Must(template.New("page").Parse(`<!DOCTYPE html>
@@ -23,9 +22,6 @@ var pageTemplate = template.Must(template.New("page").Parse(`<!DOCTYPE html>
 {{- if .HasMermaid}}
 <script src="{{.RelPrefix}}assets/mermaid.min.js"></script>
 <script>mermaid.initialize({ startOnLoad: true, securityLevel: 'strict' });</script>
-{{- end}}
-{{- if .HasEdgeLinks}}
-<script src="{{.RelPrefix}}assets/barnacle-edges.js"></script>
 {{- end}}
 </head>
 <body>

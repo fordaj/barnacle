@@ -37,7 +37,7 @@ If you want the big picture first, open [cmd/barnacle/main.go.md](../../cmd/barn
 
 ## Assets
 
-`assets/barnacle.css` (the site stylesheet), `assets/mermaid.min.js` (the Mermaid renderer, copied into `assets/` only on pages that contain a diagram) and `assets/barnacle-edges.js` (copied only on pages with `%% barnacle: link` manifests) are embedded with `go:embed` (`assetsFS` in [site.go.md](site.go.md)) and written into the output on every generation.
+`assets/barnacle.css` (the site stylesheet) and `assets/mermaid.min.js` (the Mermaid renderer, copied into `assets/` only on pages that contain a diagram) are embedded with `go:embed` (`assetsFS` in [site.go.md](site.go.md)) and written into the output on every generation.
 
 ## Testing
 

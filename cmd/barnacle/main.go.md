@@ -37,21 +37,18 @@ The `barnacle` command turns the Markdown and Mermaid files that live alongside 
 
 ## The command lifecycle (edge links)
 
-Edge links (`%% barnacle: link`) make transitions clickable — try it:
+Mermaid can't click edges, but labels render as HTML — an inline anchor just works. Try it:
 
 ```mermaid
 stateDiagram-v2
     [*] --> Idle
-    Idle --> Scanning : barnacle(args)
-    Scanning --> Done : success, exit 0
+    Idle --> Scanning : <a href="#flags">barnacle(args)</a>
+    Scanning --> Done : <a href="../../internal/barnacle/site.go.md">success, exit 0</a>
     Scanning --> Failed : error, exit 1
-    Failed --> Idle : fix and retry
-    %% barnacle: link "barnacle(args)" href "#flags" "Jump to the flags table"
-    %% barnacle: link "success, exit 0" href "../../internal/barnacle/site.go.md" "How the output is assembled"
-    %% barnacle: link "fix and retry" href "#best-effort-diagram-note" "The note that lists pages without a diagram"
+    Failed --> Idle : <a href="#best-effort-diagram-note">fix and retry</a>
 ```
 
-`barnacle(args)` jumps to the [flags](#flags) table on this page; `success, exit 0` opens the site generator; `fix and retry` jumps to the diagram note below. These are the same `%% barnacle: link` directives documented in the README's "Clickable edges" section.
+`barnacle(args)` jumps to the [flags](#flags) table on this page; `success, exit 0` opens the site generator; `fix and retry` jumps to the diagram note below. The links rewrite exactly like Markdown links (see the README's "Clickable edges" section).
 
 ## Best-effort diagram note
 

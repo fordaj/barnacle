@@ -22,40 +22,25 @@ Fenced ` ```mermaid ` code blocks become `<pre class="mermaid">` elements, which
 
 `HasMermaid` reports whether rendered HTML contains a `<pre class="mermaid">`; `Generate` uses it to decide whether to ship `mermaid.min.js` and to flag the page in the template.
 
-`HasEdgeLinks` reports whether rendered HTML contains a `class="barnacle-edge-links"` manifest (i.e. a diagram used `%% barnacle: link`); `Generate` uses it to ship `barnacle-edges.js` and to flag the page in the template.
-
 ### `click` directives (clickable nodes)
 
-Mermaid flowcharts natively support `click` directives, which make nodes navigable. `rewriteMermaidLinks` rewrites documentation targets (`.md`/`.markdown`/`.mmd`) inside `click` directives to the generated `.html` pages, the same invariant as `RewriteDocLink` — relative targets are resolved against the page URL, and the site mirrors the source tree, so swapping the extension is enough. Tooltips, external URLs and JavaScript callbacks are left alone; blocks are unescaped and re-escaped around the rewrite (`escapeMermaidText`), so entity round-trips are safe. works in fenced blocks, in hand-authored `<pre class="mermaid">` blocks, and in standalone `.mmd` files (every block is rewritten exactly once). Note: JavaScript callbacks (`click A callback`, `click A call fn()`) require Mermaid's `securityLevel: 'loose'`, which barnacle does not enable — node navigation via `href` works under `strict`, since relative URLs pass Mermaid's sanitizer. Edges are not clickable (Mermaid has no grammar for it); see the README's "Proposed: clickable edges".
+Mermaid flowcharts natively support `click` directives, which make nodes navigable. `rewriteMermaidLinks` rewrites documentation targets (`.md`/`.markdown`/`.mmd`) inside `click` directives to the generated `.html` pages, the same invariant as `RewriteDocLink` — relative targets are resolved against the page URL, and the site mirrors the source tree, so swapping the extension is enough. Tooltips, external URLs and JavaScript callbacks are left alone; blocks are unescaped and re-escaped around the rewrite (`escapeMermaidText`), so entity round-trips are safe. Works in fenced blocks, in hand-authored `<pre class="mermaid">` blocks, and in standalone `.mmd` files (every block is rewritten exactly once). Note: JavaScript callbacks (`click A callback`, `click A call fn()`) require Mermaid's `securityLevel: 'loose'`, which barnacle does not enable — node navigation via `href` works under `strict`, since relative URLs pass Mermaid's sanitizer. For transitions, see "HTML in diagram labels" below.
 
-Both passes operate on the rendered HTML, which keeps the code small and predictable.
+### HTML in diagram labels (clickable transitions)
 
-### Edge links (`%% barnacle: link`)
-
-Mermaid cannot click edges natively, so barnacle wires them itself. An author drops a comment directive into any diagram:
+Mermaid has no edge-`click` grammar, but edge labels render as real HTML inside the SVG (mermaid's `htmlLabels` mode, under `securityLevel: 'strict'`, through DOMPurify — relative URLs pass, `javascript:` is stripped). So an inline anchor in a label renders as a clickable HTML link, and barnacle rewrites its target like everything else:
 
 ```text
-%% barnacle: link <key> href "<target>" ["<tooltip>"] [_blank]
+Idle --> Waiting : <a href="dispatch.md">send(cmd)</a>
+Aim   --> Launch : <a href="launch.md" title="Launch sequence">go</a>
 ```
 
-- **`<key>` (bare)** matches the edge's `data-id` — the explicit `e1` from `A e1@--> B`, or the auto-assigned id of any unnamed edge (`edge0`, `edge1`, … in state diagrams; `L_A_B_0` in unnamed flowcharts).
-- **`<key>` (quoted)** matches the edge's label text — `%% barnacle: link "send(cmd)" href "api.go.md"` makes the `send(cmd)` transition clickable.
-- `.md`/`.markdown`/`.mmd` targets are rewritten to `.html` by the same `RewriteDocLink` invariant as everything else in this file; fragments, queries, external URLs and everything else pass through untouched; targets are case-insensitive.
-- Directives that match no edge log a `console.warn` and leave the diagram untouched — never an error, never a broken build.
+Mechanics:
 
-At build time `rewriteMermaidLinks` extracts the directives from the mermaid source (the lines stay in place — mermaid renders them as comments), rewrites their targets, and emits a per-diagram JSON manifest right after the `<pre class="mermaid">` block:
-
-```html
-<script type="application/json" class="barnacle-edge-links">
-  { "edges": [{ "key": "e1", "by": "id", "href": "api.go.html" }] }
-</script>
-```
-
-In the browser, `assets/barnacle-edges.js` (copied next to `mermaid.min.js` only when a page contains a manifest) observes each processed diagram, pairs it with its adjacent manifest, resolves each key against the SVG — bare keys against `path[data-id]`, quoted keys against `g.label[data-id]` text — and wraps the matching stroke, plus an invisible wide copy of it for a usable hit area, in an SVG `<a>` with `xlink:href`, `tabindex="0"`, `role="link"`, keyboard activation, and a visible focus outline. The resulting anchor is an ordinary link: it navigates on user interaction only, under `securityLevel: 'strict'`, and the E2E suite navigates every page and every anchor it finds (including injected edge anchors) in a real browser on every change.
-
-Like node clicks, the wiring depends on Mermaid's rendered DOM contract (`path[data-id]` / `g.label[data-id]`), which is stable in the bundled mermaid but not a published API — the end-to-end tests catch regressions across mermaid upgrades.
-
-Works in fenced blocks, in hand-authored `<pre class="mermaid">` blocks, and in standalone `.mmd` files.
+- Every `href="..."` token in the block is rewritten to `.html` when it ends in `.md`/`.markdown`/`.mmd` (case-insensitive), fragments and query strings preserved — the same invariant as Markdown links and node `click` directives. In the rendered output, `&quot;`-escaping is applied/unapplied around the pass so attribute quotes round-trip cleanly.
+- Attributes the author puts inside the anchor (`title`, `target="_blank"`, fragments, …) pass through DOMPurify untouched in `strict`.
+- Mermaid's own quirks apply to the source syntax: state diagrams cannot contain `:` in transition text; flowchart labels with parentheses must be quoted (`-->|"<a href='x.md'>send(cmd)</a>"|`), using single quotes inside the double-quoted label.
+- Node `click` directives keep working; inline anchors are for transitions and inline marks.
 
 ## Related pages
 

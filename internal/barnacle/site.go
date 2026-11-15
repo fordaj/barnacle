@@ -51,7 +51,6 @@ func Generate(root, siteDir string, cfg Config) (int, []string, error) {
 	}
 	pages := make([]page, 0, len(docs))
 	needsMermaid := false
-	needsEdgeLinks := false
 	var missingMermaid []string
 	for _, doc := range docs {
 		source, err := os.ReadFile(doc.SourcePath)
@@ -72,16 +71,13 @@ func Generate(root, siteDir string, cfg Config) (int, []string, error) {
 		} else {
 			missingMermaid = append(missingMermaid, doc.RelPath)
 		}
-		if HasEdgeLinks(content) {
-			needsEdgeLinks = true
-		}
 		pages = append(pages, page{doc: doc, content: content})
 	}
 
 	if err := prepareSiteDir(siteAbs); err != nil {
 		return 0, nil, err
 	}
-	if err := writeAssets(siteAbs, needsMermaid, needsEdgeLinks); err != nil {
+	if err := writeAssets(siteAbs, needsMermaid); err != nil {
 		return 0, nil, err
 	}
 
@@ -94,13 +90,12 @@ func Generate(root, siteDir string, cfg Config) (int, []string, error) {
 			return 0, nil, err
 		}
 		data := pageData{
-			SiteTitle:    cfg.Title,
-			PageTitle:    p.doc.Title,
-			Content:      template.HTML(p.content),
-			Nav:          template.HTML(nav),
-			RelPrefix:    relPrefix(p.doc.OutputRel),
-			HasMermaid:   HasMermaid(p.content),
-			HasEdgeLinks: HasEdgeLinks(p.content),
+			SiteTitle:  cfg.Title,
+			PageTitle:  p.doc.Title,
+			Content:    template.HTML(p.content),
+			Nav:        template.HTML(nav),
+			RelPrefix:  relPrefix(p.doc.OutputRel),
+			HasMermaid: HasMermaid(p.content),
 		}
 		if err := renderPage(out, pageTemplate, data); err != nil {
 			return 0, nil, err
@@ -145,7 +140,7 @@ func prepareSiteDir(siteAbs string) error {
 	return os.MkdirAll(siteAbs, 0o755)
 }
 
-func writeAssets(siteAbs string, includeMermaid, includeEdgeLinks bool) error {
+func writeAssets(siteAbs string, includeMermaid bool) error {
 	assetsDir := filepath.Join(siteAbs, "assets")
 	if err := os.MkdirAll(assetsDir, 0o755); err != nil {
 		return err
@@ -155,9 +150,6 @@ func writeAssets(siteAbs string, includeMermaid, includeEdgeLinks bool) error {
 	}
 	if includeMermaid {
 		writes["assets/mermaid.min.js"] = "assets/mermaid.min.js"
-	}
-	if includeEdgeLinks {
-		writes["assets/barnacle-edges.js"] = "assets/barnacle-edges.js"
 	}
 	for target, source := range writes {
 		data, err := fs.ReadFile(assetsFS, source)

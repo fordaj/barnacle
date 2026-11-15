@@ -48,7 +48,7 @@ The landing page of the fixture.
 
 `+"```mermaid\nflowchart LR\n  A[usage] --> B[api]\n  click A href \"guide/usage.md\"\n  click B href \"guide/api.go.md\" \"API docs\"\n```"+`
 
-`+"```mermaid\nstateDiagram-v2\n  [*] --> Idle\n  Idle --> Waiting : send(cmd)\n  Waiting --> Done : ack\n  Waiting --> Error : timeout\n  %% barnacle: link \"send(cmd)\" href \"guide/usage.md\" \"Usage docs\"\n  %% barnacle: link \"ack\" href \"guide/api.go.md\"\n```"+`
+`+"```mermaid\nstateDiagram-v2\n  [*] --> Idle\n  Idle --> Waiting : <a href=\"guide/usage.md\">send(cmd)</a>\n  Waiting --> Done : <a href=\"guide/api.go.md\">ack</a>\n  Waiting --> Error : timeout\n```"+`
 
 Browse [usage](guide/usage.md), [the API](guide/api.go.md), and
 [the reference](reference.mmd). External links like
@@ -58,7 +58,7 @@ Browse [usage](guide/usage.md), [the API](guide/api.go.md), and
 
 	writeFile(t, root, "guide/usage.md", `# Usage
 
-`+"```mermaid\nflowchart TD\n  R[read] --> W[write]\n  R e1@--> Done\n  click R href \"usage.cpp.md\"\n  click W \"api.go.md\" \"tooltip text\"\n  click R callback \"callback with scan.md\"\n  %% barnacle: link e1 href \"api.go.md\"\n```"+`
+`+"```mermaid\nflowchart TD\n  R[read] --> W[write]\n  R e1@--> Done\n  click R href \"usage.cpp.md\"\n  click W \"api.go.md\" \"tooltip text\"\n  click R callback \"callback with scan.md\"\n  click Done href \"api.go.md\"\n```"+`
 
 See <a href="api.go.md">the API</a> and <a href="../README.md">home</a>.
 
@@ -102,8 +102,6 @@ var (
 	mermaidRe           = regexp.MustCompile(`(?s)<pre class="mermaid">(.*?)</pre>`)
 	mermaidHrefRe       = regexp.MustCompile(`(?i)href\s+(?:"([^"\s]*)"|'([^'\s]*)'|([^\s"']+))`)
 	mermaidShortRe      = regexp.MustCompile(`(?i)^\s*click\s+([^"\s]+(?:\s+[^"\s]+)*?)\s+"([^"\s]*)"`)
-	edgeLinksManifestRe = regexp.MustCompile(`(?s)<script type="application/json" class="barnacle-edge-links">.*?</script>`)
-	edgeLinksKeyRe      = regexp.MustCompile(`"key"\s*:`)
 	schemeRe2           = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9+.-]*:`)
 	externalRel         = regexp.MustCompile(`^([A-Za-z][A-Za-z0-9+.-]*:|//|#)`)
 	docExtRe            = regexp.MustCompile(`(?i)\.(md|markdown|mmd)$`)
@@ -355,18 +353,14 @@ func TestE2EBrowserNavigation(t *testing.T) {
 				targets[target] = page
 			}
 		}
-		// After mermaid renders, every edge in a page's manifests must be
-		// wired into a clickable SVG anchor. A regression in the injection
-		// would leave this count short.
-		manifests := edgeLinksManifestRe.FindAllString(dom, -1)
-		expectedEdges := 0
-		for _, m := range manifests {
-			expectedEdges += len(edgeLinksKeyRe.FindAllStringIndex(m, -1))
-		}
-		if expectedEdges > 0 {
-			anchors := strings.Count(dom, `class="barnacle-edge-link"`)
-			if anchors != expectedEdges {
-				t.Errorf("%s: %d edge anchors injected for %d manifest edges", page, anchors, expectedEdges)
+		// The inline <a> labels in the state diagram must render as real
+		// HTML anchors (not escaped text), or clicking a transition does
+		// nothing even though every target exists.
+		if page == filepath.Join(site, "README.html") {
+			for _, want := range []string{`<a href="guide/usage.html"`, `<a href="guide/api.go.html"`} {
+				if !strings.Contains(dom, want) {
+					t.Errorf("%s: inline label anchor %q not rendered as an HTML anchor", page, want)
+				}
 			}
 		}
 
