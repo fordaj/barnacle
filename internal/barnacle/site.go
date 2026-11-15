@@ -53,7 +53,7 @@ func Generate(root, siteDir string, cfg Config) (int, error) {
 		}
 		var content string
 		if doc.MermaidOnly {
-			content = MermaidPageHTML(source)
+			content = MermaidPageHTML(doc.Title, source)
 		} else {
 			content, err = MarkdownToHTML(source)
 			if err != nil {

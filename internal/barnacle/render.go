@@ -92,10 +92,11 @@ func rewriteMermaidBlocks(rendered string) string {
 	return mermaidBlockRe.ReplaceAllString(rendered, `<pre class="mermaid">$1</pre>`)
 }
 
-// MermaidPageHTML renders a standalone .mmd file as a page body containing
-// the diagram source in a <pre class="mermaid"> block.
-func MermaidPageHTML(source []byte) string {
-	return `<pre class="mermaid">` + html.EscapeString(string(source)) + `</pre>` + "\n"
+// MermaidPageHTML renders a standalone .mmd file as a page body with a
+// heading and the diagram source in a <pre class="mermaid"> block.
+func MermaidPageHTML(title string, source []byte) string {
+	return `<h1>` + html.EscapeString(title) + `</h1>` + "\n" +
+		`<pre class="mermaid">` + html.EscapeString(string(source)) + `</pre>` + "\n"
 }
 
 // HasMermaid reports whether rendered HTML contains a Mermaid diagram.
