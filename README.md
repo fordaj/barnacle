@@ -1,258 +1,205 @@
 # barnacle
 
-**Navigate your codebase through diagrams.**
+**A navigable, diagram-centric documentation site for your codebase.**
 
-Barnacle generates a static, navigable HTML site from Mermaid diagrams and Markdown documentation distributed throughout a codebase.
+Barnacle turns Markdown and Mermaid documentation files scattered throughout a repository into a static, interconnected HTML website.
 
-Instead of maintaining a separate documentation directory, keep diagrams alongside the code they describe. Barnacle discovers these files, renders Mermaid diagrams to SVG, resolves relative links, and brings everything together into a browsable website.
+Document your code where it lives. Visualize how it fits together. Navigate your codebase through diagrams and links.
 
-## Why Barnacle?
+## Why barnacle?
 
-Codebases are easier to understand when you can visualize how their pieces fit together.
+Understanding an unfamiliar codebase often means jumping between source files, documentation, diagrams, and references scattered throughout a repository.
 
-Mermaid makes diagrams easy to write, review, and maintain as plain text. But diagrams become much more useful when they can link to one another and to the actual source files they describe.
-
-Barnacle makes that possible without introducing a separate documentation system.
+Barnacle takes a different approach: keep documentation alongside the code it describes.
 
 For example:
 
 ```text
 my-project/
-├── src/
-│   ├── main.cpp
-│   ├── main.md
+├── main.cpp
+├── main.md
+├── parser/
 │   ├── parser.cpp
-│   ├── parser.mmd
-│   └── network/
-│       ├── client.py
-│       └── client.md
+│   └── parser.mmd
+├── networking/
+│   ├── client.py
+│   └── client.md
 └── .barnacle.json
 ```
 
-Each documentation file lives alongside its corresponding source file.
+A documentation file can live directly beside its corresponding source file:
 
-- `main.md` documents `main.cpp`.
-- `parser.mmd` visualizes `parser.cpp`.
-- `client.md` documents `client.py`.
+- `main.cpp` → `main.md`
+- `parser.cpp` → `parser.mmd`
+- `client.py` → `client.md`
 
-These files can link to one another using ordinary relative paths.
+Run Barnacle against your repository to generate a static website containing rendered diagrams and navigable documentation pages.
 
-Barnacle transforms this distributed documentation into a single navigable site.
+The result is a visual map of your codebase that developers and coding agents can maintain as the code evolves.
 
 ## Features
 
-- **Parallel documentation** — Keep `.md` and `.mmd` files next to the source files they describe.
-- **Mermaid rendering** — Render Mermaid diagrams to SVG during the build.
-- **Navigable diagrams** — Follow links between diagrams and documentation.
-- **Source code links** — Link directly to the corresponding source files.
-- **Relative links** — Maintain relationships between files without hardcoding repository URLs.
-- **Static output** — Generate plain HTML, CSS, and SVG files. No server required.
-- **Cross-platform** — Distribute platform-specific executables through npm.
-- **Configurable** — Customize discovery and output through `.barnacle.json` or a command-line config path.
+- **Documentation alongside code** — Keep `.md` and `.mmd` files parallel to the source files they describe.
+- **Mermaid-first** — Use Mermaid diagrams to illustrate architecture, control flow, dependencies, and relationships.
+- **Navigable documentation** — Generated pages link to one another using relative paths.
+- **Static HTML output** — No application server or backend required to serve the generated site.
+- **Browser-rendered diagrams** — Mermaid diagrams are rendered by the browser.
+- **Portable** — Generated sites can be hosted anywhere static files can be served.
+- **Cross-platform binaries** — Written in Go and distributed as precompiled binaries for major operating systems and architectures.
 
-## Installation
+## Getting started
 
-Install Barnacle as a development dependency:
+Place documentation files alongside the source files they describe:
 
-```bash
-npm install --save-dev barnacle
+```text
+project/
+├── main.py
+├── main.md
+├── database.py
+├── database.mmd
+└── .barnacle.json
 ```
 
-Or run it without adding it to your project:
+Generate the site:
 
 ```bash
-npx barnacle
+barnacle
 ```
+
+By default, Barnacle reads configuration from `.barnacle.json` in the repository root and writes generated HTML files to `./site`.
+
+Open the generated site in a browser to explore your documentation.
 
 ## Usage
 
-Run Barnacle from the root of your repository:
-
 ```bash
-npx barnacle
+barnacle [options]
 ```
 
-By default, Barnacle:
-
-1. Discovers Markdown and Mermaid documentation files.
-2. Resolves their relationships using relative paths.
-3. Renders Mermaid diagrams to SVG.
-4. Generates a navigable HTML site.
-5. Writes the generated site to `./site`.
-
-### Command-line options
-
-| Option            | Description                        |
-| ----------------- | ---------------------------------- |
-| `--config <path>` | Use a specific configuration file. |
-| `--site <path>`   | Override the output directory.     |
-| `--help`          | Display usage information.         |
-| `--version`       | Display the installed version.     |
+| Option            | Description                                                       |
+| ----------------- | ----------------------------------------------------------------- |
+| `--config <path>` | Path to a Barnacle configuration file.                            |
+| `--site <path>`   | Output directory for the generated website. Defaults to `./site`. |
 
 Examples:
 
 ```bash
-# Use default configuration
-npx barnacle
+# Use repository configuration and default output directory
+barnacle
 
 # Specify a configuration file
-npx barnacle --config ./docs/barnacle.json
+barnacle --config ./docs/barnacle.json
 
-# Change the output directory
-npx barnacle --site ./build/docs
+# Specify an output directory
+barnacle --site ./public
 
-# Use both options
-npx barnacle --config ./barnacle.json --site ./public
+# Specify both
+barnacle --config ./config/barnacle.json --site ./build/site
 ```
 
 ## Documentation files
 
-Barnacle recognizes two documentation formats.
+Barnacle uses documentation files that live alongside your source code.
 
-### Markdown (`.md`)
+Both Markdown (`.md`) and Mermaid (`.mmd`) files can be used.
 
-Markdown files support prose, links, and Mermaid code blocks.
+### Markdown
+
+Markdown files can contain explanatory text, links, and Mermaid diagrams.
 
 ````markdown
 # Application Entry Point
 
-The application starts here.
+The application starts here and initializes the major subsystems.
 
 ```mermaid
 flowchart TD
-    A[main.cpp] --> B[Initialize]
-    B --> C[Load Configuration]
-    C --> D[Start Server]
+    A[main] --> B[Load Configuration]
+    B --> C[Initialize Database]
+    C --> D[Start Application]
 ```
 
-See the [parser documentation](../parser.mmd).
+See [Database](database.md) for more information.
 ````
 
-### Mermaid (`.mmd`)
+### Mermaid
 
-Mermaid files contain standalone diagrams.
+Mermaid files provide a dedicated place for diagrams without requiring surrounding Markdown.
 
 ```mermaid
 flowchart TD
     A[Parser] --> B[Tokenizer]
     B --> C[AST]
-    C --> D[Compiler]
+    C --> D[Interpreter]
 ```
 
-They can also contain links to other documentation and source files.
+### Linking documentation
 
-## Linking files
+Documentation files can reference other documentation files using relative Markdown links.
 
-Links are resolved relative to the documentation file containing them.
-
-For example, given:
-
-```text
-src/
-├── main.cpp
-├── main.md
-├── parser/
-│   ├── parser.cpp
-│   └── parser.md
-└── network/
-    ├── client.py
-    └── client.md
-```
-
-`main.md` could contain:
+For example:
 
 ```markdown
-- [Parser](parser/parser.md)
-- [Network Client](network/client.md)
-- [Source Code](main.cpp)
+See [the parser](../parser/parser.md) for implementation details.
 ```
 
-Barnacle resolves these relationships when generating the site, allowing readers to navigate between documentation and source files.
-
-Links inside Mermaid diagrams should follow the same relative-path conventions.
-
-## Configuration
-
-Barnacle looks for `.barnacle.json` in the repository root by default.
-
-An alternative configuration can be specified with `--config`.
-
-Example:
-
-```json
-{
-  "include": ["**/*.md", "**/*.mmd"],
-  "exclude": ["site/**", "node_modules/**", ".git/**"]
-}
-```
-
-Command-line options take precedence over configuration values.
+Links remain relative in the generated site, allowing documentation to remain portable across directories and hosting environments.
 
 ## Output
 
-Barnacle generates a self-contained static website.
+Barnacle generates a static HTML website in `./site` by default.
+
+The generated site mirrors the documentation structure, providing HTML pages that can link to one another.
 
 ```text
 site/
 ├── index.html
-├── assets/
-│   ├── styles.css
-│   └── ...
-└── src/
-    ├── main.html
-    ├── main.svg
-    ├── parser/
-    │   ├── parser.html
-    │   └── parser.svg
-    └── network/
-        └── client.html
+├── main.html
+├── parser/
+│   └── parser.html
+└── networking/
+    └── client.html
 ```
 
-The generated site preserves the source documentation's directory structure, making relative relationships predictable.
+Mermaid diagrams are rendered in the browser. The generated website requires no backend service or application runtime.
 
-The site can be:
+The output can be:
 
 - Opened locally in a browser.
-- Hosted using GitHub Pages.
-- Published using any static hosting provider.
-- Attached to CI artifacts.
-- Shared with other developers without requiring Barnacle to be installed.
+- Published using GitHub Pages.
+- Hosted on any static web server.
+- Distributed as part of a repository or project artifact.
 
-## Development
+## Configuration
 
-Barnacle is written in TypeScript and built using [Bun](https://bun.sh).
+Barnacle supports repository-level configuration through `.barnacle.json`.
 
-Bun is used to produce platform-specific standalone executables for distribution through npm.
+Alternatively, specify a configuration file using `--config`.
 
-### Requirements
-
-- [Bun](https://bun.sh)
-
-### Build
-
-```bash
-bun install
-bun run build
+```text
+my-project/
+├── .barnacle.json
+├── main.cpp
+├── main.md
+└── ...
 ```
 
-### Test
+Configuration allows repository-specific behavior without requiring developers to repeatedly supply command-line arguments.
 
-```bash
-bun test
-```
+## Built with Go
 
-## Design philosophy
+Barnacle is written in Go and designed to be distributed as standalone, cross-compiled binaries.
 
-Barnacle aims to make codebase documentation:
+Release builds target major operating systems and processor architectures, allowing developers to use Barnacle without installing Go, Python, Node.js, or other runtimes.
 
-- **Close to the code** — Documentation belongs beside the implementation it describes.
-- **Easy to maintain** — Markdown and Mermaid are readable, version-controllable text files.
-- **Easy to navigate** — Diagrams should connect to other diagrams and actual source files.
-- **Portable** — Generated documentation should work without a running application or backend.
-- **Low maintenance** — Developers and coding agents should be able to update documentation without learning a complicated documentation framework.
+## Philosophy
 
-Barnacle doesn't try to replace your source code, IDE, or existing documentation tools. It gives your codebase a visual map.
+Documentation should be:
 
----
+- **Close to the code** — Developers should be able to find and update documentation without hunting through a separate documentation repository.
+- **Easy to maintain** — Plain-text files work naturally with Git, code review, and automated coding agents.
+- **Visual** — Diagrams communicate architecture and relationships more effectively than walls of prose.
+- **Connected** — A codebase is a network of relationships. Its documentation should be navigable in the same way.
+- **Portable** — Documentation should be usable without a running application, database, or specialized infrastructure.
 
-**Barnacle — Make your codebase navigable.**
+**Barnacle makes your codebase explorable.**
