@@ -121,6 +121,17 @@ func TestMermaidPageHTMLRewritesClickLinks(t *testing.T) {
 	}
 }
 
+func TestMarkdownToHTMLRawMermaidBlock(t *testing.T) {
+	src := []byte("# Diagram\n\n<pre class=\"mermaid\">flowchart LR\n  A --> B\n  click A href \"scan.go.md\"\n</pre>\n")
+	out, err := MarkdownToHTML(src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !contains(out, `click A href &quot;scan.go.html&quot;`) {
+		t.Errorf("raw mermaid block click target not rewritten\n%s", out)
+	}
+}
+
 func TestMarkdownToHTMLMermaidClickExternalUntouched(t *testing.T) {
 	src := []byte("# Diagram\n\n```mermaid\nflowchart LR\n  A[main] --> B\n  click A href \"https://example.com/docs/scan.md\"\n  click B href \"#anchor\"\n  click C href \"mailto:a@b.c\"\n```\n")
 	out, err := MarkdownToHTML(src)

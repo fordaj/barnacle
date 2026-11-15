@@ -84,16 +84,18 @@ func RewriteDocLink(dest string) string {
 }
 
 var mermaidBlockRe = regexp.MustCompile(`(?s)<pre><code class="language-mermaid">(.*?)</code></pre>`)
+var preMermaidRe = regexp.MustCompile(`(?s)<pre class="mermaid">(.*?)</pre>`)
 
 // rewriteMermaidBlocks converts fenced ```mermaid code blocks into
 // <pre class="mermaid"> elements, which mermaid.js renders in the browser.
 // The block contents stay HTML-escaped; mermaid reads them via textContent,
 // which unescapes the entities. Documentation targets in `click` directives
-// are rewritten to the generated .html pages first (see rewriteMermaidLinks).
+// are rewritten to the generated .html pages (see rewriteMermaidLinks),
+// exactly once per block — fenced or hand-authored alike.
 func rewriteMermaidBlocks(rendered string) string {
-	return mermaidBlockRe.ReplaceAllStringFunc(rendered, func(block string) string {
-		sub := mermaidBlockRe.FindStringSubmatch(block)
-		body := html.UnescapeString(sub[1])
+	rendered = mermaidBlockRe.ReplaceAllString(rendered, `<pre class="mermaid">$1</pre>`)
+	return preMermaidRe.ReplaceAllStringFunc(rendered, func(block string) string {
+		body := html.UnescapeString(preMermaidRe.FindStringSubmatch(block)[1])
 		body = rewriteMermaidLinks(body)
 		return `<pre class="mermaid">` + escapeMermaidText(body) + `</pre>`
 	})
