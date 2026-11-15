@@ -30,13 +30,15 @@ Requires the Go toolchain from `go.mod` (Go 1.27) and, for formatting, `uv`.
 
 ```bash
 go build ./cmd/barnacle   # build the binary
-go test ./...             # run the test suite
+go test ./...             # run the test suite (includes end-to-end browser tests)
 go vet ./...              # static analysis
 ./scripts/format.sh             # format in place (prettier, black, shfmt -i 2, taplo)
 ./ci/format_check.sh    # check formatting without modifying files (CI)
 scripts/build.sh          # cross-compile into dist/<platform>/barnacle{,.exe}
 scripts/docs.sh           # regenerate the documentation site into ./site/
 ```
+
+The end-to-end tests generate a fixture site and verify it in two layers: statically (every relative link target must exist, no unrewritten `.md`/`.mmd` targets remain) and in a headless browser (every generated page and every unique anchor target must load, and every Mermaid diagram must render). The browser layer needs Chrome or Chromium on the machine and is skipped otherwise; set `BARNACLE_CHROME` to the executable to force it. CI runs on macOS and Windows self-hosted runners, where the browser layer runs if Chrome/Edge is installed.
 
 CI (`.github/workflows/ci.yml`) runs on self-hosted macOS and Windows runners: `./ci/format_check.sh`, `go vet`, `gofmt -l .`, `go test ./...`, and `go build ./...`. The runners are managed with [runner-spawner](https://github.com/fordaj/runner-spawner) (see `.runner-spawner.json` and `tools/runner-spawner/`).
 
