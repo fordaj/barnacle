@@ -3,12 +3,12 @@
 ```mermaid
 flowchart LR
     Src[Source tree<br/>.md / .mmd next to code] --> Barnacle[BARNACLE_BIN]
-    Cascade[env.sh cascade<br/>tools/barnacle/v0.0.1.0.5] --> Barnacle
+    Cascade[env.sh cascade<br/>tools/barnacle/v0.0.1.0.16] --> Barnacle
     Barnacle --> Site[./site<br/>static HTML]
     click Cascade href "env.sh.md"
 ```
 
-Generates the documentation site you are reading: it runs the pinned barnacle binary against this repository. This repository is the barnacle project itself, so the pinned release (`tools/barnacle/v0.0.1.0.5`) — not a binary built from this source tree — is what renders the site by default.
+Generates the documentation site you are reading: it runs the pinned barnacle binary against this repository. This repository is the barnacle project itself, so the pinned release (`tools/barnacle/v0.0.1.0.16`) — not a binary built from this source tree — is what renders the site by default.
 
 Barnacle scans the working tree for Markdown (`.md`) and Mermaid (`.mmd`) files, renders each as a page, and keeps relative links between them. Generated output is static HTML; it is written to `./site/` by default and is never committed (it is in `.gitignore`; `site/` is always excluded from the scan).
 

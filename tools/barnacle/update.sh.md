@@ -19,14 +19,19 @@ flowchart LR
 ```text
 tools/barnacle/
   update.sh                     # refresh from fordaj/barnacle releases
-  v0.0.1.0.5/
-    LICENSE                       # upstream MIT text
+  v0.0.1.0.16/
     macos-arm64/barnacle
+    macos-arm64/LICENSE           # upstream MIT text, copied per platform
     macos-x86_64/barnacle
+    macos-x86_64/LICENSE
     linux-arm64/barnacle
+    linux-arm64/LICENSE
     linux-x86_64/barnacle
+    linux-x86_64/LICENSE
     windows-arm64/barnacle.exe
+    windows-arm64/LICENSE
     windows-x86_64/barnacle.exe
+    windows-x86_64/LICENSE
 ```
 
 ## `update.sh` in detail
@@ -39,7 +44,7 @@ The script:
 2. Downloads via `gh` (`gh release download --pattern '*.tar.gz' --pattern '*.zip' --pattern '*.7z' --pattern 'checksums.txt' --pattern 'SHA256SUMS.txt'`).
 3. If the release ships `checksums.txt` or `SHA256SUMS.txt`, verifies exactly the archives downloaded for this run (the file may be cumulative); a mismatch is fatal. If no checksums are present, it logs a warning and installs anyway (unlike runner-spawner, which refuses).
 4. Extracts each archive (`tar` for `.tar.gz`; `unzip` for `.zip`, with `7z`/`7zz` only for legacy `.7z` assets), maps the platform (`darwin-amd64` → `macos-x86_64`, `darwin-arm64` → `macos-arm64`, `windows-*`/`linux-*` accordingly, normalizing `amd64`/`x64` → `x86_64`), and finds `barnacle{,.exe}` at the archive root or one level deep (the `barnacle-<platform>/` layout produced by `scripts/release.sh`). Copies the binary into `v<tag>/<platform>/`, makes it executable, and refuses empty ones.
-5. If the archive root carries a `LICENSE`, it is copied into the platform directory as well.
+5. If a `LICENSE` is found — at the archive root or one level deep, mirroring the binary search — it is copied into each platform directory alongside the binary (the release archives nest everything one level deep as `barnacle-<platform>/`).
 6. Stages everything in a temporary directory, swaps the version directory in atomically, and only then deletes superseded `v*/` directories — a failed refresh leaves the previous bundle intact.
 7. Smoke-tests the host binary (`barnacle --version`) and warns if its output does not contain the tag.
 
@@ -47,9 +52,9 @@ The script:
 
 ## How the repository uses it
 
-[`scripts/docs.sh`](../../scripts/docs.sh.md) resolves `BARNACLE_BIN` through the env cascade (`tools/barnacle/v<version>/<platform>/barnacle[.exe]`, pinned as `BARNACLE_VERSION_DIR` = `v0.0.1.0.5` in `scripts/.common.env`) and runs barnacle with the repository root as cwd, so `./.barnacle.json` (which excludes `tools/` and `dist/`) and the default `./site/` output land at the root. The output is git-ignored and barnacle's `.barnacle-site` marker lets a regeneration wipe stale pages.
+[`scripts/docs.sh`](../../scripts/docs.sh.md) resolves `BARNACLE_BIN` through the env cascade (`tools/barnacle/v<version>/<platform>/barnacle[.exe]`, pinned as `BARNACLE_VERSION_DIR` = `v0.0.1.0.16` in `scripts/.common.env`) and runs barnacle with the repository root as cwd, so `./.barnacle.json` (which excludes `tools/` and `dist/`) and the default `./site/` output land at the root. The output is git-ignored and barnacle's `.barnacle-site` marker lets a regeneration wipe stale pages.
 
-Licenses: MIT — see `v0.0.1.0.5/LICENSE`.
+Licenses: MIT — see the `LICENSE` in each platform directory, and the repository root of this repository (`LICENSE`).
 
 ## Related pages
 
