@@ -1,0 +1,4 @@
+dist/
+site/
+tools/
+internal/barnacle/assets/mermaid.min.js
