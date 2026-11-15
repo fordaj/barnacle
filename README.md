@@ -233,7 +233,7 @@ scripts/build.sh          # cross-compile into dist/<platform>/barnacle{,.exe}
 Formatting is orchestrated by [formattington](https://github.com/fordaj/formattington) via `uv` (Python tooling pinned in `pyproject.toml`/`uv.lock`):
 
 ```bash
-./format.sh            # format in place (prettier, black, shfmt -i 2, taplo)
+./scripts/format.sh     # format in place (prettier, black, shfmt -i 2, taplo)
 ./ci/format_check.sh   # CI check: exit 1 if anything needs formatting
 ```
 

@@ -1,4 +1,4 @@
-# The root formatter (`format.sh`)
+# The formatter (`scripts/format.sh`)
 
 Formats the barnacle repository in place with [formattington](https://github.com/fordaj/formattington). This repository dogfoods it for its own Markdown, Python, shell, and TOML files.
 
@@ -21,7 +21,7 @@ Formattington is pinned in `pyproject.toml` to a git commit (no PyPI release exi
 | Shell (`*.sh`, `*.bash`) | shfmt `-i 2` |
 | TOML (`*.toml`)          | taplo        |
 
-Style for the JavaScript/Markdown/YAML/JSON formatter is configured by formattington's own defaults plus any `.prettierrc` present at the repository root (the `format.sh` header notes this; no `.prettierrc` is currently tracked). The bundled binaries under `tools/` and generated locations such as `dist/` are skipped.
+Style for the JavaScript/Markdown/YAML/JSON formatter is configured by formattington's own defaults plus any `.prettierrc` present at the repository root (the `scripts/format.sh` header notes this; no `.prettierrc` is currently tracked). The bundled binaries under `tools/` and generated locations such as `dist/` are skipped.
 
 ## Prerequisites
 
@@ -30,9 +30,9 @@ Formatter executables must be on `PATH` (formattington exits `127` if one is mis
 ## Usage
 
 ```bash
-./format.sh              # format all matching files in place
-./format.sh --series     # format sequentially (ordered output)
-./format.sh --verbose    # show which formatter executables were resolved
+./scripts/format.sh              # format all matching files in place
+./scripts/format.sh --series     # format sequentially (ordered output)
+./scripts/format.sh --verbose    # show which formatter executables were resolved
 ```
 
 Extra flags are forwarded to `formattington` before `all` (e.g. `--series`, `--verbose`). `--config` is managed by the script; do not pass it.
@@ -41,6 +41,6 @@ To check formatting without modifying files (CI), use `./ci/format_check.sh`, wh
 
 ## Related pages
 
-- [README.md](README.md) — the repository README (formatting and CI are documented there)
-- [AGENTS.md](AGENTS.md) — the same rules restated for contributors and agents
-- [scripts/README.md](scripts/README.md) — the scripts that consume the same cascade
+- [README.md](../README.md) — the repository README (formatting and CI are documented there)
+- [AGENTS.md](../AGENTS.md) — the same rules restated for contributors and agents
+- [README.md](README.md) — the scripts that consume the same cascade

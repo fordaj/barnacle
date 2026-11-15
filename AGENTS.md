@@ -22,7 +22,7 @@ Requires the Go toolchain from `go.mod` (Go 1.27) and, for formatting, `uv`.
 go build ./cmd/barnacle   # build the binary
 go test ./...             # run the test suite
 go vet ./...              # static analysis
-./format.sh             # format in place (prettier, black, shfmt -i 2, taplo)
+./scripts/format.sh             # format in place (prettier, black, shfmt -i 2, taplo)
 ./ci/format_check.sh    # check formatting without modifying files (CI)
 scripts/build.sh          # cross-compile into dist/<platform>/barnacle{,.exe}
 scripts/docs.sh           # regenerate the documentation site into ./site/
@@ -40,7 +40,7 @@ internal/barnacle/ the whole implementation (config, scan, render, nav, site, te
 scripts/          build/release/docs tooling (+ hidden .common.env / .<platform>.env cascade)
 tools/            pinned helper binaries, each with an update.sh (not Go deps)
 ci/               format check for CI
-format.sh       root formatter (formattington via uv)
+scripts/format.sh  formatter (formattington via uv)
 site/             generated documentation (git-ignored)
 ```
 
@@ -53,7 +53,7 @@ The repository's documentation is a set of Markdown (`.md`) and Mermaid (`.mmd`)
 Layout — documentation lives next to the code it describes:
 
 - One sibling `.md` per Go file in `cmd/barnacle/` and `internal/barnacle/` (for example `scan.go` → `scan.md`), plus `internal/barnacle/README.md` as the package hub.
-- One sibling `.md` per bash script (`scripts/entry.sh` → `entry.md`, `scripts/env.sh` → `env.md`, `scripts/version.sh` → `version.md`, `scripts/docs.sh` → `docs.md`, `scripts/build.sh` → `build.md`, `scripts/release.sh` → `release.md`, root `format.sh` → `format.md`), plus `scripts/README.md` as the hub.
+- One sibling `.md` per bash script (`scripts/entry.sh` → `entry.md`, `scripts/env.sh` → `env.md`, `scripts/version.sh` → `version.md`, `scripts/docs.sh` → `docs.md`, `scripts/build.sh` → `build.md`, `scripts/release.sh` → `release.md`, `scripts/format.sh` → `scripts/format.md`), plus `scripts/README.md` as the hub.
 - One sibling `.md` per bundle in `tools/` (`tools/<name>/update.md`), plus `tools/README.md` as the hub. `tools/` is excluded from the generated site via `.barnacle.json` (the pinned binaries carry their own upstream docs), so these pages exist for the repository, not the site.
 
 Rules for keeping these files current:

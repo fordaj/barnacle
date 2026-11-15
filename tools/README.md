@@ -23,7 +23,7 @@ tools/<name>/
 
 | Tool | Used for | Page |
 | --- | --- | --- |
-| [formattington-lite](formattington-lite/update.md) | Pinned `formattington-lite` formatter binaries (not wired into `./format.sh` or CI — those run formattington via `uv`) | [update.sh](formattington-lite/update.md) |
+| [formattington-lite](formattington-lite/update.md) | Pinned `formattington-lite` formatter binaries (not wired into `./scripts/format.sh` or CI — those run formattington via `uv`) | [update.sh](formattington-lite/update.md) |
 | [logamuffin](logamuffin/update.md) | Structured logging backend for `log()` in the scripts | [update.sh](logamuffin/update.md) |
 | [runner-spawner](runner-spawner/update.md) | Manages the self-hosted CI runners (see `.runner-spawner.json` and `.github/workflows/ci.yml`) | [update.sh](runner-spawner/update.md) |
 | [versioner](versioner/update.md) | Computes the repository version for builds and releases | [update.sh](versioner/update.md) |
