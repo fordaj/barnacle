@@ -7,9 +7,13 @@ on:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-formatting:
-    name: Check Formatting
+    name: Check Formatting (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
@@ -17,10 +21,9 @@ jobs:
           - { os: macOS, labels: [self-hosted, macOS] }
           - { os: Windows, labels: [self-hosted, Windows] }
     runs-on: ${{ matrix.labels }}
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
 
       # uv for the Python side (black, formattington via uv run). uv also
       # fetches CPython 3.14 on first use.
@@ -82,16 +85,18 @@ jobs:
           - { os: macOS, labels: [self-hosted, macOS] }
           - { os: Windows, labels: [self-hosted, Windows] }
     runs-on: ${{ matrix.labels }}
+    timeout-minutes: 15
     defaults:
       run:
         shell: bash
     steps:
       - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
+      # cache: false — the setup-go post-run cache step hangs on the
+      # self-hosted runners; Go's own GOCACHE/module cache persists on disk.
       - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
+          cache: false
       - run: go vet ./...
       - run: gofmt -l . && test -z "$(gofmt -l .)"
       - run: go test ./...
