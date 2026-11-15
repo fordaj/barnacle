@@ -13,7 +13,7 @@ scripts/docs.sh --config ./docs/barnacle.json
 scripts/docs.sh --help                # usage for this script
 ```
 
-Any arguments other than `--help`/`-h` are forwarded to barnacle verbatim; see `barnacle --help` for `--config`/`--site` semantics. Barnacle's exit code is barnacle's own; a missing or non-executable bundle makes this script fail with instructions to run `tools/barnacle/update.bash` (or set `BARNACLE_BIN` explicitly).
+Any arguments other than `--help`/`-h` are forwarded to barnacle verbatim; see `barnacle --help` for `--config`/`--site` semantics. Barnacle's exit code is barnacle's own; a missing or non-executable bundle makes this script fail with instructions to run `tools/barnacle/update.sh` (or set `BARNACLE_BIN` explicitly).
 
 ## How it locates barnacle
 

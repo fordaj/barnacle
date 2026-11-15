@@ -29,7 +29,7 @@ flowchart LR
 - `1` — runtime failure (unreadable or invalid config, scan/render error, unwritable output).
 - `2` — usage error (unknown flag, unexpected positional argument, `--help`).
 
-`version` is `dev` unless stamped by the release scripts (`-ldflags "-X main.version=<v>"`, see `scripts/version.bash` and `scripts/release.sh`).
+`version` is `dev` unless stamped by the release scripts (`-ldflags "-X main.version=<v>"`, see `scripts/version.sh` and `scripts/release.sh`).
 
 ## Related pages
 

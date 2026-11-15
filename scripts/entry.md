@@ -3,7 +3,7 @@
 Every repository script sources `scripts/entry.sh` instead of the individual cascade files, because it does two jobs at once:
 
 1. **It loads the environment** — it sources [env.md](env.md), which sources the hidden cascade (`.common.env` plus the platform file selected from `uname`).
-2. **It defines `log()`** — the shared logging function used by the scripts and by the `tools/*/update.bash` refresh scripts.
+2. **It defines `log()`** — the shared logging function used by the scripts and by the `tools/*/update.sh` refresh scripts.
 
 ## `log()` semantics
 

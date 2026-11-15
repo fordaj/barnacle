@@ -13,14 +13,14 @@ Vernacular used in the headers (`log INFO`, `$REPO_ROOT_DIR`, `VERSIONER_BIN`): 
 ## Task scripts
 
 - [build.sh](build.md) — cross-compile barnacle for the six supported platforms into `dist/`, stamping the versioner-computed version into each binary.
-- [version.bash](version.md) — print the repository version computed by versioner (`--format text|shell|json`).
+- [version.sh](version.md) — print the repository version computed by versioner (`--format text|shell|json`).
 - [release.sh](release.md) — version, verify, cross-compile, package, tag, push, and publish the GitHub release.
 - [docs.sh](docs.md) — generate the documentation site you are reading, with the pinned barnacle.
-- [../format.md](../format.md) — format the repository in place with formattington (root-level `format.bash`).
+- [../format.md](../format.md) — format the repository in place with formattington (root-level `format.sh`).
 
 ## Refreshing the pinned tools
 
-The `tools/<name>/update.bash` scripts refresh the pinned helper bundles (versioner, logamuffin, runner-spawner, formattington-lite, barnacle). They are not rendered as part of this site (`tools/` is excluded in `.barnacle.json`); their pages live under `tools/` and are listed in `tools/README.md`.
+The `tools/<name>/update.sh` scripts refresh the pinned helper bundles (versioner, logamuffin, runner-spawner, formattington-lite, barnacle). They are not rendered as part of this site (`tools/` is excluded in `.barnacle.json`); their pages live under `tools/` and are listed in `tools/README.md`.
 
 ## Related pages
 

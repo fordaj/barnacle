@@ -226,18 +226,18 @@ go vet ./...              # static analysis
 scripts/build.sh          # cross-compile into dist/<platform>/barnacle{,.exe}
 ```
 
-`scripts/build.sh` emits binaries for macOS, Linux, and Windows on ARM64 and x86_64, stamping the version computed by `scripts/version.bash` into each binary.
+`scripts/build.sh` emits binaries for macOS, Linux, and Windows on ARM64 and x86_64, stamping the version computed by `scripts/version.sh` into each binary.
 
 ## Formatting and CI
 
 Formatting is orchestrated by [formattington](https://github.com/fordaj/formattington) via `uv` (Python tooling pinned in `pyproject.toml`/`uv.lock`):
 
 ```bash
-./format.bash            # format in place (prettier, black, shfmt -i 2, taplo)
-./ci/format_check.bash   # CI check: exit 1 if anything needs formatting
+./format.sh            # format in place (prettier, black, shfmt -i 2, taplo)
+./ci/format_check.sh   # CI check: exit 1 if anything needs formatting
 ```
 
-GitHub Actions (`.github/workflows/ci.yml`) runs on the repo's self-hosted macOS and Windows runners: a formatting check (`./ci/format_check.bash`) plus `go vet`, `gofmt`, `go test ./...` and `go build ./...`. Runners are managed with [runner-spawner](https://github.com/fordaj/runner-spawner) (see `.runner-spawner.json` and the bundled binary under `tools/runner-spawner/`).
+GitHub Actions (`.github/workflows/ci.yml`) runs on the repo's self-hosted macOS and Windows runners: a formatting check (`./ci/format_check.sh`) plus `go vet`, `gofmt`, `go test ./...` and `go build ./...`. Runners are managed with [runner-spawner](https://github.com/fordaj/runner-spawner) (see `.runner-spawner.json` and the bundled binary under `tools/runner-spawner/`).
 
 ## Cutting a release
 

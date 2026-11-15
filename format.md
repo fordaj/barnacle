@@ -1,4 +1,4 @@
-# The root formatter (`format.bash`)
+# The root formatter (`format.sh`)
 
 Formats the barnacle repository in place with [formattington](https://github.com/fordaj/formattington). This repository dogfoods it for its own Markdown, Python, shell, and TOML files.
 
@@ -21,7 +21,7 @@ Formattington is pinned in `pyproject.toml` to a git commit (no PyPI release exi
 | Shell (`*.sh`, `*.bash`) | shfmt `-i 2` |
 | TOML (`*.toml`)          | taplo        |
 
-Style for the JavaScript/Markdown/YAML/JSON formatter is configured by formattington's own defaults plus any `.prettierrc` present at the repository root (the `format.bash` header notes this; no `.prettierrc` is currently tracked). The bundled binaries under `tools/` and generated locations such as `dist/` are skipped.
+Style for the JavaScript/Markdown/YAML/JSON formatter is configured by formattington's own defaults plus any `.prettierrc` present at the repository root (the `format.sh` header notes this; no `.prettierrc` is currently tracked). The bundled binaries under `tools/` and generated locations such as `dist/` are skipped.
 
 ## Prerequisites
 
@@ -30,14 +30,14 @@ Formatter executables must be on `PATH` (formattington exits `127` if one is mis
 ## Usage
 
 ```bash
-./format.bash              # format all matching files in place
-./format.bash --series     # format sequentially (ordered output)
-./format.bash --verbose    # show which formatter executables were resolved
+./format.sh              # format all matching files in place
+./format.sh --series     # format sequentially (ordered output)
+./format.sh --verbose    # show which formatter executables were resolved
 ```
 
 Extra flags are forwarded to `formattington` before `all` (e.g. `--series`, `--verbose`). `--config` is managed by the script; do not pass it.
 
-To check formatting without modifying files (CI), use `./ci/format_check.bash`, which runs the same configuration with `--check` — see the README's "Formatting and CI" section.
+To check formatting without modifying files (CI), use `./ci/format_check.sh`, which runs the same configuration with `--check` — see the README's "Formatting and CI" section.
 
 ## Related pages
 

@@ -22,13 +22,13 @@ Requires the Go toolchain from `go.mod` (Go 1.27) and, for formatting, `uv`.
 go build ./cmd/barnacle   # build the binary
 go test ./...             # run the test suite
 go vet ./...              # static analysis
-./format.bash             # format in place (prettier, black, shfmt -i 2, taplo)
-./ci/format_check.bash    # check formatting without modifying files (CI)
+./format.sh             # format in place (prettier, black, shfmt -i 2, taplo)
+./ci/format_check.sh    # check formatting without modifying files (CI)
 scripts/build.sh          # cross-compile into dist/<platform>/barnacle{,.exe}
 scripts/docs.sh           # regenerate the documentation site into ./site/
 ```
 
-CI (`.github/workflows/ci.yml`) runs on self-hosted macOS and Windows runners: `./ci/format_check.bash`, `go vet`, `gofmt -l .`, `go test ./...`, and `go build ./...`. The runners are managed with [runner-spawner](https://github.com/fordaj/runner-spawner) (see `.runner-spawner.json` and `tools/runner-spawner/`).
+CI (`.github/workflows/ci.yml`) runs on self-hosted macOS and Windows runners: `./ci/format_check.sh`, `go vet`, `gofmt -l .`, `go test ./...`, and `go build ./...`. The runners are managed with [runner-spawner](https://github.com/fordaj/runner-spawner) (see `.runner-spawner.json` and `tools/runner-spawner/`).
 
 Releases go through `scripts/release.sh` (`--build-only` and `--dry-run` are the safe entry points); it computes the version with versioner, verifies `barnacle --version` agrees, and publishes per-platform archives. Do not tag or release without an explicit request.
 
@@ -38,9 +38,9 @@ Releases go through `scripts/release.sh` (`--build-only` and `--dry-run` are the
 cmd/barnacle/     the process boundary (main.go — flag parsing, exit codes)
 internal/barnacle/ the whole implementation (config, scan, render, nav, site, template)
 scripts/          build/release/docs tooling (+ hidden .common.env / .<platform>.env cascade)
-tools/            pinned helper binaries, each with an update.bash (not Go deps)
+tools/            pinned helper binaries, each with an update.sh (not Go deps)
 ci/               format check for CI
-format.bash       root formatter (formattington via uv)
+format.sh       root formatter (formattington via uv)
 site/             generated documentation (git-ignored)
 ```
 
@@ -53,7 +53,7 @@ The repository's documentation is a set of Markdown (`.md`) and Mermaid (`.mmd`)
 Layout — documentation lives next to the code it describes:
 
 - One sibling `.md` per Go file in `cmd/barnacle/` and `internal/barnacle/` (for example `scan.go` → `scan.md`), plus `internal/barnacle/README.md` as the package hub.
-- One sibling `.md` per bash script (`scripts/entry.sh` → `entry.md`, `scripts/env.sh` → `env.md`, `scripts/version.bash` → `version.md`, `scripts/docs.sh` → `docs.md`, `scripts/build.sh` → `build.md`, `scripts/release.sh` → `release.md`, root `format.bash` → `format.md`), plus `scripts/README.md` as the hub.
+- One sibling `.md` per bash script (`scripts/entry.sh` → `entry.md`, `scripts/env.sh` → `env.md`, `scripts/version.sh` → `version.md`, `scripts/docs.sh` → `docs.md`, `scripts/build.sh` → `build.md`, `scripts/release.sh` → `release.md`, root `format.sh` → `format.md`), plus `scripts/README.md` as the hub.
 - One sibling `.md` per bundle in `tools/` (`tools/<name>/update.md`), plus `tools/README.md` as the hub. `tools/` is excluded from the generated site via `.barnacle.json` (the pinned binaries carry their own upstream docs), so these pages exist for the repository, not the site.
 
 Rules for keeping these files current:
@@ -77,5 +77,5 @@ A change is complete when it:
 - Handles missing files, invalid configuration, and IO errors explicitly, without panics.
 - Remains cross-platform (path handling via `path/filepath`, no shelling out unless explicitly required).
 - Includes or updates tests where appropriate (`go test ./...` passes).
-- Leaves the formatting clean (`./ci/format_check.bash`).
+- Leaves the formatting clean (`./ci/format_check.sh`).
 - Updates relevant documentation — including the sibling `.md` pages above for every Go, bash, or bundle file touched, and `scripts/docs.sh` re-run with no broken local links.

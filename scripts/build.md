@@ -5,7 +5,7 @@ Cross-compiles barnacle for every supported platform into `dist/<platform>/barna
 ## What it does
 
 1. Sources [entry.md](entry.md) and changes into the repository root (`REPO_ROOT_DIR`).
-2. Resolves the version: `$VERSION` if set, otherwise `eval "$(scripts/version.bash --format shell)"`.
+2. Resolves the version: `$VERSION` if set, otherwise `eval "$(scripts/version.sh --format shell)"`.
 3. Fails early if the `go` toolchain is not on `PATH`.
 4. Builds six targets with `CGO_ENABLED=0`, `-trimpath`, and `-ldflags "-s -w -X main.version=$VERSION"`: `macos-arm64`, `macos-x86_64`, `linux-arm64`, `linux-x86_64`, `windows-arm64`, `windows-x86_64` (GOOS/GOARCH `darwin`/`linux`/`windows` × `arm64`/`amd64`).
 5. Writes each binary to `dist/<platform>/` and logs progress through `log()`.

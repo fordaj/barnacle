@@ -24,7 +24,7 @@ scripts/release.sh --dry-run      # compute + verify + build, touch nothing remo
 
 ## Prerequisites
 
-`git`, a Go toolchain, `tar`, and `zip`; a real release additionally needs `gh` authenticated for the target repository. Bundled versioner/logamuffin binaries are selected via [entry.md](entry.md) (refresh with `tools/versioner/update.bash` and `tools/logamuffin/update.bash`). Logging uses `log <level> <message>` from `entry.sh` (logamuffin, with printf fallback). The working tree must be clean and `HEAD` should be pushed for a real release.
+`git`, a Go toolchain, `tar`, and `zip`; a real release additionally needs `gh` authenticated for the target repository. Bundled versioner/logamuffin binaries are selected via [entry.md](entry.md) (refresh with `tools/versioner/update.sh` and `tools/logamuffin/update.sh`). Logging uses `log <level> <message>` from `entry.sh` (logamuffin, with printf fallback). The working tree must be clean and `HEAD` should be pushed for a real release.
 
 ## What it does
 

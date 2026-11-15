@@ -21,8 +21,8 @@
 # Prerequisites: git, a Go toolchain, tar, and zip (for the Windows
 # archives); a real release additionally needs gh authenticated via
 # `gh auth login`. Bundled versioner/logamuffin binaries are selected via
-# scripts/entry.sh (refresh with tools/versioner/update.bash and
-# tools/logamuffin/update.bash). Logging uses log <level> <message> from
+# scripts/entry.sh (refresh with tools/versioner/update.sh and
+# tools/logamuffin/update.sh). Logging uses log <level> <message> from
 # scripts/entry.sh (logamuffin, with printf fallback).
 # Working tree must be clean for a real release; HEAD should be pushed.
 #
@@ -139,14 +139,14 @@ fi
 # --- Dogfooding: versioner/logamuffin via scripts/entry.sh (sourced above)
 # shellcheck disable=SC2154
 if [[ -z "${VERSIONER_BIN:-}" ]]; then
-  die "no versioner binary found (run tools/versioner/update.bash, or set VERSIONER_BIN)"
+  die "no versioner binary found (run tools/versioner/update.sh, or set VERSIONER_BIN)"
 fi
 [[ -x "$VERSIONER_BIN" ]] || die "VERSIONER_BIN=$VERSIONER_BIN is not executable"
 log INFO "using versioner: $VERSIONER_BIN"
 if [[ -n "${LOGAMUFFIN_BIN:-}" && -x "${LOGAMUFFIN_BIN}" ]]; then
   log INFO "using logamuffin: $LOGAMUFFIN_BIN"
 else
-  log WARNING "logamuffin not found; falling back to printf logging (run tools/logamuffin/update.bash)"
+  log WARNING "logamuffin not found; falling back to printf logging (run tools/logamuffin/update.sh)"
 fi
 
 # --- Compute VERSION/TAG with versioner (dogfooding) ------------------

@@ -1,14 +1,14 @@
-# The version script (`scripts/version.bash`)
+# The version script (`scripts/version.sh`)
 
 Prints the version of this repository as computed by the pinned versioner — the same computation the release pipeline uses, so a local build and the published tag can never drift apart.
 
 ## Usage
 
 ```bash
-scripts/version.bash                 # VERSION=<v> and TAG=<t> lines (default)
-scripts/version.bash --format text   # same
-scripts/version.bash --format shell  # export VERSION=... and export TAG=...
-scripts/version.bash --format json   # the raw versioner JSON document
+scripts/version.sh                 # VERSION=<v> and TAG=<t> lines (default)
+scripts/version.sh --format text   # same
+scripts/version.sh --format shell  # export VERSION=... and export TAG=...
+scripts/version.sh --format json   # the raw versioner JSON document
 ```
 
 `--format` requires a value; `--help`/`-h` prints usage. Unknown arguments and an unknown format are usage errors (exit `2`).
