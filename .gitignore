@@ -154,3 +154,9 @@ site/
 
 # Tooling logs
 .logs/
+
+# Python tooling (uv / formattington)
+.venv/
+
+# Self-hosted runners (scripts/spawn-runners, .runner-spawner.json)
+.runners/

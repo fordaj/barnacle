@@ -213,7 +213,7 @@ A few rules worth knowing:
 
 ## Building from source
 
-Barnacle requires Go 1.24 or newer.
+Barnacle requires the Go toolchain from `go.mod` (currently Go 1.27).
 
 ```bash
 go build ./cmd/barnacle   # build the binary
@@ -224,6 +224,17 @@ scripts/build.sh          # cross-compile into dist/<platform>/barnacle{,.exe}
 
 `scripts/build.sh` emits binaries for macOS, Linux, and Windows on ARM64 and x86_64, stamping the version computed by `scripts/version.bash` into each binary.
 
+## Formatting and CI
+
+Formatting is orchestrated by [formattington](https://github.com/fordaj/formattington) via `uv` (Python tooling pinned in `pyproject.toml`/`uv.lock`):
+
+```bash
+./format.bash            # format in place (prettier, black, shfmt -i 2, taplo)
+./ci/format_check.bash   # CI check: exit 1 if anything needs formatting
+```
+
+GitHub Actions (`.github/workflows/ci.yml`) runs on the repo's self-hosted macOS and Windows runners: a formatting check (`./ci/format_check.bash`) plus `go vet`, `gofmt`, `go test ./...` and `go build ./...`. Runners are managed with [runner-spawner](https://github.com/fordaj/runner-spawner) (see `.runner-spawner.json` and the bundled binary under `tools/runner-spawner/`).
+
 ## Cutting a release
 
 ```bash
@@ -232,7 +243,7 @@ scripts/release.sh --dry-run      # compute version, verify, build, touch nothin
 scripts/release.sh                # tag HEAD, push the tag, create the GitHub release
 ```
 
-`scripts/release.sh` computes the version with versioner, verifies the binary reports it, cross-compiles every supported platform, and attaches one archive per platform (`barnacle-<platform>.tar.gz`, `.zip` on Windows, containing the binary, `LICENSE`, and `README.md`) plus a `SHA256SUMS.txt` manifest to a GitHub release. Re-running it against an existing tag attaches or refreshes the assets instead of failing. Requires `gh` authenticated for a real release; the working tree must be clean.
+`scripts/release.sh` computes the version with versioner, verifies the binary reports it, cross-compiles every supported platform, and attaches one archive per platform (`barnacle-<platform>.tar.gz`, `.zip` on Windows, containing the binary, `LICENSE`, and `README.md`) plus a `checksums.txt` manifest to a GitHub release. Re-running it against an existing tag attaches or refreshes the assets instead of failing. Requires `gh` authenticated for a real release; the working tree must be clean.
 
 ## Built with Go
 

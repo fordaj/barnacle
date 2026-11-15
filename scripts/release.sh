@@ -51,7 +51,7 @@ Compute the next VERSION/TAG with versioner itself (dogfooding, bundled
 binary selected via scripts/entry.sh), cross-compile barnacle for every
 supported platform into dist/, verify the program's version matches,
 create an annotated tag, push it, and create a GitHub release with the
-per-platform archives attached, plus a SHA256SUMS.txt manifest.
+per-platform archives attached, plus a checksums.txt manifest.
 
 Flags:
   --build-only    Cross-compile into dist/ and stop (no tag/push/release).
@@ -243,13 +243,13 @@ done
   done
   ((${#assets[@]} > 0)) || exit 1
   if command -v shasum >/dev/null 2>&1; then
-    shasum -a 256 "${assets[@]}" >SHA256SUMS.txt
+    shasum -a 256 "${assets[@]}" >checksums.txt
   else
-    sha256sum "${assets[@]}" >SHA256SUMS.txt
+    sha256sum "${assets[@]}" >checksums.txt
   fi
-) || die "could not generate SHA256SUMS.txt"
-RELEASE_ASSETS+=("$DIST_DIR/SHA256SUMS.txt")
-log INFO "  packaged SHA256SUMS.txt"
+) || die "could not generate checksums.txt"
+RELEASE_ASSETS+=("$DIST_DIR/checksums.txt")
+log INFO "  packaged checksums.txt"
 log INFO "built ${#RELEASE_ASSETS[@]} release assets in dist/"
 
 if [[ "$BUILD_ONLY" -eq 1 ]]; then
