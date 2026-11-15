@@ -36,6 +36,8 @@ jobs:
       # git clone otherwise (or if mirror-clone fails). A full clone is
       # required for the git-tag-derived version checks.
       - name: Clone Repo
+        # Job default is ./repo, but ./repo is created by this step.
+        working-directory: .
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -149,6 +151,8 @@ jobs:
       # git clone otherwise (or if mirror-clone fails). A full clone is
       # required for the git-tag-derived version checks.
       - name: Clone Repo
+        # Job default is ./repo, but ./repo is created by this step.
+        working-directory: .
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
