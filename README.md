@@ -224,6 +224,16 @@ scripts/build.sh          # cross-compile into dist/<platform>/barnacle{,.exe}
 
 `scripts/build.sh` emits binaries for macOS, Linux, and Windows on ARM64 and x86_64, stamping the version computed by `scripts/version.bash` into each binary.
 
+## Cutting a release
+
+```bash
+scripts/release.sh --build-only   # cross-compile and package into dist/, stop there
+scripts/release.sh --dry-run      # compute version, verify, build, touch nothing remote
+scripts/release.sh                # tag HEAD, push the tag, create the GitHub release
+```
+
+`scripts/release.sh` computes the version with versioner, verifies the binary reports it, cross-compiles every supported platform, and attaches one archive per platform (`barnacle-<platform>.tar.gz`, `.zip` on Windows, containing the binary, `LICENSE`, and `README.md`) plus a `SHA256SUMS.txt` manifest to a GitHub release. Re-running it against an existing tag attaches or refreshes the assets instead of failing. Requires `gh` authenticated for a real release; the working tree must be clean.
+
 ## Built with Go
 
 Barnacle is written in Go and designed to be distributed as standalone, cross-compiled binaries.

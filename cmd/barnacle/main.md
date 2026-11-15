@@ -14,12 +14,12 @@ flowchart LR
 
 ## Flags
 
-| Flag             | Description                                                |
-| ---------------- | ---------------------------------------------------------- |
-| `--config <path>`| Configuration file. Defaults to `./.barnacle.json`.        |
-| `--site <path>`  | Output directory. Defaults to `./site`.                    |
-| `--version`      | Print the version (stamped at build time) and exit.        |
-| `--help`         | Show usage and exit.                                       |
+| Flag              | Description                                         |
+| ----------------- | --------------------------------------------------- |
+| `--config <path>` | Configuration file. Defaults to `./.barnacle.json`. |
+| `--site <path>`   | Output directory. Defaults to `./site`.             |
+| `--version`       | Print the version (stamped at build time) and exit. |
+| `--help`          | Show usage and exit.                                |
 
 ## Exit codes
 
