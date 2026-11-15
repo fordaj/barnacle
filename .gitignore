@@ -160,3 +160,6 @@ site/
 
 # Self-hosted runners (scripts/spawn-runners, .runner-spawner.json)
 .runners/
+
+# Git worktrees
+.worktrees/
