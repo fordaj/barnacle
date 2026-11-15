@@ -87,8 +87,8 @@ func Scan(root, siteDir string, cfg Config) ([]Document, error) {
 		}
 
 		doc := Document{
-			RelPath:    relSlash,
-			SourcePath: path,
+			RelPath:     relSlash,
+			SourcePath:  path,
 			MermaidOnly: ext == ".mmd",
 		}
 		doc.OutputRel = strings.TrimSuffix(relSlash, filepath.Ext(relSlash)) + ".html"
