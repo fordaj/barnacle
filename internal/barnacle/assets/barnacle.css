@@ -218,3 +218,19 @@ body {
     padding: 1.5rem;
   }
 }
+
+/* Diagram labels render HTML (mermaid foreignObject); documentation links
+   written as <a> inside labels need to read and focus like links. */
+.edgeLabel a,
+.nodeLabel a {
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.edgeLabel a:focus-visible,
+.nodeLabel a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}

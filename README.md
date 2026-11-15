@@ -52,7 +52,7 @@ The result is a visual map of your codebase that developers and coding agents ca
 
 - **Documentation alongside code** — Keep `.md` and `.mmd` files parallel to the source files they describe.
 - **Mermaid-forward** — Every page should open with a Mermaid diagram at the top, so a brand-new reader gets a visual map before a wall of prose. Barnacle guides you (and your agents) toward that; it never forces it.
-- **Clickable diagrams** — `click` directives make diagram nodes navigable; Barnacle rewrites documentation targets (`.md`/`.mmd`) inside them to the generated pages. See [Clickable diagrams](#clickable-diagrams).
+- **Clickable diagrams** — `click` directives make diagram nodes and edges navigable; Barnacle rewrites documentation targets (`.md`/`.mmd`) inside them to the generated pages. See [Clickable diagrams](#clickable-diagrams).
 - **Navigable documentation** — Generated pages link to one another using relative paths.
 - **Retained suffixes** — `main.py.md`, `main.cpp.md`, `main.rs.md` — documentation files keep the source file's suffix, so different files that share a base name stay individually documentable.
 - **Static HTML output** — No application server or backend required to serve the generated site.
@@ -205,6 +205,42 @@ Notes:
 - Standalone `.mmd` files get the same rewriting.
 - Clicks are relative to the current page, so write targets the same way you would write a Markdown link from that page (`../parser/parser.cpp.md`).
 
+### Clickable edges
+
+Mermaid has no edge-`click` grammar, but its edge labels render as HTML inside the SVG — so **an inline anchor in the label just works**, and barnacle rewrites its `href` like any other doc link:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Validating : <a href="#configuration">barnacle(args)</a>
+    Validating --> Scanning : <a href="#features">config ok</a>
+    Scanning --> Done : site written
+    Validating --> Failed : <a href="cmd/barnacle/main.go.md">exit 1</a>
+```
+
+Try it: `barnacle(args)` and `config ok` jump to the Configuration and Features sections **on this page**; `exit 1` takes you to **another page**.
+
+Syntax notes (mermaid's own quirks, not barnacle's):
+
+| Construct                                                | Rule                                                                                                |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `Idle --> Waiting : <a href="dispatch.md">send(cmd)</a>` | State diagrams — the label is free-form, but may **not contain `:`** at all, or the parser gives up |
+| `A -->\|<a href="dispatch.md">sendcmd</a>\| B`           | Flowchart labels without parens are fine as-is                                                      |
+| `A -->\|"<a href='dispatch.md'>send(cmd)</a>"\| B`       | Flowchart labels **with parens** must be quoted; use single quotes inside the double-quoted label   |
+| `<a href="x.md" title="Send the command">…</a>`          | Standard attributes (`href`, `title`, `target="_blank"`, fragments) pass through under `strict`     |
+| `<a href="#local">…</a>`                                 | Fragment-only targets are untouched                                                                 |
+| Markdown                                                 | Not interpreted in plain labels — `**bold**` prints literally; use HTML (`<br/>`, `<strong>`)       |
+| `click A callback`                                       | Still requires `securityLevel: 'loose'`, which barnacle does not enable                             |
+
+Rules for links inside labels (identical to node clicks and everything else):
+
+- `.md` / `.markdown` / `.mmd` targets rewrite to `.html` — fragments and queries preserved; relative paths resolve from the page URL.
+- Absolute URLs, fragments and `mailto:` pass through untouched.
+- External and non-doc-fragment targets are never touched.
+- Standalone `.mmd` files are treated the same way.
+
+Node clicks (`click A href "target.md"`) remain the blessed way to make **nodes** navigable; inline anchors are the way to make **transitions** navigable. Both rely on the same label/SVG rendering under `securityLevel: 'strict'`: labels go through DOMPurify, which keeps relative URLs (and strips `javascript:`).
+
 ## Output
 
 Barnacle generates a static HTML website in `./site` by default.
@@ -326,19 +362,8 @@ Documentation should be:
 - **Close to the code** — Developers should be able to find and update documentation without hunting through a separate documentation repository.
 - **Easy to maintain** — Plain-text files work naturally with Git, code review, and automated coding agents.
 - **Visual** — Diagrams communicate architecture and relationships more effectively than walls of prose. The recommended page shape is a diagram at the very top, so the reader gets the map before the territory.
-- **Connected** — A codebase is a network of relationships. Its documentation should be navigable in the same way — links, and now clickable diagrams.
+- **Connected** — A codebase is a network of relationships. Its documentation should be navigable in the same way — links, clickable diagrams, and clickable edges.
 - **Mermaid-forward** — Mermaid is the default medium, not an occasional flourish. Barnacle guides you toward it (a nudge in the output, conventions everywhere) without ever forcing it on you.
 - **Portable** — Documentation should be usable without a running application, database, or specialized infrastructure.
 
 **Barnacle makes your codebase explorable.**
-
-## Proposed: clickable edges
-
-Mermaid natively supports `click` on flowchart **nodes** (wired up above), but not on **edges** — there is no grammar for "click this `-->` link". Edges are often exactly what a newcomer wants to follow ("reads → writes": take me to the writer's page), so this is a proposed future feature, not something Barnacle does today.
-
-Proposed design, in two phases:
-
-- **Phase 1 — Barnacle-side, no Mermaid changes.** Recognize `%% barnacle: link e1 href "target.md"` comment lines in a flowchart (Mermaid already supports edge IDs via `A e1@--> B`). Barnacle rewrites the target like any other doc link, emits a small JSON map per page (`<script type="application/json" class="barnacle-edge-links">`), and ships a tiny companion to `mermaid.min.js` that, after rendering, attaches real click handlers (plus keyboard focus and a focus outline) to the matching edge SVG groups with an invisible fat stroke for hit area.
-- **Phase 2 — Mermaid upstream.** Propose `e1@{ link: "target.md" }` natively, parallel to the existing `e1@{ animate: true }` edge-ID property syntax; Barnacle would then only need the doc-link rewrite and the companion script retires.
-
-Either way the contract matches nodes: relative `.md`/`.mmd` targets rewrite to `.html`, absolute URLs pass through untouched, `securityLevel: 'strict'` is preserved, and nothing about existing diagrams changes.

@@ -48,6 +48,8 @@ The landing page of the fixture.
 
 `+"```mermaid\nflowchart LR\n  A[usage] --> B[api]\n  click A href \"guide/usage.md\"\n  click B href \"guide/api.go.md\" \"API docs\"\n```"+`
 
+`+"```mermaid\nstateDiagram-v2\n  [*] --> Idle\n  Idle --> Waiting : <a href=\"guide/usage.md\">send(cmd)</a>\n  Waiting --> Done : <a href=\"guide/api.go.md\">ack</a>\n  Waiting --> Error : timeout\n```"+`
+
 Browse [usage](guide/usage.md), [the API](guide/api.go.md), and
 [the reference](reference.mmd). External links like
 [external](https://example.com/docs/scan.md) and fragment links like
@@ -56,7 +58,7 @@ Browse [usage](guide/usage.md), [the API](guide/api.go.md), and
 
 	writeFile(t, root, "guide/usage.md", `# Usage
 
-`+"```mermaid\nflowchart TD\n  R[read] --> W[write]\n  click R href \"usage.cpp.md\"\n  click W \"api.go.md\" \"tooltip text\"\n  click R callback \"callback with scan.md\"\n```"+`
+`+"```mermaid\nflowchart TD\n  R[read] --> W[write]\n  R e1@--> Done\n  click R href \"usage.cpp.md\"\n  click W \"api.go.md\" \"tooltip text\"\n  click R callback \"callback with scan.md\"\n  click Done href \"api.go.md\"\n```"+`
 
 See <a href="api.go.md">the API</a> and <a href="../README.md">home</a>.
 
@@ -201,16 +203,17 @@ func TestE2EGeneratedSiteAnchorsResolve(t *testing.T) {
 			}
 		}
 
-		// Mermaid blocks: no .md/.mmd click targets may remain either.
-		// Block bodies are HTML-escaped in the output, so unescape first.
+		// Mermaid blocks: no .md/.mmd click or barnacle-directive targets
+		// may remain either. Block bodies are HTML-escaped in the output,
+		// so unescape first.
 		for _, m := range mermaidRe.FindAllStringSubmatch(text, -1) {
 			body := html.UnescapeString(m[1])
 			for _, line := range strings.Split(body, "\n") {
 				trimmed := strings.TrimLeft(line, " \t")
-				if len(trimmed) < 5 || !strings.EqualFold(trimmed[:5], "click") {
-					continue
-				}
-				if len(trimmed) > 5 && trimmed[5] != ' ' && trimmed[5] != '\t' {
+				lower := strings.ToLower(trimmed)
+				isClick := strings.HasPrefix(lower, "click") && (len(lower) == 5 || lower[5] == ' ' || lower[5] == '\t')
+				isDirective := strings.HasPrefix(lower, "%%") && strings.Contains(lower, "barnacle:")
+				if !isClick && !isDirective {
 					continue
 				}
 				for _, mm := range mermaidHrefRe.FindAllStringSubmatch(line, -1) {
@@ -350,6 +353,17 @@ func TestE2EBrowserNavigation(t *testing.T) {
 				targets[target] = page
 			}
 		}
+		// The inline <a> labels in the state diagram must render as real
+		// HTML anchors (not escaped text), or clicking a transition does
+		// nothing even though every target exists.
+		if page == filepath.Join(site, "README.html") {
+			for _, want := range []string{`<a href="guide/usage.html"`, `<a href="guide/api.go.html"`} {
+				if !strings.Contains(dom, want) {
+					t.Errorf("%s: inline label anchor %q not rendered as an HTML anchor", page, want)
+				}
+			}
+		}
+
 		if strings.Contains(dom, `<pre class="mermaid"`) {
 			if !strings.Contains(dom, `data-processed="true"`) {
 				t.Errorf("%s: mermaid diagram did not render (data-processed missing)", page)

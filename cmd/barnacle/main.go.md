@@ -35,6 +35,21 @@ The `barnacle` command turns the Markdown and Mermaid files that live alongside 
 
 `version` is `dev` unless stamped by the release scripts (`-ldflags "-X main.version=<v>"`, see `scripts/version.sh.md` and `scripts/release.sh.md`).
 
+## The command lifecycle (edge links)
+
+Mermaid can't click edges, but labels render as HTML — an inline anchor just works. Try it:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Scanning : <a href="#flags">barnacle(args)</a>
+    Scanning --> Done : <a href="../../internal/barnacle/site.go.md">success, exit 0</a>
+    Scanning --> Failed : error, exit 1
+    Failed --> Idle : <a href="#best-effort-diagram-note">fix and retry</a>
+```
+
+`barnacle(args)` jumps to the [flags](#flags) table on this page; `success, exit 0` opens the site generator; `fix and retry` jumps to the diagram note below. The links rewrite exactly like Markdown links (see the README's "Clickable edges" section).
+
 ## Best-effort diagram note
 
 After a successful generation, barnacle prints a non-fatal note to stderr listing every page that contains no Mermaid diagram (`barnacle: note: N page(s) have no Mermaid diagram: …`), plus one line of best-practice reminder. Pages are never rejected for lacking a diagram; set `"warnMissingMermaid": false` in `.barnacle.json` to silence the note. Exit code `0` is unaffected either way.

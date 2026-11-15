@@ -89,9 +89,10 @@ var preMermaidRe = regexp.MustCompile(`(?s)<pre class="mermaid">(.*?)</pre>`)
 // rewriteMermaidBlocks converts fenced ```mermaid code blocks into
 // <pre class="mermaid"> elements, which mermaid.js renders in the browser.
 // The block contents stay HTML-escaped; mermaid reads them via textContent,
-// which unescapes the entities. Documentation targets in `click` directives
-// are rewritten to the generated .html pages (see rewriteMermaidLinks),
-// exactly once per block — fenced or hand-authored alike.
+// which unescapes the entities. Documentation targets in <a href> inside
+// diagram labels, and in `click` directives, are rewritten to the generated
+// .html pages (see rewriteMermaidLinks), exactly once per block — fenced or
+// hand-authored alike.
 func rewriteMermaidBlocks(rendered string) string {
 	rendered = mermaidBlockRe.ReplaceAllString(rendered, `<pre class="mermaid">$1</pre>`)
 	return preMermaidRe.ReplaceAllStringFunc(rendered, func(block string) string {
@@ -124,35 +125,57 @@ func escapeMermaidText(s string) string {
 }
 
 // rewriteMermaidLinks rewrites documentation targets (.md/.markdown/.mmd) in
-// Mermaid `click` directives so clickable diagram nodes navigate to the
-// generated .html pages, mirroring what rewriteDocLinks does for Markdown.
-// Clicking a node is a relative navigation resolved against the page URL, and
-// the generated site mirrors the source tree, so swapping the extension is
-// enough — the same invariant Markdown links rely on.
+// a Mermaid block, mirroring what rewriteDocLinks does for Markdown. The
+// generated site mirrors the source tree, so replacing the extension is all
+// that is needed; fragments and query strings are preserved; absolute URLs,
+// fragments, mailto: and friends pass through (RewriteDocLink rules).
 //
-// Two forms are supported, matching Mermaid's flowchart syntax:
+// Two forms are rewritten:
 //
-//	click NodeId href "target.md" ["tooltip"] [_blank]
-//	click NodeId "target.md" ["tooltip"] [_blank]
+//   - any href="..." token in the block — an <a href> inside a diagram
+//     label (mermaid renders label HTML), or the target of a `click`
+//     directive — is rewritten to the generated page;
+//   - the shorthand node-click form `click A "target.md"` (no href keyword),
+//     which Mermaid also supports.
 //
-// JavaScript callback forms (click A callback / click A call cb()) are left
-// alone; the URLs inside an href are always rewritten, and the URL in the
-// shorthand form is rewritten only when it contains no whitespace. Targets
-// are rewritten only for documentation extensions, so tooltips and external
-// links are never touched.
+// JavaScript callbacks (click A callback / click A call cb()) are left
+// alone, exactly like Markdown links, and the HTML inside diagram labels
+// keeps whatever attributes the author used (title, target, …).
 func rewriteMermaidLinks(src string) string {
 	lines := strings.Split(src, "\n")
 	for i, line := range lines {
-		lines[i] = rewriteMermaidClickLine(line)
+		line = rewriteMermaidHrefs(line)
+		line = rewriteMermaidClickLine(line)
+		lines[i] = line
 	}
 	return strings.Join(lines, "\n")
 }
 
-var (
-	clickHrefRe      = regexp.MustCompile(`(?i)(href\s+)(?:"([^"\s]*)"|'([^'\s]*)'|([^\s"']+))`)
-	clickShorthandRe = regexp.MustCompile(`^(\s*(?i:click)\s+)([^\s"']+(?:\s+[^\s"']+)*?\s+)(?:"([^"\s]*)"|'([^'\s]*)'|([^\s"']+))`)
-)
+var hrefDestRe = regexp.MustCompile(`(?i)href\s*=?\s*(?:"([^"]*)"|'([^']*)')`)
 
+// rewriteMermaidHrefs rewrites every href="..." token whose destination is
+// a documentation file. It is line-local and preserves quote style.
+func rewriteMermaidHrefs(line string) string {
+	return hrefDestRe.ReplaceAllStringFunc(line, func(match string) string {
+		m := hrefDestRe.FindStringSubmatch(match)
+		dest := m[1]
+		if dest == "" {
+			dest = m[2]
+		}
+		if dest == "" {
+			return match
+		}
+		return strings.Replace(match, dest, RewriteDocLink(dest), 1)
+	})
+}
+
+var clickShorthandRe = regexp.MustCompile(`^(\s*(?i:click)\s+)([^\s"']+(?:\s+[^\s"']+)*?\s+)(?:"([^"\s]*)"|'([^'\s]*)'|([^\s"']+))`)
+
+// rewriteMermaidClickLine handles the shorthand node-click form
+// (`click A "target.md"`), which carries its URL as a bareword or quoted
+// destination with no href keyword. Callback forms (click A callback /
+// click A call fn()) are never rewritten; href targets are already handled
+// by rewriteMermaidHrefs.
 func rewriteMermaidClickLine(line string) string {
 	trimmed := strings.TrimLeft(line, " \t")
 	if len(trimmed) < 5 || !strings.EqualFold(trimmed[:5], "click") {
@@ -161,22 +184,6 @@ func rewriteMermaidClickLine(line string) string {
 	if len(trimmed) > 5 && trimmed[5] != ' ' && trimmed[5] != '\t' {
 		return line
 	}
-	// Form 1: click <targets> href "url" ["tooltip"] [_blank]
-	line = clickHrefRe.ReplaceAllStringFunc(line, func(match string) string {
-		m := clickHrefRe.FindStringSubmatch(match)
-		quote := ""
-		url := m[4]
-		switch {
-		case m[2] != "":
-			quote, url = `"`, m[2]
-		case m[3] != "":
-			quote, url = `'`, m[3]
-		}
-		// Preserve the quote style (or lack of it) of the original token.
-		return m[1] + quote + RewriteDocLink(url) + quote
-	})
-	// Form 2: click <targets> "url" ["tooltip"] [_blank]
-	// Only when the targets are bare words; skip callback forms.
 	m := clickShorthandRe.FindStringSubmatch(line)
 	if m != nil {
 		targets := m[2]
@@ -190,7 +197,7 @@ func rewriteMermaidClickLine(line string) string {
 				quote, url = `'`, m[4]
 			}
 			rewritten := m[1] + targets + quote + RewriteDocLink(url) + quote
-			line = rewritten + line[len(m[0]):]
+			return rewritten + line[len(m[0]):]
 		}
 	}
 	return line
