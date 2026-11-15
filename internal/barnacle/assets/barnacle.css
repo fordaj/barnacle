@@ -1,0 +1,218 @@
+:root {
+  --sidebar-bg: #0f1722;
+  --sidebar-fg: #c9d4e3;
+  --sidebar-accent: #7dd3fc;
+  --content-bg: #ffffff;
+  --content-fg: #1f2937;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --code-bg: #f3f4f6;
+  --accent: #0369a1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--content-fg);
+  background: var(--content-bg);
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: var(--sidebar-bg);
+  color: var(--sidebar-fg);
+  padding: 1.25rem 1rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.site-title {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.25rem 0.5rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 0.75rem;
+}
+
+.site-title:hover {
+  color: var(--sidebar-accent);
+}
+
+.nav-tree,
+.nav-tree ul {
+  list-style: none;
+  margin: 0;
+  padding-left: 0.85rem;
+}
+
+.nav-tree {
+  padding-left: 0.25rem;
+}
+
+.nav-tree li {
+  margin: 0.15rem 0;
+}
+
+.nav-dir-name {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8fa3b8;
+  padding: 0.35rem 0.5rem 0.2rem;
+}
+
+.nav-link {
+  display: block;
+  color: var(--sidebar-fg);
+  text-decoration: none;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.nav-link.current {
+  background: rgba(125, 211, 252, 0.16);
+  color: var(--sidebar-accent);
+  font-weight: 600;
+}
+
+.content {
+  padding: 2rem 3rem;
+  max-width: 980px;
+  width: 100%;
+}
+
+.content h1,
+.content h2,
+.content h3,
+.content h4 {
+  line-height: 1.25;
+  color: #111827;
+}
+
+.content h1 {
+  font-size: 1.9rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.4rem;
+}
+
+.content a {
+  color: var(--accent);
+}
+
+.content code {
+  background: var(--code-bg);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  font-size: 0.9em;
+}
+
+.content pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+}
+
+.content pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.content pre.mermaid {
+  background: #fff;
+  border: none;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.content table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.content th,
+.content td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.7rem;
+}
+
+.content th {
+  background: var(--code-bg);
+  text-align: left;
+}
+
+.content blockquote {
+  border-left: 4px solid var(--border);
+  margin-left: 0;
+  padding-left: 1rem;
+  color: var(--muted);
+}
+
+.content img {
+  max-width: 100%;
+}
+
+.doc-index {
+  list-style: none;
+  padding-left: 0;
+}
+
+.doc-index ul {
+  list-style: none;
+  padding-left: 1rem;
+}
+
+.doc-path {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.empty-state {
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.page-footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 800px) {
+  body {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    height: auto;
+  }
+
+  .content {
+    padding: 1.5rem;
+  }
+}
