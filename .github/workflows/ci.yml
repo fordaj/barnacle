@@ -185,7 +185,7 @@ jobs:
       # self-hosted runners; Go's own GOCACHE/module cache persists on disk.
       - uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version-file: ./repo/go.mod
           cache: false
       - run: go vet ./...
       - run: gofmt -l . && test -z "$(gofmt -l .)"
