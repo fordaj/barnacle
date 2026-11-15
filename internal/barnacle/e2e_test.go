@@ -98,13 +98,13 @@ func generateFixture(t *testing.T) (site string, pages int) {
 }
 
 var (
-	hrefSrcRe           = regexp.MustCompile(`(?:href|src|xlink:href)="([^"]*)"`)
-	mermaidRe           = regexp.MustCompile(`(?s)<pre class="mermaid">(.*?)</pre>`)
-	mermaidHrefRe       = regexp.MustCompile(`(?i)href\s+(?:"([^"\s]*)"|'([^'\s]*)'|([^\s"']+))`)
-	mermaidShortRe      = regexp.MustCompile(`(?i)^\s*click\s+([^"\s]+(?:\s+[^"\s]+)*?)\s+"([^"\s]*)"`)
-	schemeRe2           = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9+.-]*:`)
-	externalRel         = regexp.MustCompile(`^([A-Za-z][A-Za-z0-9+.-]*:|//|#)`)
-	docExtRe            = regexp.MustCompile(`(?i)\.(md|markdown|mmd)$`)
+	hrefSrcRe      = regexp.MustCompile(`(?:href|src|xlink:href)="([^"]*)"`)
+	mermaidRe      = regexp.MustCompile(`(?s)<pre class="mermaid">(.*?)</pre>`)
+	mermaidHrefRe  = regexp.MustCompile(`(?i)href\s+(?:"([^"\s]*)"|'([^'\s]*)'|([^\s"']+))`)
+	mermaidShortRe = regexp.MustCompile(`(?i)^\s*click\s+([^"\s]+(?:\s+[^"\s]+)*?)\s+"([^"\s]*)"`)
+	schemeRe2      = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9+.-]*:`)
+	externalRel    = regexp.MustCompile(`^([A-Za-z][A-Za-z0-9+.-]*:|//|#)`)
+	docExtRe       = regexp.MustCompile(`(?i)\.(md|markdown|mmd)$`)
 )
 
 // hasDocExt reports whether dest's path (before any query/fragment)
