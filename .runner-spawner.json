@@ -1,6 +1,6 @@
 {
   "owner": "fordaj",
-  "repo": "RecipeServer",
+  "repo": "barnacle",
   "runnerNames": ["runner01", "runner02"],
   "runnersDir": ".runners",
   "runnerGroup": "Default",
