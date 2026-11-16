@@ -118,25 +118,22 @@ var preMermaidRe = regexp.MustCompile(`(?s)<pre class="mermaid">(.*?)</pre>`)
 // tags inside diagram labels are inlined per the context.
 func rewriteMermaidBlocks(rendered string, ctx RenderContext) (string, error) {
 	rendered = mermaidBlockRe.ReplaceAllString(rendered, `<pre class="mermaid">$1</pre>`)
-	var inlineErr error
-	rendered = preMermaidRe.ReplaceAllStringFunc(rendered, func(block string) string {
-		if inlineErr != nil {
-			return block
-		}
-		body := html.UnescapeString(preMermaidRe.FindStringSubmatch(block)[1])
-		var err error
-		body, err = inlineLocalSVGs(body, ctx)
+	var b strings.Builder
+	b.Grow(len(rendered))
+	last := 0
+	for _, loc := range preMermaidRe.FindAllStringSubmatchIndex(rendered, -1) {
+		body := html.UnescapeString(rendered[loc[2]:loc[3]])
+		body, err := inlineLocalSVGs(body, ctx)
 		if err != nil {
-			inlineErr = err
-			return block
+			return "", err
 		}
 		body = rewriteMermaidLinks(body)
-		return `<pre class="mermaid">` + escapeMermaidText(body) + `</pre>`
-	})
-	if inlineErr != nil {
-		return "", inlineErr
+		b.WriteString(rendered[last:loc[0]])
+		b.WriteString(`<pre class="mermaid">` + escapeMermaidText(body) + `</pre>`)
+		last = loc[1]
 	}
-	return rendered, nil
+	b.WriteString(rendered[last:])
+	return b.String(), nil
 }
 
 // MermaidPageHTML renders a standalone .mmd file as a page body with a
@@ -212,6 +209,14 @@ func rewriteMermaidHrefs(line string) string {
 	})
 }
 
+// clickShorthandRe matches the shorthand node-click form of a mermaid
+// click directive, in three parts:
+//
+//	^(\s*(?i:click)\s+)                 group 1 — leading keyword and whitespace
+//	([^\s"']+(?:\s+[^\s"']+)*?\s+)      group 2 — node name and optional tooltip words,
+//	                                            up to the destination (lazy, keeps it
+//	                                            left of the final quoted string)
+//	(?:"(...)"|'(...)'|(...))           groups 3/4/5 — quoted or bareword destination
 var clickShorthandRe = regexp.MustCompile(`^(\s*(?i:click)\s+)([^\s"']+(?:\s+[^\s"']+)*?\s+)(?:"([^"\s]*)"|'([^'\s]*)'|([^\s"']+))`)
 
 // rewriteMermaidClickLine handles the shorthand node-click form
@@ -278,38 +283,47 @@ func inlineLocalSVGs(rendered string, ctx RenderContext) (string, error) {
 	}
 	root := filepath.Clean(ctx.Root)
 	srcDir := filepath.Clean(ctx.SourceDir)
-	var inlineErr error
-	rendered = imgTagRe.ReplaceAllStringFunc(rendered, func(tag string) string {
-		if inlineErr != nil {
-			return tag
-		}
-		attrs := parseImgAttrs(tag)
-		dest := attrs["src"]
-		if !isLocalSVG(dest) {
-			return tag
-		}
-		abs := filepath.Clean(filepath.Join(srcDir, filepath.FromSlash(dest)))
-		rel, err := filepath.Rel(root, abs)
-		if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
-			inlineErr = fmt.Errorf("svg reference %q escapes the repository root", dest)
-			return tag
-		}
-		data, err := os.ReadFile(abs)
+	var b strings.Builder
+	b.Grow(len(rendered))
+	last := 0
+	for _, loc := range imgTagRe.FindAllStringIndex(rendered, -1) {
+		replacement, err := inlineImgTag(rendered[loc[0]:loc[1]], srcDir, root)
 		if err != nil {
-			inlineErr = fmt.Errorf("svg reference %q: %w", dest, err)
-			return tag
+			return "", err
 		}
-		inline, err := svgToInline(data, attrs)
-		if err != nil {
-			inlineErr = fmt.Errorf("svg reference %q: %w", dest, err)
-			return tag
-		}
-		return inline
-	})
-	if inlineErr != nil {
-		return "", inlineErr
+		b.WriteString(rendered[last:loc[0]])
+		b.WriteString(replacement)
+		last = loc[1]
 	}
-	return rendered, nil
+	b.WriteString(rendered[last:])
+	return b.String(), nil
+}
+
+// inlineImgTag inlines one <img> tag whose destination is a relative .svg
+// file. Tags that reference anything else (external URLs, data: URIs,
+// fragments, non-SVG files) are returned unchanged. A reference to a
+// missing or unreadable SVG, or a path escaping the repository root, is
+// an error — never a silent pass-through.
+func inlineImgTag(tag, srcDir, root string) (string, error) {
+	attrs := parseImgAttrs(tag)
+	dest := attrs["src"]
+	if !isLocalSVG(dest) {
+		return tag, nil
+	}
+	abs := filepath.Clean(filepath.Join(srcDir, filepath.FromSlash(dest)))
+	rel, err := filepath.Rel(root, abs)
+	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("svg reference %q escapes the repository root", dest)
+	}
+	data, err := os.ReadFile(abs)
+	if err != nil {
+		return "", fmt.Errorf("svg reference %q: %w", dest, err)
+	}
+	inline, err := svgToInline(data, attrs)
+	if err != nil {
+		return "", fmt.Errorf("svg reference %q: %w", dest, err)
+	}
+	return inline, nil
 }
 
 var attrRe = regexp.MustCompile(`([A-Za-z-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')`)
@@ -338,6 +352,24 @@ var shapeRe = regexp.MustCompile(`<(?P<tag>path|circle|rect|line|polyline|polygo
 // they are projected onto every shape so the file's intent renders under
 // mermaid's paint. When the file declares none, the lucide defaults apply.
 var visualProps = []string{"fill", "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin"}
+
+// displaySize picks the rendered size of an inlined icon: the <img>'s own
+// width and height win; either one alone squares the icon; otherwise the
+// house default is 20px square (the viewBox carries the aspect).
+func displaySize(imgAttrs map[string]string) (string, string) {
+	width, hasW := imgAttrs["width"]
+	height, hasH := imgAttrs["height"]
+	switch {
+	case hasW && hasH:
+		return width, height
+	case hasW:
+		return width, width
+	case hasH:
+		return height, height
+	default:
+		return "20px", "20px"
+	}
+}
 
 // svgToInline renders a file's bytes as an inline <svg> element. Display
 // attributes carried by the <img> win (width/height), otherwise the SVG's
@@ -372,20 +404,7 @@ func svgToInline(data []byte, imgAttrs map[string]string) (string, error) {
 	}
 
 	attrs := fileAttrs
-
-	width, hasW := imgAttrs["width"]
-	height, hasH := imgAttrs["height"]
-	switch {
-	case hasW && hasH:
-		attrs["width"], attrs["height"] = width, height
-	case hasW:
-		attrs["width"], attrs["height"] = width, width
-	case hasH:
-		attrs["width"], attrs["height"] = height, height
-	default:
-		// House default: 20px square. viewBox carries the aspect.
-		attrs["width"], attrs["height"] = "20px", "20px"
-	}
+	attrs["width"], attrs["height"] = displaySize(imgAttrs)
 	if attrs["viewbox"] == "" {
 		attrs["viewbox"] = "0 0 24 24" // sensible default for icon-shaped files
 	}
@@ -445,10 +464,8 @@ func projectVisual(inner string, proj map[string]string) string {
 			if _, own := shapeAttrs[k]; own {
 				continue // shape declares its own
 			}
-			if _, own := shapeAttrs["style"]; own {
-				if styleContent := shapeAttrs["style"]; styleHasProp(styleContent, k) {
-					continue
-				}
+			if styleContent, own := shapeAttrs["style"]; own && styleHasProp(styleContent, k) {
+				continue
 			}
 			keep = append(keep, k+":"+v)
 		}
@@ -456,20 +473,30 @@ func projectVisual(inner string, proj map[string]string) string {
 			return tag
 		}
 		if styleContent, ok := shapeAttrs["style"]; ok {
-			merged := strings.Join(append(strings.FieldsFunc(styleContent, func(r rune) bool { return r == ';' }), keep...), ";")
-			// Replace the existing style="..." segment in the tag verbatim.
-			oldStart := strings.Index(head, `style="`)
-			oldEnd := strings.Index(head[oldStart+len(`style="`):], `"`) + oldStart + len(`style="`)
-			head = head[:oldStart] + `style="` + merged + `"` + head[oldEnd:]
+			merged := mergeStyle(styleContent, keep)
+			head = styleAttrRe.ReplaceAllString(head, `style="`+merged+`"`)
 			return "<" + name + head + close + ">"
 		}
 		return "<" + name + head + ` style="` + strings.Join(keep, ";") + `"` + close + ">"
 	})
 }
 
+var styleAttrRe = regexp.MustCompile(`style\s*=\s*(?:"[^"]*"|'[^']*')`)
+
+// mergeStyle appends the projection declarations to an inline style
+// property list, preserving the declarations the shape itself had.
+func mergeStyle(style string, extra []string) string {
+	return strings.Join(append(splitStyle(style), extra...), ";")
+}
+
+// splitStyle splits an inline style property list on ';'.
+func splitStyle(style string) []string {
+	return strings.FieldsFunc(style, func(r rune) bool { return r == ';' })
+}
+
 // styleHasProp reports whether a style property list explicitly declares key.
 func styleHasProp(style, key string) bool {
-	for _, chunk := range strings.FieldsFunc(style, func(r rune) bool { return r == ';' }) {
+	for _, chunk := range splitStyle(style) {
 		if i := strings.Index(chunk, ":"); i >= 0 && strings.TrimSpace(chunk[:i]) == key {
 			return true
 		}

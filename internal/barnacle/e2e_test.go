@@ -175,6 +175,65 @@ func resolveRef(pageDir, ref string) (string, bool) {
 	return filepath.Join(pageDir, filepath.FromSlash(unescaped)), true
 }
 
+// checkHrefsResolve verifies every relative href/src on a generated page
+// resolves to a file that exists, and no local .md/.mmd target remains.
+func checkHrefsResolve(t *testing.T, page string, text string) {
+	t.Helper()
+	pageDir := filepath.Dir(page)
+	for _, m := range hrefSrcRe.FindAllStringSubmatch(text, -1) {
+		dest := m[1]
+		if externalRel.MatchString(dest) {
+			continue
+		}
+		// A local .md/.mmd target in the generated output is the
+		// bug class this suite exists to prevent: the file does not
+		// exist, so clicking fails in a real browser.
+		if hasDocExt(dest) {
+			t.Errorf("%s: unrewritten documentation target %q", page, dest)
+			continue
+		}
+		target, ok := resolveRef(pageDir, dest)
+		if !ok {
+			continue
+		}
+		if _, err := os.Stat(target); err != nil {
+			t.Errorf("%s: link to %q resolves to missing file %s", page, dest, target)
+		}
+	}
+}
+
+// checkMermaidClicks rewrites-check: no `click` or barnacle directive in a
+// Mermaid block may keep a local .md/.mmd target. Block bodies are
+// HTML-escaped in the output, so unescape first.
+func checkMermaidClicksResolve(t *testing.T, page string, text string) {
+	t.Helper()
+	for _, m := range mermaidRe.FindAllStringSubmatch(text, -1) {
+		body := html.UnescapeString(m[1])
+		for _, line := range strings.Split(body, "\n") {
+			trimmed := strings.TrimLeft(line, " \t")
+			lower := strings.ToLower(trimmed)
+			isClick := strings.HasPrefix(lower, "click") && (len(lower) == 5 || lower[5] == ' ' || lower[5] == '\t')
+			isDirective := strings.HasPrefix(lower, "%%") && strings.Contains(lower, "barnacle:")
+			if !isClick && !isDirective {
+				continue
+			}
+			for _, mm := range mermaidHrefRe.FindAllStringSubmatch(line, -1) {
+				for _, g := range mm[1:] {
+					if g != "" && hasDocExt(g) {
+						t.Errorf("%s: mermaid click keeps an unrewritten documentation target %q\n%s", page, g, line)
+					}
+				}
+			}
+			if mm := mermaidShortRe.FindStringSubmatch(line); mm != nil {
+				targets, dest := mm[1], mm[2]
+				if !containsWord(targets, "callback") && !containsWord(targets, "call") && !containsWord(targets, "href") && hasDocExt(dest) {
+					t.Errorf("%s: mermaid click keeps an unrewritten documentation target %q\n%s", page, dest, line)
+				}
+			}
+		}
+	}
+}
+
 func TestE2EGeneratedSiteAnchorsResolve(t *testing.T) {
 	site, pages := generateFixture(t)
 	if pages < 6 {
@@ -188,57 +247,8 @@ func TestE2EGeneratedSiteAnchorsResolve(t *testing.T) {
 			t.Fatal(err)
 		}
 		text := string(data)
-		pageDir := filepath.Dir(page)
-
-		for _, m := range hrefSrcRe.FindAllStringSubmatch(text, -1) {
-			dest := m[1]
-			if externalRel.MatchString(dest) {
-				continue
-			}
-			// A local .md/.mmd target in the generated output is the
-			// bug class this suite exists to prevent: the file does not
-			// exist, so clicking fails in a real browser.
-			if hasDocExt(dest) {
-				t.Errorf("%s: unrewritten documentation target %q", page, dest)
-				continue
-			}
-			target, ok := resolveRef(pageDir, dest)
-			if !ok {
-				continue
-			}
-			if _, err := os.Stat(target); err != nil {
-				t.Errorf("%s: link to %q resolves to missing file %s", page, dest, target)
-			}
-		}
-
-		// Mermaid blocks: no .md/.mmd click or barnacle-directive targets
-		// may remain either. Block bodies are HTML-escaped in the output,
-		// so unescape first.
-		for _, m := range mermaidRe.FindAllStringSubmatch(text, -1) {
-			body := html.UnescapeString(m[1])
-			for _, line := range strings.Split(body, "\n") {
-				trimmed := strings.TrimLeft(line, " \t")
-				lower := strings.ToLower(trimmed)
-				isClick := strings.HasPrefix(lower, "click") && (len(lower) == 5 || lower[5] == ' ' || lower[5] == '\t')
-				isDirective := strings.HasPrefix(lower, "%%") && strings.Contains(lower, "barnacle:")
-				if !isClick && !isDirective {
-					continue
-				}
-				for _, mm := range mermaidHrefRe.FindAllStringSubmatch(line, -1) {
-					for _, g := range mm[1:] {
-						if g != "" && hasDocExt(g) {
-							t.Errorf("%s: mermaid click keeps an unrewritten documentation target %q\n%s", page, g, line)
-						}
-					}
-				}
-				if mm := mermaidShortRe.FindStringSubmatch(line); mm != nil {
-					targets, dest := mm[1], mm[2]
-					if !containsWord(targets, "callback") && !containsWord(targets, "call") && !containsWord(targets, "href") && hasDocExt(dest) {
-						t.Errorf("%s: mermaid click keeps an unrewritten documentation target %q\n%s", page, dest, line)
-					}
-				}
-			}
-		}
+		checkHrefsResolve(t, page, text)
+		checkMermaidClicksResolve(t, page, text)
 	}
 }
 
