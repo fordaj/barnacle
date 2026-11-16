@@ -146,6 +146,12 @@ body {
   padding: 1rem 0;
 }
 
+/* Diagram authors sometimes place small HTML details (icons, badges) at the
+   corners of a node; the SVG foreignObject must not clip them. */
+.mermaid foreignObject {
+  overflow: visible;
+}
+
 .content table {
   border-collapse: collapse;
   margin: 1rem 0;
