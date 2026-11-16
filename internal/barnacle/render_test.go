@@ -175,8 +175,8 @@ func TestInlineLocalSVGsRewritesRelativeRefs(t *testing.T) {
 	if !contains(out, `<svg`) {
 		t.Errorf("svg was not inlined\n%s", out)
 	}
-	if !contains(out, `<path d="M12 3v12"/>`) {
-		t.Errorf("svg body missing\n%s", out)
+	if !contains(out, `<path d="M12 3v12" style="fill:none;stroke:currentColor"/>`) {
+		t.Errorf("svg body missing or malformed\n%s", out)
 	}
 	if contains(out, `src="icons/wave.svg"`) {
 		t.Errorf("relative svg reference not rewritten\n%s", out)
@@ -251,6 +251,56 @@ func TestInlineLocalSVGsZeroContextSkips(t *testing.T) {
 	}
 	if !contains(out, `src="icons/wave.svg"`) {
 		t.Errorf("zero context must skip inlining, got\n%s", out)
+	}
+}
+
+func TestInlineLocalSVGsRespectsShapeFillOverride(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "custom.svg", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="contextColor"><path d="M0 0h24" fill="#ff0000"/><path d="M0 12h24"/></svg>`)
+	src := []byte("# Title\n\n<img src=\"custom.svg\"/>\n")
+	out, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: root}, src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// shape with explicit fill= wins over the projection
+	if !contains(out, `fill="#ff0000"`) {
+		t.Errorf("shape-declared fill was not preserved\n%s", out)
+	}
+	// stroke was projected inline because shape had none
+	if !contains(out, `stroke="contextColor"`) {
+		t.Errorf("file-declared stroke was not projected inline\n%s", out)
+	}
+}
+
+func TestInlineLocalSVGsDefaultsLikeLucide(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "mini.svg", `<svg viewBox="0 0 24 24"><path d="M0 0h24"/></svg>`)
+	src := []byte("# Title\n\n<img src=\"mini.svg\"/>\n")
+	out, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: root}, src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !contains(out, `fill:none`) {
+		t.Errorf("default fill:none not applied\n%s", out)
+	}
+	if !contains(out, `stroke:currentColor`) {
+		t.Errorf("default stroke:currentColor not applied\n%s", out)
+	}
+}
+
+func TestInlineLocalSVGSetAltBecomesAriaLabel(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "icons/wave.svg", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3v12"/></svg>`)
+	src := []byte("# Title\n\n<img src=\"icons/wave.svg\" alt=\"a wave\"/>\n")
+	out, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: root}, src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !contains(out, `aria-label="a wave"`) {
+		t.Errorf("author alt became aria-label\n%s", out)
+	}
+	if contains(out, `aria-hidden="true"`) {
+		t.Errorf("aria-label alt must suppress aria-hidden\n%s", out)
 	}
 }
 

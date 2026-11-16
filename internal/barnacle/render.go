@@ -330,6 +330,15 @@ func parseImgAttrs(tag string) map[string]string {
 
 var svgOpenRe = regexp.MustCompile(`(?s)^\s*(?:<\?xml[^>]*\?>)?\s*(?:<!--.*?-->\s*)*<svg\b([^>]*)>\s*(.*)\s*</svg>\s*$`)
 
+var shapeRe = regexp.MustCompile(`<(?P<tag>path|circle|rect|line|polyline|polygon|ellipse)(\s[^/>]*)?(/)?>`)
+
+// visualProps are the properties mermaid's default theme paints over with
+// #ECECFF fill and #9370DB stroke: fill, stroke, stroke-width, stroke-linecap,
+// stroke-linejoin. When the file declares any of them on the root <svg>,
+// they are projected onto every shape so the file's intent renders under
+// mermaid's paint. When the file declares none, the lucide defaults apply.
+var visualProps = []string{"fill", "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin"}
+
 // svgToInline renders a file's bytes as an inline <svg> element. Display
 // attributes carried by the <img> win (width/height), otherwise the SVG's
 // own width/height/viewBox settings are scaled to the house default of 20.
@@ -339,8 +348,30 @@ func svgToInline(data []byte, imgAttrs map[string]string) (string, error) {
 	if m == nil {
 		return "", fmt.Errorf("not a well-formed svg document")
 	}
-	attrs := parseImgAttrs("<svg " + string(m[1]) + ">")
-	inner := m[2]
+	fileAttrs := parseImgAttrs("<svg " + string(m[1]) + ">")
+	inner := string(m[2])
+
+	// Project the file's visual attributes (or the stroke-only defaults) onto
+	// every shape as inline styles, so mermaid's .node path theme paint can't
+	// repaint stroke-only icons into solid lavender blobs. A shape that
+	// already declares the property keeps its own value.
+	projection := make(map[string]string, len(visualProps))
+	for _, k := range visualProps {
+		if v, ok := fileAttrs[k]; ok && v != "" {
+			projection[k] = v
+		}
+	}
+	if _, ok := projection["fill"]; !ok {
+		projection["fill"] = "none"
+	}
+	if _, ok := projection["stroke"]; !ok {
+		projection["stroke"] = "currentColor"
+	}
+	if len(projection) > 0 {
+		inner = projectVisual(inner, projection, shapeRe)
+	}
+
+	attrs := fileAttrs
 
 	width, hasW := imgAttrs["width"]
 	height, hasH := imgAttrs["height"]
@@ -358,18 +389,27 @@ func svgToInline(data []byte, imgAttrs map[string]string) (string, error) {
 	if attrs["viewbox"] == "" {
 		attrs["viewbox"] = "0 0 24 24" // sensible default for icon-shaped files
 	}
-	attrs["class"] = "label-icon" // mermaid's own carve-out: fill: currentColor, stroke: revert
-	// Display overrides from the img tag itself.
+	// Display overrides from the img tag itself; everything else passes through.
 	for k, v := range imgAttrs {
 		if k == "width" || k == "height" {
 			continue // handled above
 		}
-		if k == "src" || k == "alt" {
+		if k == "src" {
 			continue
 		}
+		delete(attrs, "src")
 		attrs[k] = v
 	}
-	attrs["aria-hidden"] = "true"
+	// Author-provided alt wins as an accessible label; otherwise mark the icon
+	// as decorative. The file's own aria-* attributes are never overwritten.
+	if alt, ok := imgAttrs["alt"]; ok && strings.TrimSpace(alt) != "" {
+		if _, ok := attrs["aria-label"]; !ok {
+			attrs["aria-label"] = alt
+		}
+	} else if _, ok := attrs["aria-label"]; !ok {
+		attrs["aria-hidden"] = "true"
+	}
+	delete(attrs, "alt")
 
 	keys := make([]string, 0, len(attrs))
 	for k := range attrs {
@@ -382,11 +422,63 @@ func svgToInline(data []byte, imgAttrs map[string]string) (string, error) {
 		fmt.Fprintf(&b, " %s=\"%s\"", k, html.EscapeString(attrs[k]))
 	}
 	b.WriteString(">")
-	// Mermaid splits labels on newlines, turning stray \n into <br/>s;
-	// keep the markup on one line.
-	fmt.Fprint(&b, strings.Join(strings.Fields(string(inner)), " "))
+	fmt.Fprint(&b, strings.Join(strings.Fields(inner), " "))
 	b.WriteString("</svg>")
 	return b.String(), nil
+}
+
+// projectVisual appends the projection styles to every shape, preserving
+// whatever the shape itself already declares (fill, stroke, stroke-width
+// and their inline-style forms). This is the minimal interjection meant
+// to stop mermaid's theme paint from retinting stroke-only glyphs.
+func projectVisual(inner string, proj map[string]string, shapeRe *regexp.Regexp) string {
+	return shapeRe.ReplaceAllStringFunc(inner, func(tag string) string {
+		match := shapeRe.FindStringSubmatch(tag)
+		name, head, tail := match[1], match[2], match[3]
+		close := "/"
+		if tail == "" {
+			close = ""
+		}
+		shapeAttrs := parseImgAttrs("<" + name + head + close + ">")
+		keep := make([]string, 0, len(proj))
+		for _, k := range visualProps {
+			v, ok := proj[k]
+			if !ok {
+				continue
+			}
+			if _, own := shapeAttrs[k]; own {
+				continue // shape declares its own
+			}
+			if _, own := shapeAttrs["style"]; own {
+				if styleContent := shapeAttrs["style"]; styleHasProp(styleContent, k) {
+					continue
+				}
+			}
+			keep = append(keep, k+":"+v)
+		}
+		if len(keep) == 0 {
+			return tag
+		}
+		if styleContent, ok := shapeAttrs["style"]; ok {
+			merged := strings.Join(append(strings.FieldsFunc(styleContent, func(r rune) bool { return r == ';' }), keep...), ";")
+			// Replace the existing style="..." segment in the tag verbatim.
+			oldStart := strings.Index(head, `style="`)
+			oldEnd := strings.Index(head[oldStart+len(`style="`):], `"`) + oldStart + len(`style="`)
+			head = head[:oldStart] + `style="` + merged + `"` + head[oldEnd:]
+			return "<" + name + head + close + ">"
+		}
+		return "<" + name + head + ` style="` + strings.Join(keep, ";") + `"` + close + ">"
+	})
+}
+
+// styleHasProp reports whether a style property list explicitly declares key.
+func styleHasProp(style, key string) bool {
+	for _, chunk := range strings.FieldsFunc(style, func(r rune) bool { return r == ';' }) {
+		if i := strings.Index(chunk, ":"); i >= 0 && strings.TrimSpace(chunk[:i]) == key {
+			return true
+		}
+	}
+	return false
 }
 
 func isLocalSVG(dest string) bool {
