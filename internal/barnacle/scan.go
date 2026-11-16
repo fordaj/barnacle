@@ -52,10 +52,8 @@ func Scan(root, siteDir string, cfg Config) ([]Document, error) {
 		relSlash := filepath.ToSlash(rel)
 
 		// Never scan the output directory.
-		if siteAbs != "" {
-			if pathAbs, err := filepath.Abs(path); err == nil && pathAbs == siteAbs {
-				return filepath.SkipDir
-			}
+		if siteAbs != "" && path == siteAbs {
+			return filepath.SkipDir
 		}
 
 		if entry.IsDir() {
@@ -165,14 +163,11 @@ func extractTitle(path, ext, name string) (string, error) {
 		if !strings.HasPrefix(trimmed, "#") {
 			continue
 		}
-		level := 0
-		for level < len(trimmed) && trimmed[level] == '#' {
-			level++
-		}
-		if level != 1 {
+		hashes := strings.TrimLeft(trimmed, "#")
+		if level := len(trimmed) - len(hashes); level != 1 {
 			continue
 		}
-		title := strings.TrimSpace(strings.TrimRight(strings.TrimSpace(trimmed[level:]), "#"))
+		title := strings.TrimSpace(strings.TrimRight(strings.TrimSpace(hashes), "#"))
 		if title != "" {
 			return title, nil
 		}

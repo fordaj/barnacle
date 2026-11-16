@@ -44,37 +44,9 @@ func Generate(root, siteDir string, cfg Config) (int, []string, error) {
 		return 0, nil, err
 	}
 
-	// Render page bodies first so we know whether Mermaid is needed.
-	type page struct {
-		doc        Document
-		content    string
-		hasMermaid bool
-	}
-	pages := make([]page, 0, len(docs))
-	needsMermaid := false
-	var missingMermaid []string
-	for _, doc := range docs {
-		source, err := os.ReadFile(doc.SourcePath)
-		if err != nil {
-			return 0, nil, err
-		}
-		var content string
-		renderCtx := RenderContext{SourceDir: filepath.Dir(doc.SourcePath), Root: rootAbs}
-		if doc.MermaidOnly {
-			content, err = MermaidPageHTML(renderCtx, doc.Title, source)
-		} else {
-			content, err = MarkdownToHTML(renderCtx, source)
-		}
-		if err != nil {
-			return 0, nil, fmt.Errorf("rendering %s: %w", doc.RelPath, err)
-		}
-		hasMermaid := HasMermaid(content)
-		if hasMermaid {
-			needsMermaid = true
-		} else {
-			missingMermaid = append(missingMermaid, doc.RelPath)
-		}
-		pages = append(pages, page{doc: doc, content: content, hasMermaid: hasMermaid})
+	pages, needsMermaid, missingMermaid, err := renderPages(docs, rootAbs)
+	if err != nil {
+		return 0, nil, err
 	}
 
 	if err := prepareSiteDir(siteAbs); err != nil {
@@ -123,6 +95,50 @@ func Generate(root, siteDir string, cfg Config) (int, []string, error) {
 		return 0, nil, err
 	}
 	return len(pages) + 1, missingMermaid, nil
+}
+
+// page is a rendered document ready to be written to the site.
+type page struct {
+	doc        Document
+	content    string
+	hasMermaid bool
+}
+
+// renderPages renders every document body. It reports whether the site
+// needs mermaid.min.js and the relative paths of the pages that contain
+// no Mermaid diagram; missing diagrams are never an error.
+func renderPages(docs []Document, rootAbs string) ([]page, bool, []string, error) {
+	pages := make([]page, 0, len(docs))
+	needsMermaid := false
+	var missingMermaid []string
+	for _, doc := range docs {
+		content, err := renderOne(doc, rootAbs)
+		if err != nil {
+			return nil, false, nil, fmt.Errorf("rendering %s: %w", doc.RelPath, err)
+		}
+		hasMermaid := HasMermaid(content)
+		if hasMermaid {
+			needsMermaid = true
+		} else {
+			missingMermaid = append(missingMermaid, doc.RelPath)
+		}
+		pages = append(pages, page{doc: doc, content: content, hasMermaid: hasMermaid})
+	}
+	return pages, needsMermaid, missingMermaid, nil
+}
+
+// renderOne renders a single document, dispatching on whether it is a
+// standalone .mmd file (Mermaid only) or a Markdown page.
+func renderOne(doc Document, rootAbs string) (string, error) {
+	source, err := os.ReadFile(doc.SourcePath)
+	if err != nil {
+		return "", err
+	}
+	ctx := RenderContext{SourceDir: filepath.Dir(doc.SourcePath), Root: rootAbs}
+	if doc.MermaidOnly {
+		return MermaidPageHTML(ctx, doc.Title, source)
+	}
+	return MarkdownToHTML(ctx, source)
 }
 
 // prepareSiteDir creates the output directory. If it already contains a
