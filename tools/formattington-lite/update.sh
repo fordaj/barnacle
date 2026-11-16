@@ -366,9 +366,12 @@ for archive in "${archives[@]}"; do
     cp -p "$bin_src" "$target_dir/$bin_name"
     chmod +x "$target_dir/$bin_name"
     [[ -s "$target_dir/$bin_name" ]] || die "installed binary is empty: $target_dir/$bin_name"
+    # Attribution files are looked up alongside the binary (archives may
+    # nest everything under one top-level directory).
+    bin_dir="$(dirname "$bin_src")"
     for extra in NOTICE.md "LICENSES"; do
-        if [[ -e "$extract_dir/$extra" ]]; then
-            cp -pr "$extract_dir/$extra" "$target_dir/"
+        if [[ -e "$bin_dir/$extra" ]]; then
+            cp -pr "$bin_dir/$extra" "$target_dir/"
         fi
     done
     log INFO "installed $PLATFORM/$bin_name (from $base)"
