@@ -330,6 +330,8 @@ func parseImgAttrs(tag string) map[string]string {
 
 var svgOpenRe = regexp.MustCompile(`(?s)^\s*(?:<\?xml[^>]*\?>)?\s*(?:<!--.*?-->\s*)*<svg\b([^>]*)>\s*(.*)\s*</svg>\s*$`)
 
+var shapeRe = regexp.MustCompile(`<(?P<tag>path|circle|rect|line|polyline|polygon|ellipse)(\s[^/>]*)?(/)?>`)
+
 // svgToInline renders a file's bytes as an inline <svg> element. Display
 // attributes carried by the <img> win (width/height), otherwise the SVG's
 // own width/height/viewBox settings are scaled to the house default of 20.
@@ -340,7 +342,32 @@ func svgToInline(data []byte, imgAttrs map[string]string) (string, error) {
 		return "", fmt.Errorf("not a well-formed svg document")
 	}
 	attrs := parseImgAttrs("<svg " + string(m[1]) + ">")
-	inner := m[2]
+	inner := string(m[2])
+
+	// Every shape gets fill:none inline. Mermaid's theme rules set
+	// .node path { fill:#ECECFF } and .node .label-icon path { fill:currentColor } —
+	// even ID-scoped rules are outranked by an inline style attribute, and since
+	// lucide icons are stroke-only, any filled result looks broken.
+	inner = shapeRe.ReplaceAllStringFunc(inner, func(tag string) string {
+		match := shapeRe.FindStringSubmatch(tag)
+		head := match[2]
+		tail := ""
+		if match[3] == "/" {
+			tail = "/"
+		}
+		if strings.Contains(head, `fill:`) || strings.Contains(head, `style=`) {
+			if i := strings.Index(head, `style="`); i >= 0 {
+				// append into an existing inline style attribute
+				end := strings.Index(head[i+7:], `"`)
+				if end >= 0 {
+					head = head[:i+7+end] + ";fill:none" + head[i+7+end:]
+					return "<" + match[1] + head + tail + ">"
+				}
+			}
+			return tag // has a fill: attribute of its own; respect it
+		}
+		return "<" + match[1] + head + ` style="fill:none"` + tail + ">"
+	})
 
 	width, hasW := imgAttrs["width"]
 	height, hasH := imgAttrs["height"]

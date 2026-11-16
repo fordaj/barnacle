@@ -175,8 +175,8 @@ func TestInlineLocalSVGsRewritesRelativeRefs(t *testing.T) {
 	if !contains(out, `<svg`) {
 		t.Errorf("svg was not inlined\n%s", out)
 	}
-	if !contains(out, `<path d="M12 3v12"/>`) {
-		t.Errorf("svg body missing\n%s", out)
+	if !contains(out, `<path d="M12 3v12" style="fill:none"/>`) {
+		t.Errorf("svg body missing or malformed\n%s", out)
 	}
 	if contains(out, `src="icons/wave.svg"`) {
 		t.Errorf("relative svg reference not rewritten\n%s", out)
