@@ -3,16 +3,19 @@
 #
 # Barnacle (https://github.com/fordaj/barnacle) turns the Markdown and
 # Mermaid files scattered through the repository into a static, navigable
-# HTML site. This script runs the bundled binary from
-# tools/barnacle/v<version>/<platform>/ (refresh with
-# tools/barnacle/update.sh; resolved via scripts/entry.sh) against the
+# HTML site. This script runs the cross-compiled binary from
+# dist/<platform>/barnacle[.exe] (via scripts/entry.sh) against the
 # repository root, so ./site is generated next to .formattington.json.
+# dist/ is built from this tree by scripts/build.sh, so the site always
+# reflects the current source — no release is needed to see changes.
+#
+# Run scripts/build.sh once before the first docs.sh on a fresh clone.
 #
 # The generated site is written to ./site by default (git-ignored). Any
 # arguments are forwarded to barnacle verbatim, so barnacle's own options
 # work natively:
 #
-#   scripts/docs.sh                          # generate into ./site
+#   scripts/build.sh && scripts/docs.sh
 #   scripts/docs.sh --site ./public          # generate elsewhere
 #   scripts/docs.sh --config ./docs/barnacle.json
 #
@@ -41,26 +44,28 @@ Usage: scripts/docs.sh [barnacle options...]
 Generate the repository's documentation site with barnacle. With no
 options, the site is written to ./site (relative to the repository root).
 Any options are forwarded to barnacle verbatim; see `barnacle --help`.
+The barnacle binary defaults to dist/<platform>/barnacle[.exe], built
+from this source tree by scripts/build.sh — run that first on a fresh
+clone. Set BARNACLE_BIN to override it.
 
 Options handled by this script:
   --help, -h   Show this help and exit.
 
 Environment:
-  BARNACLE_BIN   Path to the barnacle binary (default: the bundle under
-                 tools/barnacle/v<version>/<platform>/, resolved via
-                 scripts/entry.sh).
+  BARNACLE_BIN   Path to the barnacle binary (default: dist/<platform>/barnacle[.exe],
+                 resolved via scripts/entry.sh).
 
-The bundled binaries are refreshed with tools/barnacle/update.sh.
+The cross-compiled binaries under dist/ are refreshed with scripts/build.sh.
 EOF
   exit 0
 fi
 
 if [[ -z "${BARNACLE_BIN:-}" ]]; then
-  log ERROR "no barnacle binary found (run tools/barnacle/update.sh, or set BARNACLE_BIN)"
+  log ERROR "no barnacle binary found (run scripts/build.sh, or set BARNACLE_BIN)"
   exit 1
 fi
 [[ -x "$BARNACLE_BIN" ]] || {
-  log ERROR "BARNACLE_BIN=$BARNACLE_BIN is not executable (run tools/barnacle/update.sh, or set BARNACLE_BIN)"
+  log ERROR "BARNACLE_BIN=$BARNACLE_BIN is not executable (run scripts/build.sh, or set BARNACLE_BIN)"
   exit 1
 }
 log INFO "using barnacle: $BARNACLE_BIN"

@@ -2,19 +2,21 @@
 
 ```mermaid
 flowchart TD
-    Generate[Generate<br/>site.go.md] --> Scan[Scan<br/>scan.go.md]
-    Generate --> Render[MarkdownToHTML<br/>render.go.md]
-    Generate --> Nav[renderNav<br/>nav.go.md]
-    Generate --> Template[pageTemplate<br/>template.go.md]
+    Generate("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> Generate<br/>site.go <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>") --> Scan("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> Scan<br/>scan.go <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Generate --> Render("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> MarkdownToHTML<br/>render.go <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Generate --> Nav("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> renderNav<br/>nav.go <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Generate --> Template("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> pageTemplate<br/>template.go <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
     Render --> Template
     Nav --> Template
-    Generate -.->|reads once| Config[LoadConfig<br/>config.go.md]
+    Generate -.->|reads once| Config("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> LoadConfig<br/>config.go <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
     click Generate href "site.go.md"
     click Scan href "scan.go.md"
     click Render href "render.go.md"
     click Nav href "nav.go.md"
     click Template href "template.go.md"
     click Config href "config.go.md"
+    class Generate,Scan,Render,Nav,Template,Config goFile
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
 ```
 
 All of barnacle's implementation lives in this package: configuration, scanning, rendering, HTML assembly, navigation, and the page template. `cmd/barnacle/main.go.md` is a two-line shim over `Generate` here.

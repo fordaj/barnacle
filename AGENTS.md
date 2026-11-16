@@ -2,11 +2,23 @@
 
 ```mermaid
 flowchart LR
-    Code[Edit source] --> Doc[Update sibling .md<br/>in the same change]
-    Doc --> Regen[scripts/docs.sh]
-    Regen --> Site[./site — git-ignored]
-    Site --> Review[Self-review the<br/>changed pages]
-    Review --> Commit[Commit source + doc together]
+    Code("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/> Edit source") --> Doc("<img src='tools/lucide/icons/file-text.svg' width='20' alt=''/> Update sibling .md<br/>in the same change")
+    Doc --> Regen("<img src='tools/lucide/icons/terminal.svg' width='20' alt=''/> scripts/docs.sh")
+    Regen --> Site("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/> ./site — git-ignored")
+    Site --> Review("<img src='tools/lucide/icons/check.svg' width='20' alt=''/> Self-review<br/>the changed pages")
+    Review --> Commit("<img src='tools/lucide/icons/tag.svg' width='20' alt=''/> Commit source<br/>+ doc together")
+    class Code goFile
+    class Doc mdFile
+    class Regen shFile
+    class Site folder
+    class Review checkNode
+    class Commit tagNode
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef mdFile fill:#dcd6ce,stroke:#6b6255,color:#292524
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
+    classDef checkNode fill:#9fe8c9,stroke:#0f766e,color:#052e22
+    classDef tagNode fill:#f6b8d4,stroke:#be185d,color:#500724
 ```
 
 ## Project Overview
@@ -22,7 +34,7 @@ It ships as a single dependency-light binary: the only direct dependency is `git
 - **Static, portable output.** No server, no database; the generated site works from any base URL (`file://`, GitHub Pages, any static host).
 - **Fail loudly.** A missing documented file is an error; a `.md`/`.mmd` stem collision fails the whole build; an explicitly requested config that is missing or invalid is an error.
 - **No magic.** The HTML shell and stylesheet are embedded with `go:embed`; the scan excludes `.git`, `node_modules`, `vendor`, `dist`, and the output directory — nothing else is hidden.
-- **Dogfood the toolchain.** The repository formats itself with formattington via `uv`, releases with versioner, logs with logamuffin, and renders its own documentation with the pinned barnacle release. To render the site with changes that have not been released yet, build from source and point `BARNACLE_BIN` at it (`BARNACLE_BIN=dist/macos-arm64/barnacle scripts/docs.sh`; on stderr barnacle notes any pages still missing a diagram).
+- **Dogfood the toolchain.** The repository formats itself with formattington via `uv`, releases with versioner, logs with logamuffin, and renders its own documentation with a barnacle built from this tree (`scripts/build.sh` builds `dist/<platform>/barnacle[.exe]`; `scripts/docs.sh` runs it — pass `BARNACLE_BIN=` to override). Nothing is pinned, so the site always reflects the current source; on stderr barnacle notes any pages still missing a diagram.
 
 ## Build and Test
 
@@ -60,7 +72,7 @@ Important files include `cmd/barnacle/main.go`, `internal/barnacle/{config,scan,
 
 ## Documentation files (barnacle)
 
-The repository's documentation is a set of Markdown (`.md`) and Mermaid (`.mmd`) source files rendered into a static site by the pinned [barnacle](https://github.com/fordaj/barnacle) binary (`tools/barnacle/`, wired into the environment cascade as `BARNACLE_BIN`). Generate the site with `scripts/docs.sh`; the output (`./site/`) is git-ignored and never committed.
+The repository's documentation is a set of Markdown (`.md`) and Mermaid (`.mmd`) source files rendered into a static site by a barnacle built from this tree — `scripts/build.sh` produces `dist/<platform>/barnacle[.exe]` (wired into the environment cascade as `BARNACLE_BIN`) and `scripts/docs.sh` runs it. Generate the site with `scripts/docs.sh` (nothing is pinned, so the site always reflects the current tree); the output (`./site/`) is git-ignored and never committed.
 
 Layout — documentation lives next to the code it describes:
 
@@ -77,9 +89,9 @@ Naming rules:
 Rules for keeping these files current:
 
 - When you add, rename, remove, or repurpose a documented file — a Go file, a script, or a bundle — update its sibling `.md` **in the same change**. A new file without its page is incomplete work; a stale page is worse than none.
-- **Every page opens with a Mermaid diagram** under its `#` heading (guidance, not a hard rule): what the thing is and how it fits, in the diagram type that fits best. If a page you touch has no diagram at the top, add one.
+- **Every page opens with a Mermaid diagram** under its `#` heading (guidance, not a hard rule): what the thing is and how it fits, in the diagram type that fits best. If a page you touch has no diagram at the top, add one. Follow the README's "Diagram conventions" (colored classes for file kinds, hexagon decisions, inline Lucide glyphs — file kind first in the label, chain link last when the node is clickable — colors that read on light and dark) — it is the house style, not something barnacle enforces.
 - Source every fact: the `.go`/`.sh`/`.env` file itself, this file (AGENTS.md), and README.md are the accepted sources. Never invent flags, exit codes, extensions, or bundle-platform matrices.
-- Use plain relative links (`scan.go.md`, `../../README.md`) with the linking file's `.md` path — barnacle rewrites them to `.html`. Do not link to files barnacle does not render (binaries, `.sh`, `LICENSE`); link the related `.md` page (for external references, a full `https://` URL is fine). Pages that are not rendered (`tools/`) may still be linked from other unrendered pages; rendered pages must not hyperlink into `tools/` — refer to those pages as code (for example `tools/barnacle/update.sh.md`), because `.barnacle.json` excludes them from the site.
+- Use plain relative links (`scan.go.md`, `../../README.md`) with the linking file's `.md` path — barnacle rewrites them to `.html`. Do not link to files barnacle does not render (binaries, `.sh`, `LICENSE`); link the related `.md` page (for external references, a full `https://` URL is fine). Pages that are not rendered (`tools/`) may still be linked from other unrendered pages; rendered pages must not hyperlink into `tools/` — refer to those pages as code (for example `tools/versioner/update.sh.md`), because `.barnacle.json` excludes them from the site.
 - Mermaid `click` directives are rewritten too (`click Scan href "scan.go.md"`), so diagram nodes may link between pages — prefer this in the top-of-page diagram; it makes the site explorable by diagram alone. Transitions work the same way with an inline anchor in the label (`Idle --> Waiting : <a href="scan.go.md">send(cmd)</a>`, see the README's "Clickable edges") — no JS, no directives.
 - A `foo.md` and a `foo.mmd` may not coexist for the same stem — barnacle fails the whole site rather than overwriting. The same applies with retained suffixes: `main.py.md` and `main.py.mmd` both generate `main.py.html`.
 - Hub pages (`README.md` in each documented directory) list their siblings; adding a page means linking it from the hub too, in the same order as the rest of the directory's list.

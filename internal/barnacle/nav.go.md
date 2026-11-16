@@ -2,13 +2,19 @@
 
 ```mermaid
 flowchart LR
-    Docs[Sorted documents] --> Tree[buildTree]
-    Tree --> Nav[renderNav<br/>sidebar per page]
-    Tree --> Index[renderIndex<br/>landing page body]
-    Nav --> Page[pageTemplate]
-    Index --> Landing[index.html]
+    Docs("<img src='../../tools/lucide/icons/file-text.svg' width='20' alt=''/> Sorted documents") --> Tree("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> buildTree <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Tree --> Nav("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> renderNav<br/>sidebar per page")
+    Tree --> Index("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> renderIndex<br/>landing page body")
+    Nav --> Page("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> pageTemplate <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Index --> Landing("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/> index.html")
     click Tree href "site.go.md"
     click Page href "template.go.md"
+    class Docs mdFile
+    class Tree,Nav,Index,Page goFile
+    class Landing htmlFile
+    classDef mdFile fill:#dcd6ce,stroke:#6b6255,color:#292524
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef htmlFile fill:#ffc48a,stroke:#c2410c,color:#431407
 ```
 
 `nav.go` renders the sidebar navigation and the body of the landing page `index.html`. Both are built from the same directory tree derived from the scanned documents.

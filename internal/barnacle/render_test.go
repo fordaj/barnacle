@@ -1,6 +1,7 @@
 package barnacle
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -37,7 +38,7 @@ func TestRewriteDocLink(t *testing.T) {
 
 func TestMarkdownToHTMLRewritesDocLinks(t *testing.T) {
 	src := []byte("# Title\n\nSee [the parser](../parser/parser.md#impl) and [external](https://example.com/x.md).\n")
-	out, err := MarkdownToHTML(src)
+	out, err := MarkdownToHTML(RenderContext{}, src)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +57,7 @@ func TestMarkdownToHTMLRewritesDocLinks(t *testing.T) {
 
 func TestMarkdownToHTMLMermaidBlock(t *testing.T) {
 	src := []byte("# Diagram\n\n```mermaid\nflowchart TD\n  A[main] --> B[start]\n```\n")
-	out, err := MarkdownToHTML(src)
+	out, err := MarkdownToHTML(RenderContext{}, src)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +74,7 @@ func TestMarkdownToHTMLMermaidBlock(t *testing.T) {
 
 func TestMarkdownToHTMLMermaidClickLinks(t *testing.T) {
 	src := []byte("# Diagram\n\n```mermaid\nflowchart LR\n  A[main] --> B[parser]\n  click A href \"parser/parser.md\"\n  click B href '../main.md#start' _blank\n  click A \"docs/deep dive.md\"\n```\n")
-	out, err := MarkdownToHTML(src)
+	out, err := MarkdownToHTML(RenderContext{}, src)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +92,7 @@ func TestMarkdownToHTMLMermaidClickLinks(t *testing.T) {
 
 func TestMarkdownToHTMLMermaidClickCallbacksUntouched(t *testing.T) {
 	src := []byte("# Diagram\n\n```mermaid\nflowchart LR\n  A[main] --> B\n  click A callback \"see scan.md\"\n  click B call cb() \"see nav.md\"\n  click D href \"site.go.md\" \"The site generator, plain text.md\"\n```\n")
-	out, err := MarkdownToHTML(src)
+	out, err := MarkdownToHTML(RenderContext{}, src)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,7 +110,10 @@ func TestMarkdownToHTMLMermaidClickCallbacksUntouched(t *testing.T) {
 
 func TestMermaidPageHTMLRewritesClickLinks(t *testing.T) {
 	src := []byte("flowchart LR\n  A --> B\n  click A href \"scan.go.md\"\n  click B \"render.go.md\"\n  click C callback \"template.go.md\"\n")
-	out := MermaidPageHTML("Diagram", src)
+	out, err := MermaidPageHTML(RenderContext{}, "Diagram", src)
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, want := range []string{
 		`click A href &quot;scan.go.html&quot;`,
 		`click B &quot;render.go.html&quot;`,
@@ -123,7 +127,7 @@ func TestMermaidPageHTMLRewritesClickLinks(t *testing.T) {
 
 func TestMarkdownToHTMLRawMermaidBlock(t *testing.T) {
 	src := []byte("# Diagram\n\n<pre class=\"mermaid\">flowchart LR\n  A --> B\n  click A href \"scan.go.md\"\n</pre>\n")
-	out, err := MarkdownToHTML(src)
+	out, err := MarkdownToHTML(RenderContext{}, src)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +138,7 @@ func TestMarkdownToHTMLRawMermaidBlock(t *testing.T) {
 
 func TestMarkdownToHTMLMermaidClickExternalUntouched(t *testing.T) {
 	src := []byte("# Diagram\n\n```mermaid\nflowchart LR\n  A[main] --> B\n  click A href \"https://example.com/docs/scan.md\"\n  click B href \"#anchor\"\n  click C href \"mailto:a@b.c\"\n```\n")
-	out, err := MarkdownToHTML(src)
+	out, err := MarkdownToHTML(RenderContext{}, src)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -151,12 +155,102 @@ func TestMarkdownToHTMLMermaidClickExternalUntouched(t *testing.T) {
 
 func TestMarkdownGFMTable(t *testing.T) {
 	src := []byte("# T\n\n| a | b |\n|---|---|\n| 1 | 2 |\n")
-	out, err := MarkdownToHTML(src)
+	out, err := MarkdownToHTML(RenderContext{}, src)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !contains(out, "<table>") {
 		t.Errorf("GFM table not rendered\n%s", out)
+	}
+}
+
+func TestInlineLocalSVGsRewritesRelativeRefs(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "icons/wave.svg", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3v12"/></svg>`)
+	src := []byte("# Title\n\n<img src=\"icons/wave.svg\"/>\n")
+	out, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: root}, src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !contains(out, `<svg`) {
+		t.Errorf("svg was not inlined\n%s", out)
+	}
+	if !contains(out, `<path d="M12 3v12"/>`) {
+		t.Errorf("svg body missing\n%s", out)
+	}
+	if contains(out, `src="icons/wave.svg"`) {
+		t.Errorf("relative svg reference not rewritten\n%s", out)
+	}
+}
+
+func TestInlineLocalSVGsRewritesMermaidLabelRefs(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "wave.svg", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3v12"/></svg>`)
+	src := []byte("# Diagram\n\n```mermaid\nflowchart LR\n  A[\"<img src='wave.svg' width='15'/>main\"] --> B\n```\n")
+	out, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: root}, src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !contains(out, `&lt;svg`) || !contains(out, `aria-hidden=&quot;true&quot;`) {
+		t.Errorf("svg in mermaid label was not inlined\n%s", out)
+	}
+	start := strings.Index(out, "&lt;svg")
+	end := strings.Index(out, "&lt;/svg&gt;")
+	if start < 0 || end < start {
+		t.Fatalf("svg tags not found in balanced order\n%s", out)
+	}
+	if bytes := out[start:end]; strings.ContainsAny(bytes, "\n\r") {
+		t.Errorf("inline SVG contains a raw newline; mermaid would render <br/>s inside the label\n%q", bytes)
+	}
+}
+
+func TestInlineLocalSVGsMissingFileFails(t *testing.T) {
+	root := t.TempDir()
+	src := []byte("# Title\n\n<img src=\"icons/missing.svg\"/>\n")
+	_, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: root}, src)
+	if err == nil {
+		t.Fatal("expected error for missing svg")
+	}
+}
+
+func TestInlineLocalSVGsEscapesRootFails(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "secret.svg", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3v12"/></svg>`)
+	src := []byte("# Title\n\n<img src=\"secret.svg\"/>\n")
+	// The file is inside SourceDir but outside Root — escaping is an error.
+	_, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: filepath.Join(root, "inner")}, src)
+	if err == nil {
+		t.Fatal("expected error for path escaping the repository root")
+	}
+}
+
+func TestInlineLocalSVGsExternalUntouched(t *testing.T) {
+	root := t.TempDir()
+	for _, dest := range []string{
+		`https://example.com/icon.svg`,
+		`data:image/svg+xml;utf8,<svg/>`,
+		`#icon`,
+		`//cdn.example.com/icon.svg`,
+	} {
+		src := []byte("# Title\n\n<img src=\"" + dest + "\"/>\n")
+		out, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: root}, src)
+		if err != nil {
+			t.Fatalf("dest %q: unexpected error: %v", dest, err)
+		}
+		if !contains(out, dest) {
+			t.Errorf("dest %q was rewritten\n%s", dest, out)
+		}
+	}
+}
+
+func TestInlineLocalSVGsZeroContextSkips(t *testing.T) {
+	src := []byte("# Title\n\n<img src=\"icons/wave.svg\"/>\n")
+	out, err := MarkdownToHTML(RenderContext{}, src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !contains(out, `src="icons/wave.svg"`) {
+		t.Errorf("zero context must skip inlining, got\n%s", out)
 	}
 }
 

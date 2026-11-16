@@ -2,16 +2,24 @@
 
 ```mermaid
 flowchart TD
-    Start[LoadConfig] --> Exists{File readable?}
-    Exists -- "no, default path" --> Defaults[Defaults]
-    Exists -- "no, --config" --> Error[Error → exit 1]
-    Exists -- yes --> Parse{Valid JSON?}
+    Start("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> LoadConfig") --> Exists{{"<img src='../../tools/lucide/icons/hexagon.svg' width='20' alt=''/> File readable?"}}
+    Exists -- "no, default path" --> Defaults("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> Defaults")
+    Exists -- "no, --config" --> Error("<img src='../../tools/lucide/icons/circle-exclamation-point.svg' width='20' alt=''/> Error → exit 1 <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Exists -- yes --> Parse{{"<img src='../../tools/lucide/icons/hexagon.svg' width='20' alt=''/> Valid JSON?"}}
     Parse -- no --> Error
-    Parse -- yes --> Check{Blank exclude entry?}
+    Parse -- yes --> Check{{"<img src='../../tools/lucide/icons/hexagon.svg' width='20' alt=''/> Blank exclude entry?"}}
     Check -- yes --> Error
-    Check -- no --> Cfg[Config]
+    Check -- no --> Cfg("<img src='../../tools/lucide/icons/braces.svg' width='20' alt=''/> Config<br/>.barnacle.json <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
     click Error href "../../cmd/barnacle/main.go.md"
     click Cfg href "site.go.md"
+    class Start,Defaults goFile
+    class Exists,Parse,Check hexNode
+    class Error errNode
+    class Cfg jsonFile
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef hexNode fill:#ffe08a,stroke:#a16207,color:#422006
+    classDef errNode fill:#f6b8b8,stroke:#b91c1c,color:#450a0a
+    classDef jsonFile fill:#cdb9f7,stroke:#6d28d9,color:#2e1065
 ```
 
 `LoadConfig` reads and validates the repository-level configuration file (`.barnacle.json`) and produces the `Config` value the rest of the pipeline uses.

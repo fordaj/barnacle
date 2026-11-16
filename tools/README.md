@@ -2,13 +2,21 @@
 
 ```mermaid
 flowchart LR
-    Gh[GitHub release<br/>fordaj/*] --> Update[update.sh]
-    Update --> Verify[checksums when present]
-    Verify --> Stage[stage in temp dir]
-    Stage --> Swap[atomic swap<br/>delete superseded v*]
+    Gh("<img src='../tools/lucide/icons/tag.svg' width='20' alt=''/> GitHub release<br/>fordaj/*") --> Update("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> update.sh")
+    Update --> Verify("<img src='../tools/lucide/icons/check.svg' width='20' alt=''/> checksums<br/>when present")
+    Verify --> Stage("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/> stage in<br/>temp dir")
+    Stage --> Swap("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/> atomic swap<br/>delete superseded v*")
+    class Gh tagNode
+    class Update shFile
+    class Verify checkNode
+    class Stage,Swap folder
+    classDef tagNode fill:#f6b8d4,stroke:#be185d,color:#500724
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef checkNode fill:#9fe8c9,stroke:#0f766e,color:#052e22
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
 ```
 
-`tools/` carries the repository's pinned helper binaries — formatting, logging, CI-runner and docs tooling — plus one `update.sh` per tool that refreshes them. These are the tools used to build, release, log, format, and document this repository itself; they are not Go dependencies.
+`tools/` carries the repository's pinned helper binaries — formatting, logging and CI-runner tooling — plus one `update.sh` per tool that refreshes them. These are the tools used to build, log, format, release and run CI for this repository; they are not Go dependencies. Barnacle itself is not pinned here: its binary is built from this tree into `dist/` by `scripts/build.sh`.
 
 These pages are **not part of the generated site** (`.barnacle.json` excludes `tools`); they are maintained as ordinary Markdown for people reading the repository.
 
@@ -35,18 +43,18 @@ tools/<name>/
 | [logamuffin](logamuffin/update.sh.md) | Structured logging backend for `log()` in the scripts | [update.sh](logamuffin/update.sh.md) |
 | [runner-spawner](runner-spawner/update.sh.md) | Manages the self-hosted CI runners (see `.runner-spawner.json` and `.github/workflows/ci.yml`) | [update.sh](runner-spawner/update.sh.md) |
 | [versioner](versioner/update.sh.md) | Computes the repository version for builds and releases | [update.sh](versioner/update.sh.md) |
-| [barnacle](barnacle/update.sh.md) | The pinned barnacle release that renders this documentation site | [update.sh](barnacle/update.sh.md) |
+| [lucide](lucide/update.sh.md) | Vendored [Lucide](https://lucide.dev) icons (ISC) used by the diagram conventions; inlined into the generated site by barnacle | [update.sh](lucide/update.sh.md) |
 
 `scripts/.common.env` and `scripts/.<platform>.env` select these via `*_VERSION_DIR`/`*_BIN`; see [scripts/env.sh.md](../scripts/env.sh.md). (Those env files are barnacle-hidden; `scripts/env.sh.md` documents them.)
 
 ## Refreshing a pinned tool
 
 ```bash
-tools/barnacle/update.sh            # download the latest release, verify, swap
-tools/barnacle/update.sh --dry-run  # show what would change
+tools/versioner/update.sh            # download the latest release, verify, swap
+tools/versioner/update.sh --dry-run  # show what would change
 ```
 
-(Same flags for `versioner`, `logamuffin`, `runner-spawner`, `formattington-lite`.)
+(Same flags for `logamuffin`, `runner-spawner`, `formattington-lite`. `tools/lucide/update.sh` refreshes the vendored icon set the same way.)
 
 ## Related pages
 

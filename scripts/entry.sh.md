@@ -2,12 +2,16 @@
 
 ```mermaid
 flowchart LR
-    Script[Any scripts/*.sh] --> Entry[entry.sh]
-    Entry --> Env[env.sh — cascade<br/>VERSIONER_BIN · LOGAMUFFIN_BIN · ...]
-    Entry --> Log[log LEVEL MESSAGE]
-    Log -->|binary present| Logamuffin[logamuffin]
-    Log -->|missing / fresh clone| Fallback[printf fallback]
+    Script("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> Any scripts/*.sh") --> Entry("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> entry.sh")
+    Entry --> Env("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> env.sh — cascade<br/>VERSIONER_BIN · LOGAMUFFIN_BIN · … <img src='../tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Entry --> Log("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> log LEVEL MESSAGE")
+    Log -->|binary present| Logamuffin("<img src='../tools/lucide/icons/file-code.svg' width='20' alt=''/> logamuffin")
+    Log -->|missing / fresh clone| Fallback("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> printf fallback")
     click Env href "env.sh.md"
+    class Script,Entry,Env,Log,Fallback shFile
+    class Logamuffin goFile
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
 ```
 
 Every repository script sources `scripts/entry.sh` instead of the individual cascade files, because it does two jobs at once:

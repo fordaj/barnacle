@@ -2,24 +2,31 @@
 
 ```mermaid
 flowchart TD
-    Uname[uname -s : -m] --> Check{platform?}
-    Check -->|Darwin:arm64| MacArm[.macos-arm64.env]
-    Check -->|Darwin:x86_64| Mac86[.macos-x86_64.env]
-    Check -->|Linux:aarch64| LinArm[.linux-arm64.env]
-    Check -->|Linux:x86_64| Lin86[.linux-x86_64.env]
-    Check -->|Windows:x86_64| Win86[.windows-x86_64.env]
-    Check -->|Windows:arm64| WinArm[.windows-arm64.env]
-    Check -->|other| Error[Error → return 1]
-    MacArm --> Anchor[Anchor *_BIN to repo root]
+    Uname("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> uname -s : -m") --> Check{{"<img src='../tools/lucide/icons/hexagon.svg' width='20' alt=''/> platform?"}}
+    Check -->|Darwin:arm64| MacArm("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .macos-arm64.env")
+    Check -->|Darwin:x86_64| Mac86("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .macos-x86_64.env")
+    Check -->|Linux:aarch64| LinArm("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .linux-arm64.env")
+    Check -->|Linux:x86_64| Lin86("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .linux-x86_64.env")
+    Check -->|Windows:x86_64| Win86("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .windows-x86_64.env")
+    Check -->|Windows:arm64| WinArm("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .windows-arm64.env")
+    Check -->|other| Error("<img src='../tools/lucide/icons/circle-exclamation-point.svg' width='20' alt=''/> Error → return 1")
+    MacArm --> Anchor("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> Anchor *_BIN to repo root")
     Mac86 --> Anchor
     LinArm --> Anchor
     Lin86 --> Anchor
     Win86 --> Anchor
     WinArm --> Anchor
-    Common[.common.env] -.-> Anchor
+    Common("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .common.env") -.-> Anchor
+    class Uname,Anchor shFile
+    class Check hexNode
+    class MacArm,Mac86,LinArm,Lin86,Win86,WinArm,Common shFile
+    class Error errNode
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef hexNode fill:#ffe08a,stroke:#a16207,color:#422006
+    classDef errNode fill:#f6b8b8,stroke:#b91c1c,color:#450a0a
 ```
 
-`scripts/env.sh` is the plumbing that makes the pinned helper tools resolvable from any script, in any working directory, on every supported platform. It is sourced — never executed — and it works from both bash and zsh.
+`scripts/env.sh` is the plumbing that makes the pinned helper tools plus the freshly built barnacle resolvable from any script, in any working directory, on every supported platform. It is sourced — never executed — and it works from both bash and zsh.
 
 ## What it does
 
@@ -28,7 +35,7 @@ flowchart TD
 3. **Anchors** every repository-relative `*_BIN` to the repository root (`REPO_ROOT_DIR`), leaving absolute paths untouched. After sourcing, `$VERSIONER_BIN`, `$LOGAMUFFIN_BIN`, `$RUNNER_SPAWNER_BIN`, and `$BARNACLE_BIN` are absolute.
 4. Sets `REPO_ROOT_DIR` for callers that need the repository root (for example [version.sh.md](version.sh.md)).
 
-A `*_BIN` set by the caller always wins over the pinned default: the platform files expand each path as `${NAME:-${VERSION_DIR}/<platform>/<binary>}`, so `BARNACLE_BIN=dist/macos-arm64/barnacle scripts/docs.sh` renders the site with a locally built barnacle instead of the pinned release. (Before this behaviour existed, the cascade silently overwrote a caller-set `BARNACLE_BIN`.)
+A `*_BIN` set by the caller always wins over the built-in default: the platform files expand each path with the `${NAME:-…}` form — for example `BARNACLE_BIN=dist/macos-arm64/barnacle scripts/docs.sh` renders the site with a specific barnacle instead of the freshly built one. (Before this behaviour existed, the cascade silently overwrote a caller-set `BARNACLE_BIN`.)
 
 Everything is exported with `set -a` while sourcing and un-exported at the end, so the cascade does not leak into the caller's environment beyond the intended variables.
 
@@ -40,11 +47,12 @@ Hidden files are excluded from barnacle's default scan (this repository's `.barn
   - `VERSIONER_VERSION_DIR` → `tools/versioner/v0.0.3.0.5`
   - `LOGAMUFFIN_VERSION_DIR` → `tools/logamuffin/v0.1.3.0.35`
   - `RUNNER_SPAWNER_VERSION_DIR` → `tools/runner-spawner/v0.0.1.2.6`
-  - `BARNACLE_VERSION_DIR` → `tools/barnacle/v0.0.1.0.16`
+
+  Barnacle is not pinned: `scripts/build.sh` cross-compiles `dist/<platform>/barnacle[.exe]` from this tree, and the platform files point `BARNACLE_BIN` at it.
 
   When bumping a pinned tool, this file names the version directory the platform files point into.
 
-- **`.<platform>.env`** — one per supported platform (`linux-arm64`, `linux-x86_64`, `macos-arm64`, `macos-x86_64`, `windows-arm64`, `windows-x86_64`). Each sets `PROJECT_PLATFORM` and the `*_BIN` paths, including `BARNACLE_BIN`. Two platform-file caveats are recorded inline: runner-spawner reports unsupported on Linux (macOS + Windows only; the Linux binaries ship for uniform bundle layout), and there is no windows-arm64 versioner bundle upstream — `.windows-arm64.env` points `VERSIONER_BIN` at the `windows-x86_64` path, which does not exist as a versioner bundle; set `VERSIONER_BIN` explicitly there if needed.
+- **`.<platform>.env`** — one per supported platform (`linux-arm64`, `linux-x86_64`, `macos-arm64`, `macos-x86_64`, `windows-arm64`, `windows-x86_64`). Each sets `PROJECT_PLATFORM` and the `*_BIN` paths: `VERSIONER_BIN`, `LOGAMUFFIN_BIN`, `RUNNER_SPAWNER_BIN`, and `BARNACLE_BIN` (default `dist/<platform>/barnacle[.exe]`). Two platform-file caveats are recorded inline: runner-spawner reports unsupported on Linux (macOS + Windows only; the Linux binaries ship for uniform bundle layout), and there is no windows-arm64 versioner bundle upstream — `.windows-arm64.env` points `VERSIONER_BIN` at the `windows-x86_64` path, which does not exist as a versioner bundle; set `VERSIONER_BIN` explicitly there if needed.
 
 ## Related pages
 

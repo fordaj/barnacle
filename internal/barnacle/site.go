@@ -58,13 +58,14 @@ func Generate(root, siteDir string, cfg Config) (int, []string, error) {
 			return 0, nil, err
 		}
 		var content string
+		renderCtx := RenderContext{SourceDir: filepath.Dir(doc.SourcePath), Root: rootAbs}
 		if doc.MermaidOnly {
-			content = MermaidPageHTML(doc.Title, source)
+			content, err = MermaidPageHTML(renderCtx, doc.Title, source)
 		} else {
-			content, err = MarkdownToHTML(source)
-			if err != nil {
-				return 0, nil, fmt.Errorf("rendering %s: %w", doc.RelPath, err)
-			}
+			content, err = MarkdownToHTML(renderCtx, source)
+		}
+		if err != nil {
+			return 0, nil, fmt.Errorf("rendering %s: %w", doc.RelPath, err)
 		}
 		if HasMermaid(content) {
 			needsMermaid = true

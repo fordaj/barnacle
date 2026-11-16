@@ -2,13 +2,21 @@
 
 ```mermaid
 flowchart LR
-    Versioner[versioner] --> Verify[build throwaway<br/>--version matches?]
-    Verify --> Build[build.sh — 6 platforms]
-    Build --> Package[archives + checksums.txt]
-    Package --> Tag[tag HEAD + push]
-    Tag --> GH[gh release create<br/>or refresh assets]
+    Versioner("<img src='../tools/lucide/icons/tag.svg' width='20' alt=''/> versioner <img src='../tools/lucide/icons/link.svg' width='16' alt=''/>") --> Verify("<img src='../tools/lucide/icons/check.svg' width='20' alt=''/> build throwaway<br/>--version matches?")
+    Verify --> Build("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> build.sh — 6 platforms <img src='../tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Build --> Package("<img src='../tools/lucide/icons/package.svg' width='20' alt=''/> archives<br/>+ checksums.txt")
+    Package --> Tag("<img src='../tools/lucide/icons/tag.svg' width='20' alt=''/> tag HEAD + push")
+    Tag --> GH("<img src='../tools/lucide/icons/tag.svg' width='20' alt=''/> gh release create<br/>or refresh assets")
     click Build href "build.sh.md"
     click Versioner href "version.sh.md"
+    class Versioner,Tag,GH tagNode
+    class Verify checkNode
+    class Build shFile
+    class Package boxNode
+    classDef tagNode fill:#f6b8d4,stroke:#be185d,color:#500724
+    classDef checkNode fill:#9fe8c9,stroke:#0f766e,color:#052e22
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef boxNode fill:#e8cf9d,stroke:#a16207,color:#33240a
 ```
 
 Computes the next version with versioner (dogfooding), cross-compiles the binaries, packages the release archives, tags HEAD, and creates the GitHub release with the archives attached.

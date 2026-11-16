@@ -2,12 +2,18 @@
 
 ```mermaid
 flowchart LR
-    Version[version.sh] --> Stamp["go build -ldflags -X main.version"]
-    Platforms[6 targets<br/>darwin · linux · windows<br/>arm64 · amd64 — CGO off] --> Stamp
-    Stamp --> Dist["dist/<platform>/barnacle{,.exe}"]
-    Dist --> Release[release.sh — archives]
+    Version("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> version.sh <img src='../tools/lucide/icons/link.svg' width='16' alt=''/>") --> Stamp("<img src='../tools/lucide/icons/file-code.svg' width='20' alt=''/> go build -ldflags -X main.version")
+    Platforms(6 targets<br/>darwin · linux · windows<br/>arm64 · amd64 — CGO off) --> Stamp
+    Stamp --> Dist("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/> dist/&lt;platform&gt;/<br/>barnacle{,.exe}")
+    Dist --> Release("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> release.sh — archives <img src='../tools/lucide/icons/link.svg' width='16' alt=''/>")
     click Release href "release.sh.md"
     click Version href "version.sh.md"
+    class Version,Release shFile
+    class Stamp goFile
+    class Dist folder
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
 ```
 
 Cross-compiles barnacle for every supported platform into `dist/<platform>/barnacle` (`barnacle.exe` on Windows), stamping the version computed by versioner into each binary.
