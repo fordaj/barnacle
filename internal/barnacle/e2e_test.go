@@ -74,6 +74,15 @@ Fragment targets work: [usage](usage.md#configuration) and [api](api.go.md#confi
 Back to [usage](usage.md) or [home](../README.md).
 `)
 
+	writeFile(t, root, "icons/upload.svg", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3v12"/></svg>`)
+
+	writeFile(t, root, "guide/icons.md", `# Icons
+
+`+"```mermaid\nflowchart TD\n  Up(\"<img src='../icons/upload.svg' width='15'/>upload\")\n```"+`
+
+Inline SVG icons work in body content too: <img src="../icons/upload.svg" alt="">.
+`)
+
 	writeFile(t, root, "guide/usage.cpp.md", `# Usage (C++)
 
 `+"```mermaid\nflowchart LR\n  C[plain] --> D[plain]\n```"+`

@@ -2,10 +2,10 @@
 
 ```mermaid
 flowchart LR
-    Gh["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M4.5 4.5h6.4a2 2 0 0 1 1.4.6l7.3 7.3a2 2 0 0 1 0 2.9l-4.3 4.3a2 2 0 0 1-2.9 0l-7.3-7.3a2 2 0 0 1-.6-1.4V4.5z'/><circle cx='8.7' cy='8.7' r='0.9' fill='currentColor' stroke='none'/></svg>GitHub release<br/>fordaj/*</span>"] --> Update["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 8l4.5 4L5 16'/><path d='M12 16.5h7'/></svg>update.sh</span>"]
-    Update --> Verify["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12.8 9.7 17.5 19 8'/></svg>checksums<br/>when present</span>"]
-    Verify --> Stage["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 5.7A2.2 2.2 0 0 1 5.7 3.5h4L12 6h5.3a2.2 2.2 0 0 1 2.2 2.2v8.6a2.2 2.2 0 0 1-2.2 2.2H5.7a2.2 2.2 0 0 1-2.2-2.2z'/></svg>stage in<br/>temp dir</span>"]
-    Stage --> Swap["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 5.7A2.2 2.2 0 0 1 5.7 3.5h4L12 6h5.3a2.2 2.2 0 0 1 2.2 2.2v8.6a2.2 2.2 0 0 1-2.2 2.2H5.7a2.2 2.2 0 0 1-2.2-2.2z'/></svg>atomic swap<br/>delete superseded v*</span>"]
+    Gh("<img src='../tools/lucide/icons/tag.svg' width='20' alt=''/> GitHub release<br/>fordaj/*") --> Update("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> update.sh")
+    Update --> Verify("<img src='../tools/lucide/icons/check.svg' width='20' alt=''/> checksums<br/>when present")
+    Verify --> Stage("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/> stage in<br/>temp dir")
+    Stage --> Swap("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/> atomic swap<br/>delete superseded v*")
     class Gh tagNode
     class Update shFile
     class Verify checkNode
@@ -43,6 +43,7 @@ tools/<name>/
 | [logamuffin](logamuffin/update.sh.md) | Structured logging backend for `log()` in the scripts | [update.sh](logamuffin/update.sh.md) |
 | [runner-spawner](runner-spawner/update.sh.md) | Manages the self-hosted CI runners (see `.runner-spawner.json` and `.github/workflows/ci.yml`) | [update.sh](runner-spawner/update.sh.md) |
 | [versioner](versioner/update.sh.md) | Computes the repository version for builds and releases | [update.sh](versioner/update.sh.md) |
+| [lucide](lucide/update.sh.md) | Vendored [Lucide](https://lucide.dev) icons (ISC) used by the diagram conventions; inlined into the generated site by barnacle | [update.sh](lucide/update.sh.md) |
 
 `scripts/.common.env` and `scripts/.<platform>.env` select these via `*_VERSION_DIR`/`*_BIN`; see [scripts/env.sh.md](../scripts/env.sh.md). (Those env files are barnacle-hidden; `scripts/env.sh.md` documents them.)
 
@@ -53,7 +54,7 @@ tools/versioner/update.sh            # download the latest release, verify, swap
 tools/versioner/update.sh --dry-run  # show what would change
 ```
 
-(Same flags for `logamuffin`, `runner-spawner`, `formattington-lite`.)
+(Same flags for `logamuffin`, `runner-spawner`, `formattington-lite`. `tools/lucide/update.sh` refreshes the vendored icon set the same way.)
 
 ## Related pages
 

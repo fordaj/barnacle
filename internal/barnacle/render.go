@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"html"
+	"os"
+	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/yuin/goldmark"
@@ -19,19 +22,39 @@ var markdown = goldmark.New(
 	goldmark.WithRendererOptions(goldhtml.WithUnsafe()),
 )
 
+// RenderContext carries the per-document context needed by rewrites that
+// read the filesystem, such as local SVG inlining. Its zero value disables
+// those rewrites (context is empty), which keeps all label rewriting inert.
+type RenderContext struct {
+	// SourceDir is the absolute path of the directory holding the source
+	// document. Local resource references are resolved against it.
+	SourceDir string
+	// Root is the absolute repository root. Local SVG references must
+	// resolve beneath it; anything escaping is an error.
+	Root string
+}
+
 // MarkdownToHTML renders a Markdown document to an HTML fragment. Links to
 // other documentation files (.md/.mmd) are rewritten to point at the
 // generated .html pages — in ordinary links and inside Mermaid `click`
 // directives — and Mermaid code fences are turned into <pre class="mermaid">
-// blocks so they render in the browser.
-func MarkdownToHTML(source []byte) (string, error) {
+// blocks so they render in the browser. Local SVG references in <img> tags
+// are inlined as data URIs (unless the context is the zero value).
+func MarkdownToHTML(ctx RenderContext, source []byte) (string, error) {
 	var buf bytes.Buffer
 	if err := markdown.Convert(source, &buf); err != nil {
 		return "", fmt.Errorf("rendering markdown: %w", err)
 	}
 	content := buf.String()
+	content, err := rewriteMermaidBlocks(content, ctx)
+	if err != nil {
+		return "", err
+	}
 	content = rewriteDocLinks(content)
-	content = rewriteMermaidBlocks(content)
+	content, err = inlineLocalSVGs(content, ctx)
+	if err != nil {
+		return "", err
+	}
 	return content, nil
 }
 
@@ -91,23 +114,43 @@ var preMermaidRe = regexp.MustCompile(`(?s)<pre class="mermaid">(.*?)</pre>`)
 // The block contents stay HTML-escaped; mermaid reads them via textContent,
 // which unescapes the entities. Documentation targets in <a href> inside
 // diagram labels, and in `click` directives, are rewritten to the generated
-// .html pages (see rewriteMermaidLinks), exactly once per block — fenced or
-// hand-authored alike.
-func rewriteMermaidBlocks(rendered string) string {
+// .html pages (see rewriteMermaidLinks). Local SVG references in <img>
+// tags inside diagram labels are inlined per the context.
+func rewriteMermaidBlocks(rendered string, ctx RenderContext) (string, error) {
 	rendered = mermaidBlockRe.ReplaceAllString(rendered, `<pre class="mermaid">$1</pre>`)
-	return preMermaidRe.ReplaceAllStringFunc(rendered, func(block string) string {
+	var inlineErr error
+	rendered = preMermaidRe.ReplaceAllStringFunc(rendered, func(block string) string {
+		if inlineErr != nil {
+			return block
+		}
 		body := html.UnescapeString(preMermaidRe.FindStringSubmatch(block)[1])
+		var err error
+		body, err = inlineLocalSVGs(body, ctx)
+		if err != nil {
+			inlineErr = err
+			return block
+		}
 		body = rewriteMermaidLinks(body)
 		return `<pre class="mermaid">` + escapeMermaidText(body) + `</pre>`
 	})
+	if inlineErr != nil {
+		return "", inlineErr
+	}
+	return rendered, nil
 }
 
 // MermaidPageHTML renders a standalone .mmd file as a page body with a
-// heading and the diagram source in a <pre class="mermaid"> block.
-func MermaidPageHTML(title string, source []byte) string {
-	src := rewriteMermaidLinks(string(source))
+// heading and the diagram source in a <pre class="mermaid"> block. Local SVG
+// references in <img> tags are inlined as data URIs (unless the context is
+// the zero value).
+func MermaidPageHTML(ctx RenderContext, title string, source []byte) (string, error) {
+	src, err := inlineLocalSVGs(string(source), ctx)
+	if err != nil {
+		return "", fmt.Errorf("rendering mermaid page %q: %w", title, err)
+	}
+	src = rewriteMermaidLinks(src)
 	return `<h1>` + html.EscapeString(title) + `</h1>` + "\n" +
-		`<pre class="mermaid">` + escapeMermaidText(src) + `</pre>` + "\n"
+		`<pre class="mermaid">` + escapeMermaidText(src) + `</pre>` + "\n", nil
 }
 
 // escapeMermaidText escapes the characters goldmark escapes inside code
@@ -215,4 +258,143 @@ func containsWord(s, word string) bool {
 // HasMermaid reports whether rendered HTML contains a Mermaid diagram.
 func HasMermaid(rendered string) bool {
 	return strings.Contains(rendered, `<pre class="mermaid">`)
+}
+
+var imgTagRe = regexp.MustCompile(`<img\b[^>]*>`)
+
+// inlineLocalSVGs replaces every <img src="..."> whose destination is a
+// relative .svg file with the file's contents as an inline <svg> element,
+// carrying over the destination's display attributes (width, height, aria-*,
+// role, style) and escaping nothing a Mermaid label would not escape itself.
+// The resulting pages never reference the icon files externally, and the
+// icons compose with text inside a label exactly as Mermaid's own HTML
+// labels expect (an inline <svg> is a perfectly ordinary element there).
+// External URLs, data: URIs, fragments and non-SVG files are left untouched;
+// a reference to a missing or unreadable SVG fails the render, and a path
+// escaping the repository root is an error, never a read.
+func inlineLocalSVGs(rendered string, ctx RenderContext) (string, error) {
+	if ctx.Root == "" || ctx.SourceDir == "" {
+		return rendered, nil
+	}
+	root := filepath.Clean(ctx.Root)
+	srcDir := filepath.Clean(ctx.SourceDir)
+	var inlineErr error
+	rendered = imgTagRe.ReplaceAllStringFunc(rendered, func(tag string) string {
+		if inlineErr != nil {
+			return tag
+		}
+		attrs := parseImgAttrs(tag)
+		dest := attrs["src"]
+		if !isLocalSVG(dest) {
+			return tag
+		}
+		abs := filepath.Clean(filepath.Join(srcDir, filepath.FromSlash(dest)))
+		rel, err := filepath.Rel(root, abs)
+		if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+			inlineErr = fmt.Errorf("svg reference %q escapes the repository root", dest)
+			return tag
+		}
+		data, err := os.ReadFile(abs)
+		if err != nil {
+			inlineErr = fmt.Errorf("svg reference %q: %w", dest, err)
+			return tag
+		}
+		inline, err := svgToInline(data, attrs)
+		if err != nil {
+			inlineErr = fmt.Errorf("svg reference %q: %w", dest, err)
+			return tag
+		}
+		return inline
+	})
+	if inlineErr != nil {
+		return "", inlineErr
+	}
+	return rendered, nil
+}
+
+var attrRe = regexp.MustCompile(`([A-Za-z-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')`)
+
+// parseImgAttrs extracts the attribute map of an <img> tag (name → value,
+// single- or double-quoted). Boolean attributes without a value are absent.
+func parseImgAttrs(tag string) map[string]string {
+	out := map[string]string{}
+	for _, m := range attrRe.FindAllStringSubmatch(tag, -1) {
+		v := m[2]
+		if v == "" {
+			v = m[3]
+		}
+		out[strings.ToLower(m[1])] = v
+	}
+	return out
+}
+
+var svgOpenRe = regexp.MustCompile(`(?s)^\s*(?:<\?xml[^>]*\?>)?\s*(?:<!--.*?-->\s*)*<svg\b([^>]*)>\s*(.*)\s*</svg>\s*$`)
+
+// svgToInline renders a file's bytes as an inline <svg> element. Display
+// attributes carried by the <img> win (width/height), otherwise the SVG's
+// own width/height/viewBox settings are scaled to the house default of 20.
+// viewBox is always retained or synthesized; content passes through verbatim.
+func svgToInline(data []byte, imgAttrs map[string]string) (string, error) {
+	m := svgOpenRe.FindSubmatch(data)
+	if m == nil {
+		return "", fmt.Errorf("not a well-formed svg document")
+	}
+	attrs := parseImgAttrs("<svg " + string(m[1]) + ">")
+	inner := m[2]
+
+	width, hasW := imgAttrs["width"]
+	height, hasH := imgAttrs["height"]
+	switch {
+	case hasW && hasH:
+		attrs["width"], attrs["height"] = width, height
+	case hasW:
+		attrs["width"], attrs["height"] = width, width
+	case hasH:
+		attrs["width"], attrs["height"] = height, height
+	default:
+		// House default: 20px square. viewBox carries the aspect.
+		attrs["width"], attrs["height"] = "20px", "20px"
+	}
+	if attrs["viewbox"] == "" {
+		attrs["viewbox"] = "0 0 24 24" // sensible default for icon-shaped files
+	}
+	attrs["class"] = "label-icon" // mermaid's own carve-out: fill: currentColor, stroke: revert
+	// Display overrides from the img tag itself.
+	for k, v := range imgAttrs {
+		if k == "width" || k == "height" {
+			continue // handled above
+		}
+		if k == "src" || k == "alt" {
+			continue
+		}
+		attrs[k] = v
+	}
+	attrs["aria-hidden"] = "true"
+
+	keys := make([]string, 0, len(attrs))
+	for k := range attrs {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	var b strings.Builder
+	b.WriteString("<svg")
+	for _, k := range keys {
+		fmt.Fprintf(&b, " %s=\"%s\"", k, html.EscapeString(attrs[k]))
+	}
+	b.WriteString(">")
+	b.Write(inner)
+	b.WriteString("</svg>")
+	return b.String(), nil
+}
+
+func isLocalSVG(dest string) bool {
+	if dest == "" || strings.HasPrefix(dest, "#") || strings.HasPrefix(dest, "//") || schemeRe.MatchString(dest) {
+		return false
+	}
+	// Fragments and queries make no sense for inlining; treat the whole
+	// destination as external to the inlining pass.
+	if strings.ContainsAny(dest, "?#") {
+		return false
+	}
+	return strings.HasSuffix(strings.ToLower(dest), ".svg")
 }

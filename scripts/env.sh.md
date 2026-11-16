@@ -2,21 +2,21 @@
 
 ```mermaid
 flowchart TD
-    Uname["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 8l4.5 4L5 16'/><path d='M12 16.5h7'/></svg>uname -s : -m</span>"] --> Check{{"<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M12 3.2 19.6 7.6v8.8L12 20.8l-7.6-4.4V7.6z'/></svg>platform?</span>"}}
-    Check -->|Darwin:arm64| MacArm["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 8l4.5 4L5 16'/><path d='M12 16.5h7'/></svg>.macos-arm64.env</span>"]
-    Check -->|Darwin:x86_64| Mac86["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 8l4.5 4L5 16'/><path d='M12 16.5h7'/></svg>.macos-x86_64.env</span>"]
-    Check -->|Linux:aarch64| LinArm["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 8l4.5 4L5 16'/><path d='M12 16.5h7'/></svg>.linux-arm64.env</span>"]
-    Check -->|Linux:x86_64| Lin86["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 8l4.5 4L5 16'/><path d='M12 16.5h7'/></svg>.linux-x86_64.env</span>"]
-    Check -->|Windows:x86_64| Win86["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 8l4.5 4L5 16'/><path d='M12 16.5h7'/></svg>.windows-x86_64.env</span>"]
-    Check -->|Windows:arm64| WinArm["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 8l4.5 4L5 16'/><path d='M12 16.5h7'/></svg>.windows-arm64.env</span>"]
-    Check -->|other| Error["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='8.3'/><path d='M12 8.2v5'/><path d='M12 16.3h.01'/></svg>Error → return 1</span>"]
-    MacArm --> Anchor["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 8l4.5 4L5 16'/><path d='M12 16.5h7'/></svg>Anchor *_BIN to repo root</span>"]
+    Uname("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> uname -s : -m") --> Check{{"<img src='../tools/lucide/icons/hexagon.svg' width='20' alt=''/> platform?"}}
+    Check -->|Darwin:arm64| MacArm("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .macos-arm64.env")
+    Check -->|Darwin:x86_64| Mac86("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .macos-x86_64.env")
+    Check -->|Linux:aarch64| LinArm("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .linux-arm64.env")
+    Check -->|Linux:x86_64| Lin86("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .linux-x86_64.env")
+    Check -->|Windows:x86_64| Win86("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .windows-x86_64.env")
+    Check -->|Windows:arm64| WinArm("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .windows-arm64.env")
+    Check -->|other| Error("<img src='../tools/lucide/icons/circle-exclamation-point.svg' width='20' alt=''/> Error → return 1")
+    MacArm --> Anchor("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> Anchor *_BIN to repo root")
     Mac86 --> Anchor
     LinArm --> Anchor
     Lin86 --> Anchor
     Win86 --> Anchor
     WinArm --> Anchor
-    Common["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 8l4.5 4L5 16'/><path d='M12 16.5h7'/></svg>.common.env</span>"] -.-> Anchor
+    Common("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .common.env") -.-> Anchor
     class Uname,Anchor shFile
     class Check hexNode
     class MacArm,Mac86,LinArm,Lin86,Win86,WinArm,Common shFile

@@ -2,10 +2,10 @@
 
 ```mermaid
 flowchart TD
-    Entry["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 8l4.5 4L5 16'/><path d='M12 16.5h7'/></svg><svg class='label-icon' viewBox='0 0 24 24' width='12' height='12' style='position:absolute;right:-31px;top:-14px' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M10 14a5 5 0 0 0 7.07 0L20.6 10.4a5 5 0 0 0-7.07-7.07l-2 2'/><path d='M14 10a5 5 0 0 0-7.07 0L3.4 13.6a5 5 0 0 0 7.07 7.07l2-2'/></svg>entry.sh<br/>sources env.sh + log()</span>"] --> Env["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 8l4.5 4L5 16'/><path d='M12 16.5h7'/></svg><svg class='label-icon' viewBox='0 0 24 24' width='12' height='12' style='position:absolute;right:-31px;top:-14px' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M10 14a5 5 0 0 0 7.07 0L20.6 10.4a5 5 0 0 0-7.07-7.07l-2 2'/><path d='M14 10a5 5 0 0 0-7.07 0L3.4 13.6a5 5 0 0 0 7.07 7.07l2-2'/></svg>env.sh<br/>cascade locator/anchor</span>"]
-    Env --> Common["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 8l4.5 4L5 16'/><path d='M12 16.5h7'/></svg>.common.env</span>"]
-    Env --> Plat["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 8l4.5 4L5 16'/><path d='M12 16.5h7'/></svg>.os-arch.env<br/>one per platform</span>"]
-    Common --> Tools["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 5.7A2.2 2.2 0 0 1 5.7 3.5h4L12 6h5.3a2.2 2.2 0 0 1 2.2 2.2v8.6a2.2 2.2 0 0 1-2.2 2.2H5.7a2.2 2.2 0 0 1-2.2-2.2z'/></svg>tools/&lt;name&gt;/v*<br/>pinned binaries</span>"]
+    Entry("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> entry.sh<br/>sources env.sh + log() <img src='../tools/lucide/icons/link.svg' width='16' alt=''/>") --> Env("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> env.sh<br/>cascade locator/anchor <img src='../tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Env --> Common("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .common.env")
+    Env --> Plat("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .os-arch.env<br/>one per platform")
+    Common --> Tools("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/> tools/&lt;name&gt;/v*<br/>pinned binaries")
     Plat --> Tools
     click Entry href "entry.sh.md"
     click Env href "env.sh.md"
@@ -35,7 +35,7 @@ Vernacular used in the headers (`log INFO`, `$REPO_ROOT_DIR`, `VERSIONER_BIN`): 
 
 ## Refreshing the pinned tools
 
-The `tools/<name>/update.sh` scripts refresh the pinned helper bundles (versioner, logamuffin, runner-spawner, formattington-lite). They are not rendered as part of this site (`tools/` is excluded in `.barnacle.json`); their pages live under `tools/` and are listed in `tools/README.md`. Barnacle is not one of them — its binary comes from `scripts/build.sh`.
+The `tools/<name>/update.sh` scripts refresh the pinned helper bundles (versioner, logamuffin, runner-spawner, formattington-lite) and the vendored Lucide icons in `tools/lucide/`. They are not rendered as part of this site (`tools/` is excluded in `.barnacle.json`); their pages live under `tools/` and are listed in `tools/README.md`. Barnacle is not one of them — its binary comes from `scripts/build.sh`.
 
 ## Related pages
 

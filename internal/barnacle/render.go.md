@@ -2,10 +2,10 @@
 
 ```mermaid
 flowchart TD
-    MD["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M4.5 5h15v14h-15z'/><path d='M8 14.5v-4l2.2 2.8 2.2-2.8v4'/></svg>Markdown source</span>"] --> GM["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M8.5 7 4 12l4.5 5'/><path d='M15.5 7 20 12l-4.5 5'/></svg>goldmark + GFM</span>"]
-    GM --> Links["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M8.5 7 4 12l4.5 5'/><path d='M15.5 7 20 12l-4.5 5'/></svg><svg class='label-icon' viewBox='0 0 24 24' width='12' height='12' style='position:absolute;right:-31px;top:-14px' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M10 14a5 5 0 0 0 7.07 0L20.6 10.4a5 5 0 0 0-7.07-7.07l-2 2'/><path d='M14 10a5 5 0 0 0-7.07 0L3.4 13.6a5 5 0 0 0 7.07 7.07l2-2'/></svg>RewriteDocLink pass<br/>href rewriting</span>"]
-    Links --> Mermaid["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M8.5 7 4 12l4.5 5'/><path d='M15.5 7 20 12l-4.5 5'/></svg><svg class='label-icon' viewBox='0 0 24 24' width='12' height='12' style='position:absolute;right:-31px;top:-14px' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M10 14a5 5 0 0 0 7.07 0L20.6 10.4a5 5 0 0 0-7.07-7.07l-2 2'/><path d='M14 10a5 5 0 0 0-7.07 0L3.4 13.6a5 5 0 0 0 7.07 7.07l2-2'/></svg>Mermaid block pass<br/>fences become pre.mermaid</span>"]
-    Mermaid --> HTML["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><rect x='3.5' y='5' width='17' height='14' rx='2'/><path d='M3.5 9.5h17'/></svg>HTML fragment</span>"]
+    MD("<img src='../../tools/lucide/icons/file-text.svg' width='20' alt=''/> Markdown source") --> GM("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> goldmark + GFM")
+    GM --> Links("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> RewriteDocLink pass<br/>href rewriting <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Links --> Mermaid("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> Mermaid block pass<br/>fences become pre.mermaid <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Mermaid --> HTML("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/> HTML fragment")
     click Links href "#link-rewriting"
     click Mermaid href "#mermaid"
     class MD mdFile
@@ -24,7 +24,7 @@ Markdown is rendered to HTML with [goldmark](https://github.com/yuin/goldmark) (
 
 ## Mermaid
 
-Fenced ` ```mermaid ` code blocks become `<pre class="mermaid">` elements, which mermaid.js (bundled at `assets/mermaid.min.js`) renders in the browser. Standalone `.mmd` files are placed in a `<pre class="mermaid">` block directly — see [the site generator](site.go.md). The block contents stay HTML-escaped; mermaid reads them via `textContent`, which unescapes the entities. One stylesheet detail matters for fancy labels: mermaid clips label HTML to the label's box by default, so `barnacle.css` ships `.mermaid foreignObject { overflow: visible }` — a rule added for (and used by) HTML labels whose content hangs outside the text box, such as the corner glyphs in this repository's own diagrams.
+Fenced ` ```mermaid ` code blocks become `<pre class="mermaid">` elements, which mermaid.js (bundled at `assets/mermaid.min.js`) renders in the browser. Standalone `.mmd` files are placed in a `<pre class="mermaid">` block directly — see [the site generator](site.go.md). The block contents stay HTML-escaped; mermaid reads them via `textContent`, which unescapes the entities.
 
 `HasMermaid` reports whether rendered HTML contains a `<pre class="mermaid">`; `Generate` uses it to decide whether to ship `mermaid.min.js` and to flag the page in the template.
 
@@ -47,6 +47,21 @@ Mechanics:
 - Attributes the author puts inside the anchor (`title`, `target="_blank"`, fragments, …) pass through DOMPurify untouched in `strict`.
 - Mermaid's own quirks apply to the source syntax: state diagrams cannot contain `:` in transition text; flowchart labels with parentheses must be quoted (`-->|"<a href='x.md'>send(cmd)</a>"|`), using single quotes inside the double-quoted label.
 - Node `click` directives keep working; inline anchors are for transitions and inline marks.
+
+## Local SVG inlining
+
+Barnacle rewrites `<img>` tags whose destination is a relative `.svg` path to **data URIs** at generation time, so diagrams (and body content) can inline real icon files without any external requests — sites stay fully self-contained and work from any base URL. This repository uses the vendored [Lucide](https://lucide.dev) icon set living in `tools/lucide/` for its own diagram icons.
+
+The rules:
+
+- Only relative `.svg` destinations are inlined (case-insensitive), resolved against the **document's own directory** — a reference must resolve beneath the repository root, or the page fails to render with an error naming the path and the page.
+- External URLs, `data:` URIs, protocol-relative URLs, fragments and anything else are left untouched.
+- Missing or unreadable files fail the render (`Fail loudly`).
+- Only `.svg` is handled; the bytes are base64-wrapped into `data:image/svg+xml;base64,…`, which also sidesteps every escaping concern at the HTML and Mermaid layers — `strict` securityLevel is unaffected, no new tags or attributes are introduced.
+- It applies to Markdown content and to Mermaid diagrams alike (diagram labels may reference an icon file; e.g. `<img src='icon.svg'/>`), and to standalone `.mmd` pages.
+- `MarkdownToHTML` and `MermaidPageHTML` take a `RenderContext{SourceDir, Root}` identifying the source file's directory and the repository root. Passing the zero context leaves `<img>` tags untouched — useful for tests and callers that render detached content.
+
+This is how the icons in this repository's own diagrams appear in the browser with no network requests: the generator reads each `<img>` from disk and bakes its bytes into the page.
 
 ## Related pages
 

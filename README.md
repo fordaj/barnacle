@@ -2,10 +2,10 @@
 
 ```mermaid
 flowchart TD
-    Root["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M8.5 7 4 12l4.5 5'/><path d='M15.5 7 20 12l-4.5 5'/></svg>barnacle</span>"]
-    Cmd["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 5.7A2.2 2.2 0 0 1 5.7 3.5h4L12 6h5.3a2.2 2.2 0 0 1 2.2 2.2v8.6a2.2 2.2 0 0 1-2.2 2.2H5.7a2.2 2.2 0 0 1-2.2-2.2z'/></svg><svg class='label-icon' viewBox='0 0 24 24' width='12' height='12' style='position:absolute;right:-31px;top:-14px' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M10 14a5 5 0 0 0 7.07 0L20.6 10.4a5 5 0 0 0-7.07-7.07l-2 2'/><path d='M14 10a5 5 0 0 0-7.07 0L3.4 13.6a5 5 0 0 0 7.07 7.07l2-2'/></svg>cmd/barnacle<br/>process boundary</span>"]
-    Internal["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 5.7A2.2 2.2 0 0 1 5.7 3.5h4L12 6h5.3a2.2 2.2 0 0 1 2.2 2.2v8.6a2.2 2.2 0 0 1-2.2 2.2H5.7a2.2 2.2 0 0 1-2.2-2.2z'/></svg><svg class='label-icon' viewBox='0 0 24 24' width='12' height='12' style='position:absolute;right:-31px;top:-14px' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M10 14a5 5 0 0 0 7.07 0L20.6 10.4a5 5 0 0 0-7.07-7.07l-2 2'/><path d='M14 10a5 5 0 0 0-7.07 0L3.4 13.6a5 5 0 0 0 7.07 7.07l2-2'/></svg>internal/barnacle<br/>the implementation</span>"]
-    Scripts["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 5.7A2.2 2.2 0 0 1 5.7 3.5h4L12 6h5.3a2.2 2.2 0 0 1 2.2 2.2v8.6a2.2 2.2 0 0 1-2.2 2.2H5.7a2.2 2.2 0 0 1-2.2-2.2z'/></svg><svg class='label-icon' viewBox='0 0 24 24' width='12' height='12' style='position:absolute;right:-31px;top:-14px' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M10 14a5 5 0 0 0 7.07 0L20.6 10.4a5 5 0 0 0-7.07-7.07l-2 2'/><path d='M14 10a5 5 0 0 0-7.07 0L3.4 13.6a5 5 0 0 0 7.07 7.07l2-2'/></svg>scripts/<br/>build · release · docs · format</span>"]
+    Root("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/> barnacle")
+    Cmd("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/> cmd/barnacle<br/>process boundary <img src='tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Internal("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/> internal/barnacle<br/>the implementation <img src='tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Scripts("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/> scripts/<br/>build · release · docs · format <img src='tools/lucide/icons/link.svg' width='16' alt=''/>")
     Root --> Cmd
     Root --> Internal
     Root --> Scripts
@@ -60,7 +60,7 @@ The result is a visual map of your codebase that developers and coding agents ca
 
 - **Documentation alongside code** — Keep `.md` and `.mmd` files parallel to the source files they describe.
 - **Mermaid-forward** — Every page should open with a Mermaid diagram at the top, so a brand-new reader gets a visual map before a wall of prose. Barnacle guides you (and your agents) toward that; it never forces it.
-- **Diagram conventions** — Per-file-kind node colors, hexagon decisions, and corner glyphs (file-kind upper-left, chain link upper-right when clickable): conventions this repository follows and this README documents; nothing Barnacle enforces. See [Diagram conventions](#diagram-conventions).
+- **Diagram conventions** — Per-file-kind node colors, hexagon decisions, and inline Lucide glyphs (file kind first, chain link last when clickable): conventions this repository follows and this README documents; nothing Barnacle enforces. See [Diagram conventions](#diagram-conventions).
 - **Clickable diagrams** — `click` directives make diagram nodes and edges navigable; Barnacle rewrites documentation targets (`.md`/`.mmd`) inside them to the generated pages. See [Clickable diagrams](#clickable-diagrams).
 - **Navigable documentation** — Generated pages link to one another using relative paths.
 - **Retained suffixes** — `main.py.md`, `main.cpp.md`, `main.rs.md` — documentation files keep the source file's suffix, so different files that share a base name stay individually documentable.
@@ -148,9 +148,9 @@ Markdown files can contain explanatory text, links, and Mermaid diagrams. Best p
 
 ```mermaid
 flowchart TD
-    A[main] --> B[Load Configuration]
-    B --> C[Initialize Database]
-    C --> D[Start Application]
+    A(main) --> B(Load Configuration)
+    B --> C(Initialize Database)
+    C --> D(Start Application)
 ```
 
 The application starts here and initializes the major subsystems. See [Database](database.py.md) for more information.
@@ -162,9 +162,9 @@ Mermaid files provide a dedicated place for diagrams without requiring surroundi
 
 ```mermaid
 flowchart TD
-    A[Parser] --> B[Tokenizer]
-    B --> C[AST]
-    C --> D[Interpreter]
+    A(Parser) --> B(Tokenizer)
+    B --> C(AST)
+    C --> D(Interpreter)
 ```
 
 ### A diagram at the top of every page
@@ -197,9 +197,9 @@ Mermaid flowcharts natively support `click` directives, which make individual no
 
 ```mermaid
 flowchart LR
-    Src["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='12' height='12' style='position:absolute;right:-31px;top:-14px' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M10 14a5 5 0 0 0 7.07 0L20.6 10.4a5 5 0 0 0-7.07-7.07l-2 2'/><path d='M14 10a5 5 0 0 0-7.07 0L3.4 13.6a5 5 0 0 0 7.07 7.07l2-2'/></svg>main.py</span>"] --> Doc[main.py.md]
-    Doc --> Barnacle["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='12' height='12' style='position:absolute;right:-31px;top:-14px' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M10 14a5 5 0 0 0 7.07 0L20.6 10.4a5 5 0 0 0-7.07-7.07l-2 2'/><path d='M14 10a5 5 0 0 0-7.07 0L3.4 13.6a5 5 0 0 0 7.07 7.07l2-2'/></svg>barnacle</span>"]
-    Barnacle --> Site[main.py.html]
+    Src("main.py <img src='tools/lucide/icons/link.svg' width='16' alt=''/>") --> Doc(main.py.md)
+    Doc --> Barnacle("barnacle <img src='tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Barnacle --> Site(main.py.html)
     click Src href "cmd/barnacle/main.go.md" "What the command does"
     click Barnacle href "internal/barnacle/README.md"
 ```
@@ -258,8 +258,8 @@ Mermaid's own features get you a lot of polish for free — colored classes, com
 
 ```mermaid
 flowchart LR
-    Go["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M8.5 7 4 12l4.5 5'/><path d='M15.5 7 20 12l-4.5 5'/></svg>scan.go — Go</span>"] --> Sh["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 8l4.5 4L5 16'/><path d='M12 16.5h7'/></svg>build.sh — Bash</span>"] --> Json["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M9.5 4.5c-2.4 0-3.4 1-3.4 3.5 0 1.8-1 2.8-2 3.5 1 .7 2 1.7 2 3.5 0 2.5 1 3.5 3.4 3.5'/><path d='M14.5 4.5c2.4 0 3.4 1 3.4 3.5 0 1.8 1 2.8 2 3.5-1 .7-2 1.7-2 3.5 0 2.5-1 3.5-3.4 3.5'/></svg>.barnacle.json — JSON</span>"] --> Md["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M4.5 5h15v14h-15z'/><path d='M8 14.5v-4l2.2 2.8 2.2-2.8v4'/></svg>README.md — Markdown</span>"] --> Html["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><rect x='3.5' y='5' width='17' height='14' rx='2'/><path d='M3.5 9.5h17'/></svg>index.html — generated</span>"] --> Js["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M13 3 5.5 13.5H11L10 21l7.5-10.5H12z'/></svg>mermaid.min.js — JavaScript</span>"]
-    Tag["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M4.5 4.5h6.4a2 2 0 0 1 1.4.6l7.3 7.3a2 2 0 0 1 0 2.9l-4.3 4.3a2 2 0 0 1-2.9 0l-7.3-7.3a2 2 0 0 1-.6-1.4V4.5z'/><circle cx='8.7' cy='8.7' r='0.9' fill='currentColor' stroke='none'/></svg>v0.1.0 — release tag</span>"] --> Dl["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M12 4.5v10'/><path d='m8 10.5 4 4 4-4'/><path d='M5.5 19h13'/></svg>gh release download</span>"] --> Check["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12.8 9.7 17.5 19 8'/></svg>verify checksums</span>"] --> Box["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M4 8.2 12 4l8 4.2v7.6L12 20l-8-4.2z'/><path d='M4.3 8.5 12 12.4l7.7-3.9'/><path d='M12 12.4V19.5'/></svg>dist/barnacle.tar.gz</span>"]
+    Go("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/> scan.go — Go") --> Sh("<img src='tools/lucide/icons/terminal.svg' width='20' alt=''/> build.sh — Bash") --> Json("<img src='tools/lucide/icons/braces.svg' width='20' alt=''/> .barnacle.json — JSON") --> Md("<img src='tools/lucide/icons/file-text.svg' width='20' alt=''/> README.md — Markdown") --> Html("<img src='tools/lucide/icons/app-window.svg' width='20' alt=''/> index.html — generated") --> Js("<img src='tools/lucide/icons/zap.svg' width='20' alt=''/> mermaid.min.js — JavaScript")
+    Tag("<img src='tools/lucide/icons/tag.svg' width='20' alt=''/> v0.1.0 — release tag") --> Dl("<img src='tools/lucide/icons/download.svg' width='20' alt=''/> gh release download") --> Check("<img src='tools/lucide/icons/check.svg' width='20' alt=''/> verify checksums") --> Box("<img src='tools/lucide/icons/package.svg' width='20' alt=''/> dist/barnacle.tar.gz")
     class Go goFile
     class Sh shFile
     class Json jsonFile
@@ -284,12 +284,12 @@ flowchart LR
 
 Assign them with `class NodeA,NodeB goFile` — the `:::` shorthand works too, but one form everywhere keeps the source greppable.
 
-**Corner glyphs — file kind on the left, chain link on the right.** A tiny glyph in the upper-left corner says what a node is; a chain link in the upper-right corner says the node is clickable. Labels are HTML, so an inline `<svg>` just works under `securityLevel: 'strict'`, and with `class="label-icon"` mermaid's own theme CSS defers to it (it sets `fill: currentColor`, so glyphs take the node's text color — no clash with the tinted fills). The glyphs hang outside the label box, which mermaid clips by default — so barnacle ships one extra rule in `assets/barnacle.css` to allow it: `.mermaid foreignObject { overflow: visible }`. Pages rendered by an older barnacle simply hide the glyphs and degrade to plain text.
+**Inline glyphs — file kind first, chain link on clickable nodes.** Icons are the real [Lucide](https://lucide.dev) set, vendored at `tools/lucide/` (ISC-licensed; see `tools/lucide/LICENSE`) and referenced straight from the diagram source as plain Markdown inline images. Labels are HTML, so an inline `<img>` just works under `securityLevel: 'strict'`; barnacle inlines local `.svg` references itself at generation time, so no request ever goes out to disk.
 
 ```mermaid
 flowchart LR
-    Scan["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M8.5 7 4 12l4.5 5'/><path d='M15.5 7 20 12l-4.5 5'/></svg><svg class='label-icon' viewBox='0 0 24 24' width='12' height='12' style='position:absolute;right:-31px;top:-14px' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M10 14a5 5 0 0 0 7.07 0L20.6 10.4a5 5 0 0 0-7.07-7.07l-2 2'/><path d='M14 10a5 5 0 0 0-7.07 0L3.4 13.6a5 5 0 0 0 7.07 7.07l2-2'/></svg>Scan</span>"]
-    Site["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 5.7A2.2 2.2 0 0 1 5.7 3.5h4L12 6h5.3a2.2 2.2 0 0 1 2.2 2.2v8.6a2.2 2.2 0 0 1-2.2 2.2H5.7a2.2 2.2 0 0 1-2.2-2.2z'/></svg><svg class='label-icon' viewBox='0 0 24 24' width='12' height='12' style='position:absolute;right:-31px;top:-14px' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M10 14a5 5 0 0 0 7.07 0L20.6 10.4a5 5 0 0 0-7.07-7.07l-2 2'/><path d='M14 10a5 5 0 0 0-7.07 0L3.4 13.6a5 5 0 0 0 7.07 7.07l2-2'/></svg>site/</span>"]
+    Scan("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/> Scan <img src='tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Site("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/> site/ <img src='tools/lucide/icons/link.svg' width='16' alt=''/>")
     Scan --> Site
     click Scan href "internal/barnacle/scan.go.md"
     click Site href "internal/barnacle/site.go.md"
@@ -299,21 +299,21 @@ flowchart LR
     classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
 ```
 
-The upper-left glyph is picked by file kind — a folder for `scripts/`, `</>` for Go source, a terminal prompt for shell, braces for JSON, a page for Markdown, a window for HTML, a bolt for JavaScript, a tag for releases, an arrow for downloads, a check for verifications, a box for archives, a hexagon outline for decisions, an alert circle for fatal exits — stroked glyphs in the node's text color. The upper-right chain link appears **only** on nodes with a `click` directive; unclickable nodes carry nothing. Positioning notes (mermaid's own quirks, not barnacle's): labels are HTML with the SVG absolutely placed against the label span, whose offsets match mermaid's flowchart padding (~30px horizontal, ~15px vertical), so they sit just on the node frame. A relative file path in an `<img src>` does **not** work — barnacle copies only its own assets, it does not fetch arbitrary files — so keep the SVG in the label. A literal `<name>` in a label needs double-escaping (`&lt;name&gt;`), and multi-line labels work with `<br/>`.
+The file-kind glyph is picked to match the class — a folder for `scripts/`, `</>`-style code for Go source, a terminal prompt for shell, braces for JSON, a page for Markdown, a window for HTML, a bolt for JavaScript, a tag for releases, an arrow for downloads, a check for verifications, a box for archives, a hexagon outline for decisions, an exclamation circle for fatal exits. The chain link appears **only** on nodes with a `click` directive; unclickable nodes carry nothing. Everything happens inside the label flow — no absolute positioning, no magic offsets, so it works for any node shape and any wrap; you decide where the line breaks (`<br/>`) and where the `<img>` goes. Notes (mermaid's own quirks, not barnacle's): mermaid treats the label as HTML, escapes `<`, `>`, `&` and quotes for you, and escapes entities work in labels (`&lt;name&gt;` for a literal `<name>`, `<br/>` for a line break). A relative `<img src='…/file.svg'>` is inlined by barnacle; an absolute URL or `data:` URI is left alone; a missing or unreadable file (or a path that escapes the repository root) fails the render with a clear error naming the page. The glyphs are stroked in `currentColor`, so they follow the node's text color automatically — exactly why they read on any class tint.
 
 **Hexagons for conditions.** Mermaid's diamond shape (`{...}`) balloons with long condition text; the hexagon (`{{...}}`) stays vertically compact and reads just as well as a decision:
 
 ```mermaid
 flowchart TD
-    Parse{{"<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='M12 3.2 19.6 7.6v8.8L12 20.8l-7.6-4.4V7.6z'/></svg>Valid JSON?</span>"}} -->|no| Error["<span style='position:relative;display:inline-block'><svg class='label-icon' viewBox='0 0 24 24' width='15' height='15' style='position:absolute;left:-32px;top:-15px' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='8.3'/><path d='M12 8.2v5'/><path d='M12 16.3h.01'/></svg>Error → exit 1</span>"]
-    Parse -->|yes| Config[Config]
+    Parse{{"<img src='tools/lucide/icons/hexagon.svg' width='20' alt=''/> Valid JSON?"}} -->|no| Error("<img src='tools/lucide/icons/circle-exclamation-point.svg' width='20' alt=''/> Error → exit 1")
+    Parse -->|yes| Config(Config)
     class Parse hexNode
     class Error errNode
     classDef hexNode fill:#ffe08a,stroke:#a16207,color:#422006
     classDef errNode fill:#f6b8b8,stroke:#b91c1c,color:#450a0a
 ```
 
-**Putting it together** — a small node glossary this repository sticks to: tinted text nodes everywhere, the `folder`/`goFile`/`shFile`/`jsonFile`/`mdFile`/`htmlFile`/`jsFile` classes for the corresponding file kinds, `hexNode` for decisions, `errNode` for fatal exits, `tagNode` for releases and tags, `dlNode` for downloads, `checkNode` for verifications, `boxNode` for archives — and the corner glyphs to match: file-kind glyph upper-left, chain link upper-right iff the node is clickable (`click` directive). When a step maps cleanly onto one of those, use it; otherwise leave the node unclassed rather than inventing a new shade.
+**Putting it together** — a small node glossary this repository sticks to: tinted text nodes everywhere (following the `folder`/`goFile`/`shFile`/`jsonFile`/`mdFile`/`htmlFile`/`jsFile` classes for the corresponding file kinds), `hexNode` for decisions, `errNode` for fatal exits, `tagNode` for releases and tags, `dlNode` for downloads, `checkNode` for verifications, `boxNode` for archives — and inline glyphs to match: file-kind glyph first in the label, chain link last iff the node is clickable (`click` directive). When a step maps cleanly onto one of those, use it; otherwise leave the node unclassed rather than inventing a new shade.
 
 None of this is linter-enforced. The rule is the one at the top of the README: a reader who has never seen the page should get the map before the territory — everything else is seasoning.
 
