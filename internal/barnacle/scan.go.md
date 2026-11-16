@@ -2,17 +2,25 @@
 
 ```mermaid
 flowchart TD
-    Root[Repository root] --> Walk[WalkDir]
-    Walk --> Filter{Regular .md/.mmd?}
+    Root["Repository root"] --> Walk[WalkDir]
+    Walk --> Filter{{"Regular .md/.mmd?"}}
     Filter -- no --> Skip[Skip]
-    Filter -- yes --> Excludes{"Excluded by config/defaults?"}
+    Filter -- yes --> Excludes{{"Excluded by config/defaults?"}}
     Excludes -- yes --> Skip
-    Excludes -- no --> Hidden{Hidden segment?}
+    Excludes -- no --> Hidden{{"Hidden segment?"}}
     Hidden -- yes --> Skip
-    Hidden -- no --> Doc[Document]
-    Doc --> Sorted[Sorted Document list]
+    Hidden -- no --> Doc["Document"]
+    Doc --> Sorted["Sorted Document list"]
     click Excludes href "config.go.md"
     click Sorted href "site.go.md"
+    class Root folder
+    class Walk goFile
+    class Filter,Excludes,Hidden hexNode
+    class Doc,Sorted mdFile
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef hexNode fill:#ffe08a,stroke:#a16207,color:#422006
+    classDef mdFile fill:#dcd6ce,stroke:#6b6255,color:#292524
 ```
 
 `Scan` walks the repository root and returns every `.md` and `.mmd` file, sorted by slash-separated relative path. The output directory is never scanned.

@@ -2,10 +2,18 @@
 
 ```mermaid
 flowchart LR
-    Gh[GitHub release<br/>fordaj/*] --> Update[update.sh]
-    Update --> Verify[checksums when present]
-    Verify --> Stage[stage in temp dir]
-    Stage --> Swap[atomic swap<br/>delete superseded v*]
+    Gh["GitHub release<br/>fordaj/*"] --> Update["update.sh"]
+    Update --> Verify["checksums<br/>when present"]
+    Verify --> Stage["stage in<br/>temp dir"]
+    Stage --> Swap["atomic swap<br/>delete superseded v*"]
+    class Gh tagNode
+    class Update shFile
+    class Verify checkNode
+    class Stage,Swap folder
+    classDef tagNode fill:#f6b8d4,stroke:#be185d,color:#500724
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef checkNode fill:#9fe8c9,stroke:#0f766e,color:#052e22
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
 ```
 
 `tools/` carries the repository's pinned helper binaries — formatting, logging, CI-runner and docs tooling — plus one `update.sh` per tool that refreshes them. These are the tools used to build, release, log, format, and document this repository itself; they are not Go dependencies.

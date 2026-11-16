@@ -2,12 +2,18 @@
 
 ```mermaid
 flowchart TD
-    MD[Markdown source] --> GM[goldmark + GFM]
+    MD["Markdown source"] --> GM[goldmark + GFM]
     GM --> Links["RewriteDocLink pass<br/>href rewriting"]
     Links --> Mermaid["Mermaid block pass<br/>fences become pre.mermaid"]
     Mermaid --> HTML[HTML fragment]
     click Links href "#link-rewriting"
     click Mermaid href "#mermaid"
+    class MD mdFile
+    class GM,Links,Mermaid goFile
+    class HTML htmlFile
+    classDef mdFile fill:#dcd6ce,stroke:#6b6255,color:#292524
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef htmlFile fill:#ffc48a,stroke:#c2410c,color:#431407
 ```
 
 Markdown is rendered to HTML with [goldmark](https://github.com/yuin/goldmark) (GFM: tables, strikethrough, task lists, autolinked URLs), plus two post-processing passes.

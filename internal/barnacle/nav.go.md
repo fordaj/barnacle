@@ -2,13 +2,19 @@
 
 ```mermaid
 flowchart LR
-    Docs[Sorted documents] --> Tree[buildTree]
+    Docs["Sorted documents"] --> Tree[buildTree]
     Tree --> Nav[renderNav<br/>sidebar per page]
     Tree --> Index[renderIndex<br/>landing page body]
     Nav --> Page[pageTemplate]
-    Index --> Landing[index.html]
+    Index --> Landing["index.html"]
     click Tree href "site.go.md"
     click Page href "template.go.md"
+    class Docs mdFile
+    class Tree,Nav,Index,Page goFile
+    class Landing htmlFile
+    classDef mdFile fill:#dcd6ce,stroke:#6b6255,color:#292524
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef htmlFile fill:#ffc48a,stroke:#c2410c,color:#431407
 ```
 
 `nav.go` renders the sidebar navigation and the body of the landing page `index.html`. Both are built from the same directory tree derived from the scanned documents.

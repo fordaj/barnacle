@@ -5,16 +5,24 @@ flowchart TD
     Config[".barnacle.json"] --> Generate[Generate]
     Generate --> Scan["Scan (walk .md/.mmd)"]
     Scan --> Render[MarkdownToHTML]
-    Render --> Pages[Per-page HTML<br/>+ list of pages without a diagram]
-    Generate --> Index[index.html landing page]
-    Pages --> Assets[assets/barnacle.css<br/>assets/mermaid.min.js]
-    Pages --> Out[site/]
+    Render --> Pages["Per-page HTML<br/>+ list of pages without a diagram"]
+    Generate --> Index["index.html<br/>landing page"]
+    Pages --> Assets["assets/<br/>barnacle.css · mermaid.min.js"]
+    Pages --> Out["site/"]
     Index --> Out
     Assets --> Out
     click Scan href "scan.go.md"
     click Render href "render.go.md"
     click Index href "nav.go.md"
     click Config href "config.go.md"
+    class Config jsonFile
+    class Generate,Scan,Render goFile
+    class Pages,Index htmlFile
+    class Assets,Out folder
+    classDef jsonFile fill:#cdb9f7,stroke:#6d28d9,color:#2e1065
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef htmlFile fill:#ffc48a,stroke:#c2410c,color:#431407
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
 ```
 
 `Generate` builds the static site from the root directory into the output directory.

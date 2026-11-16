@@ -2,13 +2,21 @@
 
 ```mermaid
 flowchart TD
-    Root[barnacle] --> Cmd[cmd/barnacle<br/>process boundary]
-    Root --> Internal[internal/barnacle<br/>the implementation]
-    Root --> Scripts[scripts/<br/>build · release · docs · format]
+    Root["barnacle"]
+    Cmd["cmd/barnacle<br/>process boundary"]
+    Internal["internal/barnacle<br/>the implementation"]
+    Scripts["scripts/<br/>build · release · docs · format"]
+    Root --> Cmd
+    Root --> Internal
+    Root --> Scripts
     Cmd --> Internal
     click Cmd href "cmd/barnacle/main.go.md"
     click Internal href "internal/barnacle/README.md"
     click Scripts href "scripts/README.md"
+    class Root goFile
+    class Cmd,Internal,Scripts folder
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
 ```
 
 **A navigable, diagram-centric documentation site for your codebase.**
@@ -52,6 +60,7 @@ The result is a visual map of your codebase that developers and coding agents ca
 
 - **Documentation alongside code** — Keep `.md` and `.mmd` files parallel to the source files they describe.
 - **Mermaid-forward** — Every page should open with a Mermaid diagram at the top, so a brand-new reader gets a visual map before a wall of prose. Barnacle guides you (and your agents) toward that; it never forces it.
+- **Diagram conventions** — Per-file-kind node colors, hexagon decisions, and bring-your-own-SVG icons in labels: conventions this repository follows and this README documents; nothing Barnacle enforces. See [Diagram conventions](#diagram-conventions).
 - **Clickable diagrams** — `click` directives make diagram nodes and edges navigable; Barnacle rewrites documentation targets (`.md`/`.mmd`) inside them to the generated pages. See [Clickable diagrams](#clickable-diagrams).
 - **Navigable documentation** — Generated pages link to one another using relative paths.
 - **Retained suffixes** — `main.py.md`, `main.cpp.md`, `main.rs.md` — documentation files keep the source file's suffix, so different files that share a base name stay individually documentable.
@@ -240,6 +249,69 @@ Rules for links inside labels (identical to node clicks and everything else):
 - Standalone `.mmd` files are treated the same way.
 
 Node clicks (`click A href "target.md"`) remain the blessed way to make **nodes** navigable; inline anchors are the way to make **transitions** navigable. Both rely on the same label/SVG rendering under `securityLevel: 'strict'`: labels go through DOMPurify, which keeps relative URLs (and strips `javascript:`).
+
+### Diagram conventions
+
+Mermaid's own features get you a lot of polish for free — colored classes, compact shapes, HTML labels — and this repository uses them throughout its diagrams. Barnacle neither knows about nor enforces any of this; it is simply the house style, shown here so you can copy it. Everything below works under `securityLevel: 'strict'` and reads well on both light and dark pages: the class fills are mid-tone with near-black text, so they stay legible regardless of the page theme behind them.
+
+**Color by file kind.** A handful of `classDef`s, recolored per language, make a diagram scannable at a glance. Keep the fills mid-tone and the text near-black and the same palette survives light and dark mode. This repository's palette (copy the ones you use into each diagram — mermaid scopes classes to a single diagram, and there is no global hook):
+
+```mermaid
+flowchart LR
+    Go["scan.go — Go"] --> Sh["build.sh — Bash"] --> Json[".barnacle.json — JSON"] --> Md["README.md — Markdown"] --> Html["index.html — generated"] --> Js["mermaid.min.js — JavaScript"]
+    Tag["v0.1.0 — release tag"] --> Dl["gh release download"] --> Check["verify checksums"] --> Box["dist/barnacle.tar.gz"]
+    class Go goFile
+    class Sh shFile
+    class Json jsonFile
+    class Md mdFile
+    class Html htmlFile
+    class Js jsFile
+    class Tag tagNode
+    class Dl dlNode
+    class Check checkNode
+    class Box boxNode
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef jsonFile fill:#cdb9f7,stroke:#6d28d9,color:#2e1065
+    classDef mdFile fill:#dcd6ce,stroke:#6b6255,color:#292524
+    classDef htmlFile fill:#ffc48a,stroke:#c2410c,color:#431407
+    classDef jsFile fill:#fbe86f,stroke:#a16207,color:#423806
+    classDef tagNode fill:#f6b8d4,stroke:#be185d,color:#500724
+    classDef dlNode fill:#93e2e2,stroke:#0f766e,color:#042f2e
+    classDef checkNode fill:#9fe8c9,stroke:#0f766e,color:#052e22
+    classDef boxNode fill:#e8cf9d,stroke:#a16207,color:#33240a
+```
+
+Assign them with `class NodeA,NodeB goFile` — the `:::` shorthand works too, but one form everywhere keeps the source greppable.
+
+**Icons in labels — bring your own SVG.** Labels are HTML under the hood, so an inline `<svg>` just works, and it survives `securityLevel: 'strict'`. Paste your SVG straight into the label; keep it small (`width` 14–18) and aligned (`vertical-align`). barnacle escapes `<`, `>`, `&` and quotes in the block for you and mermaid reads them back via `textContent`, so this source is all you need:
+
+```mermaid
+flowchart LR
+    Folder["<svg viewBox='0 0 24 24' width='16' height='16' style='vertical-align:-2px'><path fill='#f0c558' stroke='#8a6d1c' d='M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z'/></svg> scripts/"]
+    GoFile["<svg viewBox='0 0 24 24' width='16' height='16' style='vertical-align:-2px'><rect width='24' height='24' rx='5' fill='#59c7f9'/><text x='12' y='15.5' font-size='9' font-weight='bold' text-anchor='middle' fill='#082f2e' font-family='monospace'>go</text></svg> scan.go"]
+    Folder --> GoFile
+    click Folder href "scripts/README.md"
+    click GoFile href "internal/barnacle/scan.go.md"
+```
+
+Two rules of thumb: an inline `<svg>` carries its own colors, so pick colors with contrast against the page (and against the class fill if you also tint the node); and a relative file path in an `<img src>` does **not** work — barnacle copies only its own assets, it does not fetch arbitrary files — so keep the SVG in the label (or a `data:` URI in an `<img>`), not on disk next to the page. A literal `<name>` in a label needs double-escaping (`&lt;name&gt;`), and multi-line labels work with `<br/>`.
+
+**Hexagons for conditions.** Mermaid's diamond shape (`{...}`) balloons with long condition text; the hexagon (`{{...}}`) stays vertically compact and reads just as well as a decision:
+
+```mermaid
+flowchart TD
+    Parse{{"Valid JSON?"}} -->|no| Error[Error → exit 1]
+    Parse -->|yes| Config[Config]
+    class Parse hexNode
+    class Error errNode
+    classDef hexNode fill:#ffe08a,stroke:#a16207,color:#422006
+    classDef errNode fill:#f6b8b8,stroke:#b91c1c,color:#450a0a
+```
+
+**Putting it together** — a small node glossary this repository sticks to: tinted text nodes everywhere, the `folder`/`goFile`/`shFile`/`jsonFile`/`mdFile`/`htmlFile`/`jsFile` classes for the corresponding file kinds, `hexNode` for decisions, `errNode` for fatal exits, `tagNode` for releases and tags, `dlNode` for downloads, `checkNode` for verifications, `boxNode` for archives. When a step maps cleanly onto one of those, use it; otherwise leave the node unclassed rather than inventing a new shade.
+
+None of this is linter-enforced. The rule is the one at the top of the README: a reader who has never seen the page should get the map before the territory — everything else is seasoning.
 
 ## Output
 

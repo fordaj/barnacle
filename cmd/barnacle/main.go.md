@@ -2,16 +2,20 @@
 
 ```mermaid
 flowchart LR
-    CLI[cmd/barnacle] --> Config[LoadConfig]
+    CLI["cmd/barnacle"] --> Config[LoadConfig]
     Config --> Generate[Generate]
     Generate --> Scan[Scan]
     Generate --> Render[MarkdownToHTML]
-    Scan --> Site[site/]
+    Scan --> Site["site/"]
     Render --> Site
     click Config href "../../internal/barnacle/config.go.md"
     click Generate href "../../internal/barnacle/site.go.md"
     click Scan href "../../internal/barnacle/scan.go.md"
     click Render href "../../internal/barnacle/render.go.md"
+    class CLI,Site folder
+    class Config,Generate,Scan,Render goFile
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
 ```
 
 The `barnacle` command turns the Markdown and Mermaid files that live alongside source code into a static, interconnected website.

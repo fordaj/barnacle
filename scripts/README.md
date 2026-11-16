@@ -3,12 +3,16 @@
 ```mermaid
 flowchart TD
     Entry["entry.sh<br/>sources env.sh + log()"] --> Env["env.sh<br/>cascade locator/anchor"]
-    Env --> Common[.common.env]
-    Env --> Plat[".<os>-<arch>.env"]
-    Common --> Tools["tools/<name>/v*<br/>pinned binaries"]
+    Env --> Common[".common.env"]
+    Env --> Plat[".os-arch.env<br/>one per platform"]
+    Common --> Tools["tools/&lt;name&gt;/v*<br/>pinned binaries"]
     Plat --> Tools
     click Entry href "entry.sh.md"
     click Env href "env.sh.md"
+    class Entry,Env,Common,Plat shFile
+    class Tools folder
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
 ```
 
 The `scripts/` directory carries the repository's build/release/docs tooling: an environment cascade the other scripts source, plus one entry point per task. Everything here is bash; nothing requires a global install beyond what each script documents.

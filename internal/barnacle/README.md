@@ -2,19 +2,21 @@
 
 ```mermaid
 flowchart TD
-    Generate[Generate<br/>site.go.md] --> Scan[Scan<br/>scan.go.md]
-    Generate --> Render[MarkdownToHTML<br/>render.go.md]
-    Generate --> Nav[renderNav<br/>nav.go.md]
-    Generate --> Template[pageTemplate<br/>template.go.md]
+    Generate["Generate<br/>site.go"] --> Scan["Scan<br/>scan.go"]
+    Generate --> Render["MarkdownToHTML<br/>render.go"]
+    Generate --> Nav["renderNav<br/>nav.go"]
+    Generate --> Template["pageTemplate<br/>template.go"]
     Render --> Template
     Nav --> Template
-    Generate -.->|reads once| Config[LoadConfig<br/>config.go.md]
+    Generate -.->|reads once| Config["LoadConfig<br/>config.go"]
     click Generate href "site.go.md"
     click Scan href "scan.go.md"
     click Render href "render.go.md"
     click Nav href "nav.go.md"
     click Template href "template.go.md"
     click Config href "config.go.md"
+    class Generate,Scan,Render,Nav,Template,Config goFile
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
 ```
 
 All of barnacle's implementation lives in this package: configuration, scanning, rendering, HTML assembly, navigation, and the page template. `cmd/barnacle/main.go.md` is a two-line shim over `Generate` here.

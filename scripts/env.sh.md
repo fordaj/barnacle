@@ -2,13 +2,13 @@
 
 ```mermaid
 flowchart TD
-    Uname[uname -s : -m] --> Check{platform?}
-    Check -->|Darwin:arm64| MacArm[.macos-arm64.env]
-    Check -->|Darwin:x86_64| Mac86[.macos-x86_64.env]
-    Check -->|Linux:aarch64| LinArm[.linux-arm64.env]
-    Check -->|Linux:x86_64| Lin86[.linux-x86_64.env]
-    Check -->|Windows:x86_64| Win86[.windows-x86_64.env]
-    Check -->|Windows:arm64| WinArm[.windows-arm64.env]
+    Uname[uname -s : -m] --> Check{{"platform?"}}
+    Check -->|Darwin:arm64| MacArm[".macos-arm64.env"]
+    Check -->|Darwin:x86_64| Mac86[".macos-x86_64.env"]
+    Check -->|Linux:aarch64| LinArm[".linux-arm64.env"]
+    Check -->|Linux:x86_64| Lin86[".linux-x86_64.env"]
+    Check -->|Windows:x86_64| Win86[".windows-x86_64.env"]
+    Check -->|Windows:arm64| WinArm[".windows-arm64.env"]
     Check -->|other| Error[Error → return 1]
     MacArm --> Anchor[Anchor *_BIN to repo root]
     Mac86 --> Anchor
@@ -16,7 +16,14 @@ flowchart TD
     Lin86 --> Anchor
     Win86 --> Anchor
     WinArm --> Anchor
-    Common[.common.env] -.-> Anchor
+    Common[".common.env"] -.-> Anchor
+    class Uname,Anchor shFile
+    class Check hexNode
+    class MacArm,Mac86,LinArm,Lin86,Win86,WinArm,Common shFile
+    class Error errNode
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef hexNode fill:#ffe08a,stroke:#a16207,color:#422006
+    classDef errNode fill:#f6b8b8,stroke:#b91c1c,color:#450a0a
 ```
 
 `scripts/env.sh` is the plumbing that makes the pinned helper tools resolvable from any script, in any working directory, on every supported platform. It is sourced — never executed — and it works from both bash and zsh.

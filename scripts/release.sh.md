@@ -2,13 +2,21 @@
 
 ```mermaid
 flowchart LR
-    Versioner[versioner] --> Verify[build throwaway<br/>--version matches?]
-    Verify --> Build[build.sh — 6 platforms]
-    Build --> Package[archives + checksums.txt]
-    Package --> Tag[tag HEAD + push]
-    Tag --> GH[gh release create<br/>or refresh assets]
+    Versioner["versioner"] --> Verify["build throwaway<br/>--version matches?"]
+    Verify --> Build["build.sh — 6 platforms"]
+    Build --> Package["archives<br/>+ checksums.txt"]
+    Package --> Tag["tag HEAD + push"]
+    Tag --> GH["gh release create<br/>or refresh assets"]
     click Build href "build.sh.md"
     click Versioner href "version.sh.md"
+    class Versioner,Tag,GH tagNode
+    class Verify checkNode
+    class Build shFile
+    class Package boxNode
+    classDef tagNode fill:#f6b8d4,stroke:#be185d,color:#500724
+    classDef checkNode fill:#9fe8c9,stroke:#0f766e,color:#052e22
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef boxNode fill:#e8cf9d,stroke:#a16207,color:#33240a
 ```
 
 Computes the next version with versioner (dogfooding), cross-compiles the binaries, packages the release archives, tags HEAD, and creates the GitHub release with the archives attached.

@@ -2,13 +2,21 @@
 
 ```mermaid
 flowchart LR
-    Git[Git history] --> Versioner[versioner --quiet]
-    Rules[.versioner.json] --> Versioner
-    Versioner --> Out[VERSION / TAG<br/>text · shell · json]
-    Out --> Build[build.sh — stamp binary]
-    Out --> Release[release.sh — next tag]
+    Git[Git history] --> Versioner["versioner --quiet"]
+    Rules[".versioner.json"] --> Versioner
+    Versioner --> Out["VERSION / TAG<br/>text · shell · json"]
+    Out --> Build["build.sh — stamp binary"]
+    Out --> Release["release.sh — next tag"]
     click Build href "build.sh.md"
     click Release href "release.sh.md"
+    class Versioner tagNode
+    class Rules jsonFile
+    class Out mdFile
+    class Build,Release shFile
+    classDef tagNode fill:#f6b8d4,stroke:#be185d,color:#500724
+    classDef jsonFile fill:#cdb9f7,stroke:#6d28d9,color:#2e1065
+    classDef mdFile fill:#dcd6ce,stroke:#6b6255,color:#292524
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
 ```
 
 Prints the version of this repository as computed by the pinned versioner — the same computation the release pipeline uses, so a local build and the published tag can never drift apart.

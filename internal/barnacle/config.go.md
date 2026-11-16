@@ -2,16 +2,24 @@
 
 ```mermaid
 flowchart TD
-    Start[LoadConfig] --> Exists{File readable?}
+    Start[LoadConfig] --> Exists{{"File readable?"}}
     Exists -- "no, default path" --> Defaults[Defaults]
     Exists -- "no, --config" --> Error[Error → exit 1]
-    Exists -- yes --> Parse{Valid JSON?}
+    Exists -- yes --> Parse{{"Valid JSON?"}}
     Parse -- no --> Error
-    Parse -- yes --> Check{Blank exclude entry?}
+    Parse -- yes --> Check{{"Blank exclude entry?"}}
     Check -- yes --> Error
-    Check -- no --> Cfg[Config]
+    Check -- no --> Cfg["Config<br/>.barnacle.json"]
     click Error href "../../cmd/barnacle/main.go.md"
     click Cfg href "site.go.md"
+    class Start,Defaults goFile
+    class Exists,Parse,Check hexNode
+    class Error errNode
+    class Cfg jsonFile
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef hexNode fill:#ffe08a,stroke:#a16207,color:#422006
+    classDef errNode fill:#f6b8b8,stroke:#b91c1c,color:#450a0a
+    classDef jsonFile fill:#cdb9f7,stroke:#6d28d9,color:#2e1065
 ```
 
 `LoadConfig` reads and validates the repository-level configuration file (`.barnacle.json`) and produces the `Config` value the rest of the pipeline uses.

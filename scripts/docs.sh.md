@@ -2,10 +2,16 @@
 
 ```mermaid
 flowchart LR
-    Src[Source tree<br/>.md / .mmd next to code] --> Barnacle[BARNACLE_BIN]
-    Cascade[env.sh cascade<br/>tools/barnacle/v0.0.1.0.16] --> Barnacle
-    Barnacle --> Site[./site<br/>static HTML]
+    Src["Source tree<br/>.md / .mmd next to code"] --> Barnacle[BARNACLE_BIN]
+    Cascade["env.sh cascade<br/>tools/barnacle/v0.0.1.0.16"] --> Barnacle
+    Barnacle --> Site["./site<br/>static HTML"]
     click Cascade href "env.sh.md"
+    class Src,Site folder
+    class Cascade shFile
+    class Barnacle goFile
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
 ```
 
 Generates the documentation site you are reading: it runs the pinned barnacle binary against this repository. This repository is the barnacle project itself, so the pinned release (`tools/barnacle/v0.0.1.0.16`) — not a binary built from this source tree — is what renders the site by default.

@@ -3,12 +3,21 @@
 ```mermaid
 flowchart LR
     uv[uv run] --> FFT[formattington]
-    Config[.formattington.json] --> FFT
+    Config[".formattington.json"] --> FFT
     FFT --> Prettier[prettier — md/json/yml]
     FFT --> Black[black — py]
     FFT --> Shfmt[shfmt -i 2 — sh]
     FFT --> Taplo[taplo — toml]
-    Check[ci/format_check.sh --check] -.->|same config, exit 1 on diff| FFT
+    Check["ci/format_check.sh --check"] -.->|same config, exit 1 on diff| FFT
+    class uv,FFT shFile
+    class Config jsonFile
+    class Prettier mdFile
+    class Shfmt shFile
+    class Taplo jsonFile
+    class Check shFile
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef jsonFile fill:#cdb9f7,stroke:#6d28d9,color:#2e1065
+    classDef mdFile fill:#dcd6ce,stroke:#6b6255,color:#292524
 ```
 
 Formats the barnacle repository in place with [formattington](https://github.com/fordaj/formattington). This repository dogfoods it for its own Markdown, Python, shell, and TOML files.

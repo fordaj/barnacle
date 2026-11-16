@@ -2,14 +2,26 @@
 
 ```mermaid
 flowchart LR
-    Gh[fordaj/* release] --> Resolve[resolve tag]
-    Resolve --> Download[gh release download]
-    Download --> Check{checksums present?}
-    Check -->|yes| Verify[verify — mismatch is fatal]
+    Gh["fordaj/* release"] --> Resolve[resolve tag]
+    Resolve --> Download["gh release download"]
+    Download --> Check{{"checksums present?"}}
+    Check -->|yes| Verify["verify — mismatch is fatal"]
     Check -->|no| Warn[warn and continue]
-    Verify --> Stage[stage in temp dir]
+    Verify --> Stage["stage in temp dir"]
     Warn --> Stage
-    Stage --> Swap[atomic swap · delete superseded v*]
+    Stage --> Swap["atomic swap · delete superseded v*"]
+    class Gh tagNode
+    class Resolve shFile
+    class Download dlNode
+    class Check hexNode
+    class Verify checkNode
+    class Stage,Swap folder
+    classDef tagNode fill:#f6b8d4,stroke:#be185d,color:#500724
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef dlNode fill:#93e2e2,stroke:#0f766e,color:#042f2e
+    classDef hexNode fill:#ffe08a,stroke:#a16207,color:#422006
+    classDef checkNode fill:#9fe8c9,stroke:#0f766e,color:#052e22
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
 ```
 
 [Runner-spawner](https://github.com/fordaj/runner-spawner) manages self-hosted GitHub Actions runners. In this repository it backs the self-hosted CI described in the README ("Formatting and CI"): `.github/workflows/ci.yml` runs `check-formatting` and `test` jobs on `self-hosted` macOS and Windows runners, registered and lifecycle-managed with the bundled `runner-spawner` binary against the committed `.runner-spawner.json`:

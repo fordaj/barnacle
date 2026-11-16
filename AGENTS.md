@@ -2,11 +2,23 @@
 
 ```mermaid
 flowchart LR
-    Code[Edit source] --> Doc[Update sibling .md<br/>in the same change]
-    Doc --> Regen[scripts/docs.sh]
-    Regen --> Site[./site — git-ignored]
-    Site --> Review[Self-review the<br/>changed pages]
-    Review --> Commit[Commit source + doc together]
+    Code["Edit source"] --> Doc["Update sibling .md<br/>in the same change"]
+    Doc --> Regen["scripts/docs.sh"]
+    Regen --> Site["./site — git-ignored"]
+    Site --> Review["Self-review<br/>the changed pages"]
+    Review --> Commit["Commit source<br/>+ doc together"]
+    class Code goFile
+    class Doc mdFile
+    class Regen shFile
+    class Site folder
+    class Review checkNode
+    class Commit tagNode
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef mdFile fill:#dcd6ce,stroke:#6b6255,color:#292524
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
+    classDef checkNode fill:#9fe8c9,stroke:#0f766e,color:#052e22
+    classDef tagNode fill:#f6b8d4,stroke:#be185d,color:#500724
 ```
 
 ## Project Overview
@@ -77,7 +89,7 @@ Naming rules:
 Rules for keeping these files current:
 
 - When you add, rename, remove, or repurpose a documented file — a Go file, a script, or a bundle — update its sibling `.md` **in the same change**. A new file without its page is incomplete work; a stale page is worse than none.
-- **Every page opens with a Mermaid diagram** under its `#` heading (guidance, not a hard rule): what the thing is and how it fits, in the diagram type that fits best. If a page you touch has no diagram at the top, add one.
+- **Every page opens with a Mermaid diagram** under its `#` heading (guidance, not a hard rule): what the thing is and how it fits, in the diagram type that fits best. If a page you touch has no diagram at the top, add one. Follow the README's "Diagram conventions" (colored classes for file kinds, hexagon decisions, bring-your-own-SVG icons in labels — colors that read on light and dark) — it is the house style, not something barnacle enforces.
 - Source every fact: the `.go`/`.sh`/`.env` file itself, this file (AGENTS.md), and README.md are the accepted sources. Never invent flags, exit codes, extensions, or bundle-platform matrices.
 - Use plain relative links (`scan.go.md`, `../../README.md`) with the linking file's `.md` path — barnacle rewrites them to `.html`. Do not link to files barnacle does not render (binaries, `.sh`, `LICENSE`); link the related `.md` page (for external references, a full `https://` URL is fine). Pages that are not rendered (`tools/`) may still be linked from other unrendered pages; rendered pages must not hyperlink into `tools/` — refer to those pages as code (for example `tools/barnacle/update.sh.md`), because `.barnacle.json` excludes them from the site.
 - Mermaid `click` directives are rewritten too (`click Scan href "scan.go.md"`), so diagram nodes may link between pages — prefer this in the top-of-page diagram; it makes the site explorable by diagram alone. Transitions work the same way with an inline anchor in the label (`Idle --> Waiting : <a href="scan.go.md">send(cmd)</a>`, see the README's "Clickable edges") — no JS, no directives.

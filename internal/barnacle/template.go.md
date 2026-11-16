@@ -3,13 +3,19 @@
 ```mermaid
 flowchart LR
     Data[pageData] --> Shell[pageTemplate<br/>html/template]
-    Shell --> Page[Every generated page]
+    Shell --> Page["Every generated<br/>page"]
     Page --> Aside[Sidebar<br/>site title + nav]
     Page --> Main[Content<br/>template.HTML]
-    Main --> Mermaid[mermaid.min.js<br/>only when needed]
+    Main --> Mermaid["mermaid.min.js<br/>only when needed"]
     click Data href "#pagedata"
     click Main href "render.go.md"
     click Aside href "nav.go.md"
+    class Data,Shell goFile
+    class Page,Aside,Main htmlFile
+    class Mermaid jsFile
+    classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
+    classDef htmlFile fill:#ffc48a,stroke:#c2410c,color:#431407
+    classDef jsFile fill:#fbe86f,stroke:#a16207,color:#423806
 ```
 
 `template.go` holds the single HTML page shell every generated page shares, rendered with `html/template`.

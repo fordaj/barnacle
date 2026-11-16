@@ -2,14 +2,26 @@
 
 ```mermaid
 flowchart LR
-    Gh[fordaj/* release] --> Resolve[resolve tag]
-    Resolve --> Download[gh release download]
-    Download --> Check{checksums present?}
-    Check -->|yes| Verify[verify — mismatch is fatal]
+    Gh["fordaj/* release"] --> Resolve[resolve tag]
+    Resolve --> Download["gh release download"]
+    Download --> Check{{"checksums present?"}}
+    Check -->|yes| Verify["verify — mismatch is fatal"]
     Check -->|no| Warn[warn and continue]
-    Verify --> Stage[stage in temp dir]
+    Verify --> Stage["stage in temp dir"]
     Warn --> Stage
-    Stage --> Swap[atomic swap · delete superseded v*]
+    Stage --> Swap["atomic swap · delete superseded v*"]
+    class Gh tagNode
+    class Resolve shFile
+    class Download dlNode
+    class Check hexNode
+    class Verify checkNode
+    class Stage,Swap folder
+    classDef tagNode fill:#f6b8d4,stroke:#be185d,color:#500724
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
+    classDef dlNode fill:#93e2e2,stroke:#0f766e,color:#042f2e
+    classDef hexNode fill:#ffe08a,stroke:#a16207,color:#422006
+    classDef checkNode fill:#9fe8c9,stroke:#0f766e,color:#052e22
+    classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
 ```
 
 [Logamuffin](https://github.com/fordaj/logamuffin) is the structured logger used by this repository's scripts: timestamped, leveled `log <level> <message>` records. The scripts' `log()` wrapper ([scripts/entry.sh.md](../../scripts/entry.sh.md)) forwards to the pinned binary when it is present and falls back to an equivalent `printf` implementation when it is not, so a fresh clone works without it.
