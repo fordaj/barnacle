@@ -50,16 +50,16 @@ func buildTree(docs []Document) *treeNode {
 func renderNav(root *treeNode, currentOutRel string) string {
 	var b strings.Builder
 	b.WriteString(`<ul class="nav-tree">`)
-	renderNavNodes(&b, root, currentOutRel, 0)
+	renderNavNodes(&b, root, currentOutRel)
 	b.WriteString(`</ul>`)
 	return b.String()
 }
 
-func renderNavNodes(b *strings.Builder, node *treeNode, currentOutRel string, depth int) {
+func renderNavNodes(b *strings.Builder, node *treeNode, currentOutRel string) {
 	for _, child := range node.children {
 		if child.isDir {
 			fmt.Fprintf(b, `<li class="nav-dir"><span class="nav-dir-name">%s</span><ul>`, html.EscapeString(child.name))
-			renderNavNodes(b, child, currentOutRel, depth+1)
+			renderNavNodes(b, child, currentOutRel)
 			b.WriteString(`</ul></li>`)
 			continue
 		}

@@ -17,7 +17,7 @@ flowchart LR
 Every repository script sources `scripts/entry.sh` instead of the individual cascade files, because it does two jobs at once:
 
 1. **It loads the environment** — it sources [env.sh.md](env.sh.md), which sources the hidden cascade (`.common.env` plus the platform file selected from `uname`).
-2. **It defines `log()`** — the shared logging function used by the scripts and by the `tools/*/update.sh` refresh scripts.
+2. **It defines `log()`** — the shared logging function used by the scripts and by the `tools/*/update.sh` refresh scripts. The word-to-severity mapping lives in `severity_of()` (the same mapping the fallback uses for `LOG_LEVEL`/`LOGAMUFFIN_LEVEL`), and `parse_versioner_output()` reads the `VERSION=`/`TAG=` lines from versioner's output into `VERSION` and `TAG` for [version.sh.md](version.sh.md) and [release.sh.md](release.sh.md).
 
 ## `log()` semantics
 

@@ -155,10 +155,9 @@ VERSION_OUT="$("$VERSIONER_BIN" --repo-dir "$REPO_ROOT" --quiet)"
 log INFO "versioner output:"
 printf '%s\n' "$VERSION_OUT" | sed 's/^/release.sh:   /'
 
-VERSION="$(printf '%s\n' "$VERSION_OUT" | sed -n 's/^VERSION=//p' | tail -1)"
-TAG="$(printf '%s\n' "$VERSION_OUT" | sed -n 's/^TAG=//p' | tail -1)"
-[[ -n "$VERSION" ]] || die "could not parse VERSION from versioner output"
-[[ -n "$TAG" ]] || die "could not parse TAG from versioner output"
+if ! parse_versioner_output "$VERSION_OUT"; then
+  die "could not parse VERSION/TAG from versioner output"
+fi
 if ! [[ "$TAG" =~ ^v[0-9]+(\.[0-9]+)+$ ]]; then
   die "computed tag looks invalid: '$TAG' (expected vX.Y.Z...)"
 fi

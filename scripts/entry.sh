@@ -5,6 +5,40 @@ ENTRY_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC1091
 source "$ENTRY_DIR/env.sh"
 
+# logamuffin levels: TRACE=5 DEBUG=10 INFO=20 WARNING=30 ERROR=40 CRITICAL=50
+# (ALWAYS=-1 bypasses the threshold). severity_of maps a level word or
+# number to its numeric severity; anything unknown is treated as INFO (20),
+# matching logamuffin's fallback.
+severity_of() {
+  local arg="$1"
+  if [[ "$arg" =~ ^-?[0-9]+$ ]]; then
+    printf '%s\n' "$arg"
+    return 0
+  fi
+  local upper
+  upper="$(printf '%s' "$arg" | tr '[:lower:]' '[:upper:]')"
+  case "$upper" in
+  TRACE) printf '5\n' ;;
+  DEBUG) printf '10\n' ;;
+  INFO) printf '20\n' ;;
+  WARNING | WARN) printf '30\n' ;;
+  ERROR) printf '40\n' ;;
+  CRITICAL | FATAL) printf '50\n' ;;
+  ALWAYS) printf '%s\n' '-1' ;;
+  *) printf '20\n' ;;
+  esac
+}
+
+# parse_versioner_output OUTPUT
+#   Reads the "VERSION=<v>" and "TAG=<t>" lines from versioner's output
+#   into the global variables VERSION and TAG. Returns 1 when either
+#   line is missing. Shared by scripts/version.sh and scripts/release.sh.
+parse_versioner_output() {
+  VERSION="$(printf '%s\n' "$1" | sed -n 's/^VERSION=//p' | tail -1)"
+  TAG="$(printf '%s\n' "$1" | sed -n 's/^TAG=//p' | tail -1)"
+  [[ -n "$VERSION" && -n "$TAG" ]]
+}
+
 # log LEVEL [MESSAGE ...]
 #   LEVEL may be a word (INFO) or a number (50). When a logamuffin
 #   binary is available all arguments are forwarded to it with
@@ -46,41 +80,13 @@ log() {
     local level_arg="${1:-}"
     shift
     local msg="$*"
-    local level_upper level_value _thr_raw _thr_upper
-    if [[ "$level_arg" =~ ^-?[0-9]+$ ]]; then
-      level_value="$level_arg"
-    else
-      level_upper="$(printf '%s' "$level_arg" | tr '[:lower:]' '[:upper:]')"
-      case "$level_upper" in
-      TRACE) level_value=5 ;;
-      DEBUG) level_value=10 ;;
-      INFO) level_value=20 ;;
-      WARNING | WARN) level_value=30 ;;
-      ERROR) level_value=40 ;;
-      CRITICAL | FATAL) level_value=50 ;;
-      ALWAYS) level_value=-1 ;;
-      *) level_value=20 ;;
-      esac
-    fi
+    local level_value threshold_value _thr_raw
+    level_value="$(severity_of "$level_arg")"
     _thr_raw="${LOG_LEVEL:-${LOGAMUFFIN_LEVEL:-INFO}}"
     if [[ -z "$_thr_raw" ]]; then
       _thr_raw="INFO"
     fi
-    if [[ "$_thr_raw" =~ ^-?[0-9]+$ ]]; then
-      local threshold_value="$_thr_raw"
-    else
-      _thr_upper="$(printf '%s' "$_thr_raw" | tr '[:lower:]' '[:upper:]')"
-      case "$_thr_upper" in
-      TRACE) threshold_value=5 ;;
-      DEBUG) threshold_value=10 ;;
-      INFO) threshold_value=20 ;;
-      WARNING | WARN) threshold_value=30 ;;
-      ERROR) threshold_value=40 ;;
-      CRITICAL | FATAL) threshold_value=50 ;;
-      ALWAYS) threshold_value=-1 ;;
-      *) threshold_value=20 ;;
-      esac
-    fi
+    threshold_value="$(severity_of "$_thr_raw")"
     if [[ "$level_value" -ne -1 && "$level_value" -lt "$threshold_value" ]]; then
       return 0
     fi

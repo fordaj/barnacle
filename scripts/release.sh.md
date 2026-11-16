@@ -49,7 +49,7 @@ scripts/release.sh --dry-run      # compute + verify + build, touch nothing remo
 
 1. Sources [entry.sh.md](entry.sh.md); checks required commands (`gh` only for a real release; `gh auth status` must pass).
 2. Refuses to continue on a dirty tree (except `--build-only`/`--dry-run`, which warn); best-effort `git fetch origin --tags`.
-3. Computes `VERSION`/`TAG` with `versioner --repo-dir "$REPO_ROOT" --quiet`; the tag must match `vX.Y.Z...`.
+3. Computes `VERSION`/`TAG` with `versioner --repo-dir "$REPO_ROOT" --quiet` (extraction shared with version.sh via `parse_versioner_output()` in [entry.sh.md](entry.sh.md)); the tag must match `vX.Y.Z...`.
 4. **Verifies**: builds a throwaway binary stamped with `$VERSION` and requires `barnacle --version` to report it.
 5. Cross-compiles into `dist/` via [build.sh.md](build.sh.md) (`VERSION="$VERSION"`), then packages each `dist/<platform>/` into `dist/barnacle-<platform>.tar.gz`/`.zip` staging in a temp directory (binary + `LICENSE` + `README.md`), and writes `dist/checksums.txt` (`shasum -a 256` or `sha256sum`).
 6. `--build-only`: stops here. Otherwise tags HEAD (an existing tag is reused), pushes it, and either creates the GitHub release (`gh release create --generate-notes`) or, if it already exists, re-uploads the assets with `--clobber` — the script is idempotent and safe to re-run to (re)attach binaries.

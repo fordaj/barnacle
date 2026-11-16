@@ -111,7 +111,6 @@ var (
 	mermaidRe      = regexp.MustCompile(`(?s)<pre class="mermaid">(.*?)</pre>`)
 	mermaidHrefRe  = regexp.MustCompile(`(?i)href\s+(?:"([^"\s]*)"|'([^'\s]*)'|([^\s"']+))`)
 	mermaidShortRe = regexp.MustCompile(`(?i)^\s*click\s+([^"\s]+(?:\s+[^"\s]+)*?)\s+"([^"\s]*)"`)
-	schemeRe2      = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9+.-]*:`)
 	externalRel    = regexp.MustCompile(`^([A-Za-z][A-Za-z0-9+.-]*:|//|#)`)
 	docExtRe       = regexp.MustCompile(`(?i)\.(md|markdown|mmd)$`)
 )
@@ -156,7 +155,7 @@ func htmlFiles(t *testing.T, site string) []string {
 // returns the absolute target path. Reports false for external or same-page
 // references.
 func resolveRef(pageDir, ref string) (string, bool) {
-	if ref == "" || strings.HasPrefix(ref, "#") || strings.HasPrefix(ref, "//") || schemeRe2.MatchString(ref) {
+	if ref == "" || strings.HasPrefix(ref, "#") || strings.HasPrefix(ref, "//") || schemeRe.MatchString(ref) {
 		return "", false
 	}
 	path := ref
@@ -337,7 +336,7 @@ func TestE2EBrowserNavigation(t *testing.T) {
 	files := htmlFiles(t, site)
 
 	// Load every page; collect unique anchor targets to navigate to.
-	targets := map[string]string{}
+	targets := map[string]struct{}{}
 	for _, page := range files {
 		dom, stderr := dumpDOM(t, chrome, fileURL(t, page))
 		assertPageOK(t, page, dom, stderr)
@@ -359,7 +358,7 @@ func TestE2EBrowserNavigation(t *testing.T) {
 				continue
 			}
 			if strings.HasSuffix(target, ".html") {
-				targets[target] = page
+				targets[target] = struct{}{}
 			}
 		}
 		// The inline <a> labels in the state diagram must render as real
@@ -382,8 +381,7 @@ func TestE2EBrowserNavigation(t *testing.T) {
 
 	// Navigating every anchor target must land on a rendering barnacle page —
 	// this is the click-through path the user-facing regression came from.
-	for target, from := range targets {
-		_ = from
+	for target := range targets {
 		abs, err := filepath.Abs(target)
 		if err != nil {
 			t.Fatal(err)

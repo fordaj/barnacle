@@ -34,7 +34,7 @@ scripts/version.sh --format json   # the raw versioner JSON document
 
 ## How it works
 
-Sources [entry.sh.md](entry.sh.md) for the cascade and `log()`. If `VERSIONER_BIN` is unset or not executable, it fails with `no versioner binary found` and exits `1`. Otherwise it runs `versioner --repo-dir <root> --quiet` (plus `--format json` for the `json` format); the repo directory defaults to `VERSIONER_REPO_DIR` or the repository root implied by `REPO_ROOT_DIR` (the parent of `scripts/`).
+Sources [entry.sh.md](entry.sh.md) for the cascade and `log()`. If `VERSIONER_BIN` is unset or not executable, it fails with `no versioner binary found` and exits `1`. Otherwise it runs `versioner --repo-dir <root> --quiet` (plus `--format json` for the `json` format); the repo directory defaults to `VERSIONER_REPO_DIR` or the repository root implied by `REPO_ROOT_DIR` (the parent of `scripts/`). The `VERSION=`/`TAG=` lines are extracted with `parse_versioner_output()` from `entry.sh` (shared with `release.sh`); a missing line is an error (exit `1`).
 
 The computation itself follows `.versioner.json` at the repository root: `defaultBranchVersion: 254`, `exemptBranches: { main: 0 }`, `tagPattern: v[0-9]*`.
 

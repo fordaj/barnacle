@@ -46,8 +46,9 @@ func Generate(root, siteDir string, cfg Config) (int, []string, error) {
 
 	// Render page bodies first so we know whether Mermaid is needed.
 	type page struct {
-		doc     Document
-		content string
+		doc        Document
+		content    string
+		hasMermaid bool
 	}
 	pages := make([]page, 0, len(docs))
 	needsMermaid := false
@@ -67,12 +68,13 @@ func Generate(root, siteDir string, cfg Config) (int, []string, error) {
 		if err != nil {
 			return 0, nil, fmt.Errorf("rendering %s: %w", doc.RelPath, err)
 		}
-		if HasMermaid(content) {
+		hasMermaid := HasMermaid(content)
+		if hasMermaid {
 			needsMermaid = true
 		} else {
 			missingMermaid = append(missingMermaid, doc.RelPath)
 		}
-		pages = append(pages, page{doc: doc, content: content})
+		pages = append(pages, page{doc: doc, content: content, hasMermaid: hasMermaid})
 	}
 
 	if err := prepareSiteDir(siteAbs); err != nil {
@@ -96,7 +98,7 @@ func Generate(root, siteDir string, cfg Config) (int, []string, error) {
 			Content:    template.HTML(p.content),
 			Nav:        template.HTML(nav),
 			RelPrefix:  relPrefix(p.doc.OutputRel),
-			HasMermaid: HasMermaid(p.content),
+			HasMermaid: p.hasMermaid,
 		}
 		if err := renderPage(out, pageTemplate, data); err != nil {
 			return 0, nil, err
