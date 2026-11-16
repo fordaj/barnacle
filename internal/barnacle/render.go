@@ -368,7 +368,7 @@ func svgToInline(data []byte, imgAttrs map[string]string) (string, error) {
 		projection["stroke"] = "currentColor"
 	}
 	if len(projection) > 0 {
-		inner = projectVisual(inner, projection, shapeRe)
+		inner = projectVisual(inner, projection)
 	}
 
 	attrs := fileAttrs
@@ -391,13 +391,9 @@ func svgToInline(data []byte, imgAttrs map[string]string) (string, error) {
 	}
 	// Display overrides from the img tag itself; everything else passes through.
 	for k, v := range imgAttrs {
-		if k == "width" || k == "height" {
+		if k == "src" || k == "width" || k == "height" {
 			continue // handled above
 		}
-		if k == "src" {
-			continue
-		}
-		delete(attrs, "src")
 		attrs[k] = v
 	}
 	// Author-provided alt wins as an accessible label; otherwise mark the icon
@@ -431,7 +427,7 @@ func svgToInline(data []byte, imgAttrs map[string]string) (string, error) {
 // whatever the shape itself already declares (fill, stroke, stroke-width
 // and their inline-style forms). This is the minimal interjection meant
 // to stop mermaid's theme paint from retinting stroke-only glyphs.
-func projectVisual(inner string, proj map[string]string, shapeRe *regexp.Regexp) string {
+func projectVisual(inner string, proj map[string]string) string {
 	return shapeRe.ReplaceAllStringFunc(inner, func(tag string) string {
 		match := shapeRe.FindStringSubmatch(tag)
 		name, head, tail := match[1], match[2], match[3]

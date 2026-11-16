@@ -46,11 +46,11 @@ func TestMarkdownToHTMLRewritesDocLinks(t *testing.T) {
 		`href="../parser/parser.html#impl"`,
 		`href="https://example.com/x.md"`,
 	} {
-		if !contains(out, want) {
+		if !strings.Contains(out, want) {
 			t.Errorf("output missing %q\n%s", want, out)
 		}
 	}
-	if contains(out, `parser.md#impl`) {
+	if strings.Contains(out, `parser.md#impl`) {
 		t.Errorf("output still contains .md link\n%s", out)
 	}
 }
@@ -61,10 +61,10 @@ func TestMarkdownToHTMLMermaidBlock(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !contains(out, `<pre class="mermaid">`) {
+	if !strings.Contains(out, `<pre class="mermaid">`) {
 		t.Errorf("mermaid block not converted\n%s", out)
 	}
-	if contains(out, `language-mermaid`) {
+	if strings.Contains(out, `language-mermaid`) {
 		t.Errorf("unconverted mermaid code block remains\n%s", out)
 	}
 	if !HasMermaid(out) {
@@ -84,7 +84,7 @@ func TestMarkdownToHTMLMermaidClickLinks(t *testing.T) {
 		// Tooltip-style URLs containing spaces are never rewritten.
 		`click A &quot;docs/deep dive.md&quot;`,
 	} {
-		if !contains(out, want) {
+		if !strings.Contains(out, want) {
 			t.Errorf("output missing %q\n%s", want, out)
 		}
 	}
@@ -102,7 +102,7 @@ func TestMarkdownToHTMLMermaidClickCallbacksUntouched(t *testing.T) {
 		`click D href &quot;site.go.html&quot;`,
 		`The site generator, plain text.md`,
 	} {
-		if !contains(out, want) {
+		if !strings.Contains(out, want) {
 			t.Errorf("output missing %q\n%s", want, out)
 		}
 	}
@@ -119,7 +119,7 @@ func TestMermaidPageHTMLRewritesClickLinks(t *testing.T) {
 		`click B &quot;render.go.html&quot;`,
 		`click C callback &quot;template.go.md&quot;`,
 	} {
-		if !contains(out, want) {
+		if !strings.Contains(out, want) {
 			t.Errorf("output missing %q\n%s", want, out)
 		}
 	}
@@ -131,7 +131,7 @@ func TestMarkdownToHTMLRawMermaidBlock(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !contains(out, `click A href &quot;scan.go.html&quot;`) {
+	if !strings.Contains(out, `click A href &quot;scan.go.html&quot;`) {
 		t.Errorf("raw mermaid block click target not rewritten\n%s", out)
 	}
 }
@@ -147,7 +147,7 @@ func TestMarkdownToHTMLMermaidClickExternalUntouched(t *testing.T) {
 		`href &quot;#anchor&quot;`,
 		`href &quot;mailto:a@b.c&quot;`,
 	} {
-		if !contains(out, want) {
+		if !strings.Contains(out, want) {
 			t.Errorf("output missing %q\n%s", want, out)
 		}
 	}
@@ -159,7 +159,7 @@ func TestMarkdownGFMTable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !contains(out, "<table>") {
+	if !strings.Contains(out, "<table>") {
 		t.Errorf("GFM table not rendered\n%s", out)
 	}
 }
@@ -172,13 +172,13 @@ func TestInlineLocalSVGsRewritesRelativeRefs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !contains(out, `<svg`) {
+	if !strings.Contains(out, `<svg`) {
 		t.Errorf("svg was not inlined\n%s", out)
 	}
-	if !contains(out, `<path d="M12 3v12" style="fill:none;stroke:currentColor"/>`) {
+	if !strings.Contains(out, `<path d="M12 3v12" style="fill:none;stroke:currentColor"/>`) {
 		t.Errorf("svg body missing or malformed\n%s", out)
 	}
-	if contains(out, `src="icons/wave.svg"`) {
+	if strings.Contains(out, `src="icons/wave.svg"`) {
 		t.Errorf("relative svg reference not rewritten\n%s", out)
 	}
 }
@@ -191,7 +191,7 @@ func TestInlineLocalSVGsRewritesMermaidLabelRefs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !contains(out, `&lt;svg`) || !contains(out, `aria-hidden=&quot;true&quot;`) {
+	if !strings.Contains(out, `&lt;svg`) || !strings.Contains(out, `aria-hidden=&quot;true&quot;`) {
 		t.Errorf("svg in mermaid label was not inlined\n%s", out)
 	}
 	start := strings.Index(out, "&lt;svg")
@@ -237,7 +237,7 @@ func TestInlineLocalSVGsExternalUntouched(t *testing.T) {
 		if err != nil {
 			t.Fatalf("dest %q: unexpected error: %v", dest, err)
 		}
-		if !contains(out, dest) {
+		if !strings.Contains(out, dest) {
 			t.Errorf("dest %q was rewritten\n%s", dest, out)
 		}
 	}
@@ -249,7 +249,7 @@ func TestInlineLocalSVGsZeroContextSkips(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !contains(out, `src="icons/wave.svg"`) {
+	if !strings.Contains(out, `src="icons/wave.svg"`) {
 		t.Errorf("zero context must skip inlining, got\n%s", out)
 	}
 }
@@ -263,11 +263,11 @@ func TestInlineLocalSVGsRespectsShapeFillOverride(t *testing.T) {
 		t.Fatal(err)
 	}
 	// shape with explicit fill= wins over the projection
-	if !contains(out, `fill="#ff0000"`) {
+	if !strings.Contains(out, `fill="#ff0000"`) {
 		t.Errorf("shape-declared fill was not preserved\n%s", out)
 	}
 	// stroke was projected inline because shape had none
-	if !contains(out, `stroke="contextColor"`) {
+	if !strings.Contains(out, `stroke="contextColor"`) {
 		t.Errorf("file-declared stroke was not projected inline\n%s", out)
 	}
 }
@@ -280,10 +280,10 @@ func TestInlineLocalSVGsDefaultsLikeLucide(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !contains(out, `fill:none`) {
+	if !strings.Contains(out, `fill:none`) {
 		t.Errorf("default fill:none not applied\n%s", out)
 	}
-	if !contains(out, `stroke:currentColor`) {
+	if !strings.Contains(out, `stroke:currentColor`) {
 		t.Errorf("default stroke:currentColor not applied\n%s", out)
 	}
 }
@@ -296,14 +296,10 @@ func TestInlineLocalSVGSetAltBecomesAriaLabel(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !contains(out, `aria-label="a wave"`) {
+	if !strings.Contains(out, `aria-label="a wave"`) {
 		t.Errorf("author alt became aria-label\n%s", out)
 	}
-	if contains(out, `aria-hidden="true"`) {
+	if strings.Contains(out, `aria-hidden="true"`) {
 		t.Errorf("aria-label alt must suppress aria-hidden\n%s", out)
 	}
-}
-
-func contains(haystack, needle string) bool {
-	return strings.Contains(haystack, needle)
 }
