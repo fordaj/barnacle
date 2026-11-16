@@ -382,7 +382,9 @@ func svgToInline(data []byte, imgAttrs map[string]string) (string, error) {
 		fmt.Fprintf(&b, " %s=\"%s\"", k, html.EscapeString(attrs[k]))
 	}
 	b.WriteString(">")
-	b.Write(inner)
+	// Mermaid splits labels on newlines, turning stray \n into <br/>s;
+	// keep the markup on one line.
+	fmt.Fprint(&b, strings.Join(strings.Fields(string(inner)), " "))
 	b.WriteString("</svg>")
 	return b.String(), nil
 }

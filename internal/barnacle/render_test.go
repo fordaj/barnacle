@@ -194,6 +194,14 @@ func TestInlineLocalSVGsRewritesMermaidLabelRefs(t *testing.T) {
 	if !contains(out, `&lt;svg`) || !contains(out, `aria-hidden=&quot;true&quot;`) {
 		t.Errorf("svg in mermaid label was not inlined\n%s", out)
 	}
+	start := strings.Index(out, "&lt;svg")
+	end := strings.Index(out, "&lt;/svg&gt;")
+	if start < 0 || end < start {
+		t.Fatalf("svg tags not found in balanced order\n%s", out)
+	}
+	if bytes := out[start:end]; strings.ContainsAny(bytes, "\n\r") {
+		t.Errorf("inline SVG contains a raw newline; mermaid would render <br/>s inside the label\n%q", bytes)
+	}
 }
 
 func TestInlineLocalSVGsMissingFileFails(t *testing.T) {
