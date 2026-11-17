@@ -2,13 +2,13 @@
 
 ```mermaid
 flowchart TD
-    Config("<img src='../../tools/lucide/icons/braces.svg' width='20' alt=''/> .barnacle.json <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>") --> Generate("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> Generate")
-    Generate --> Scan("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> Scan (walk .md/.mmd) <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Scan --> Render("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> MarkdownToHTML <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Render --> Pages("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/> Per-page HTML<br/>+ list of pages without a diagram")
-    Generate --> Index("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/> index.html<br/>landing page <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Pages --> Assets("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/> assets/<br/>barnacle.css · mermaid.min.js")
-    Pages --> Out("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/> site/")
+    Config("<img src='../../tools/lucide/icons/braces.svg' width='20' alt=''/><br/><u>.barnacle.json</u>") --> Generate("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>Generate")
+    Generate --> Scan("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>Scan (walk .md/.mmd)</u>")
+    Scan --> Render("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>MarkdownToHTML</u>")
+    Render --> Pages("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/><br/>Per-page HTML<br/>+ list of pages without a diagram")
+    Generate --> Index("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/><br/><u>index.html<br/>landing page</u>")
+    Pages --> Assets("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>assets/<br/>barnacle.css · mermaid.min.js")
+    Pages --> Out("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>site/")
     Index --> Out
     Assets --> Out
     click Scan href "scan.go.md"

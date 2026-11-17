@@ -2,11 +2,11 @@
 
 ```mermaid
 flowchart LR
-    Code("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/> Edit source") --> Doc("<img src='tools/lucide/icons/file-text.svg' width='20' alt=''/> Update sibling .md<br/>in the same change")
-    Doc --> Regen("<img src='tools/lucide/icons/terminal.svg' width='20' alt=''/> scripts/docs.sh")
-    Regen --> Site("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/> ./site — git-ignored")
-    Site --> Review("<img src='tools/lucide/icons/check.svg' width='20' alt=''/> Self-review<br/>the changed pages")
-    Review --> Commit("<img src='tools/lucide/icons/tag.svg' width='20' alt=''/> Commit source<br/>+ doc together")
+    Code("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>Edit source") --> Doc("<img src='tools/lucide/icons/file-text.svg' width='20' alt=''/><br/>Update sibling .md<br/>in the same change")
+    Doc --> Regen("<img src='tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>scripts/docs.sh")
+    Regen --> Site("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/><br/>./site — git-ignored")
+    Site --> Review("<img src='tools/lucide/icons/check.svg' width='20' alt=''/><br/>Self-review<br/>the changed pages")
+    Review --> Commit("<img src='tools/lucide/icons/tag.svg' width='20' alt=''/><br/>Commit source<br/>+ doc together")
     class Code goFile
     class Doc mdFile
     class Regen shFile
@@ -89,7 +89,7 @@ Naming rules:
 Rules for keeping these files current:
 
 - When you add, rename, remove, or repurpose a documented file — a Go file, a script, or a bundle — update its sibling `.md` **in the same change**. A new file without its page is incomplete work; a stale page is worse than none.
-- **Every page opens with a Mermaid diagram** under its `#` heading (guidance, not a hard rule): what the thing is and how it fits, in the diagram type that fits best. If a page you touch has no diagram at the top, add one. Follow the README's "Diagram conventions" (colored classes for file kinds, hexagon decisions, inline Lucide glyphs — file kind first in the label, chain link last when the node is clickable — colors that read on light and dark) — it is the house style, not something barnacle enforces.
+- **Every page opens with a Mermaid diagram** under its `#` heading (guidance, not a hard rule): what the thing is and how it fits, in the diagram type that fits best. If a page you touch has no diagram at the top, add one. Follow the README's "Diagram conventions" (colored classes for file kinds, hexagon decisions, inline Lucide glyphs with the file-kind glyph above the label and clickable nodes carrying underlined text — colors that read on light and dark) — it is the house style, not something barnacle enforces.
 - Source every fact: the `.go`/`.sh`/`.env` file itself, this file (AGENTS.md), and README.md are the accepted sources. Never invent flags, exit codes, extensions, or bundle-platform matrices.
 - Use plain relative links (`scan.go.md`, `../../README.md`) with the linking file's `.md` path — barnacle rewrites them to `.html`. Do not link to files barnacle does not render (binaries, `.sh`, `LICENSE`); link the related `.md` page (for external references, a full `https://` URL is fine). Pages that are not rendered (`tools/`) may still be linked from other unrendered pages; rendered pages must not hyperlink into `tools/` — refer to those pages as code (for example `tools/versioner/update.sh.md`), because `.barnacle.json` excludes them from the site.
 - Mermaid `click` directives are rewritten too (`click Scan href "scan.go.md"`), so diagram nodes may link between pages — prefer this in the top-of-page diagram; it makes the site explorable by diagram alone. Transitions work the same way with an inline anchor in the label (`Idle --> Waiting : <a href="scan.go.md">send(cmd)</a>`, see the README's "Clickable edges") — no JS, no directives.

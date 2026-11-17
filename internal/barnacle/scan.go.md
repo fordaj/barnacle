@@ -2,15 +2,15 @@
 
 ```mermaid
 flowchart TD
-    Root("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/> Repository root") --> Walk("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> WalkDir")
-    Walk --> Filter{{"<img src='../../tools/lucide/icons/hexagon.svg' width='20' alt=''/> Regular .md/.mmd?"}}
+    Root("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>Repository root") --> Walk("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>WalkDir")
+    Walk --> Filter{{"<img src='../../tools/lucide/icons/hexagon.svg' width='20' alt=''/><br/>Regular .md/.mmd?"}}
     Filter -- no --> Skip(Skip)
-    Filter -- yes --> Excludes{{"<img src='../../tools/lucide/icons/hexagon.svg' width='20' alt=''/> Excluded by config/defaults? <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>"}}
+    Filter -- yes --> Excludes{{"<img src='../../tools/lucide/icons/hexagon.svg' width='20' alt=''/><br/><u>Excluded by config/defaults?</u>"}}
     Excludes -- yes --> Skip
-    Excludes -- no --> Hidden{{"<img src='../../tools/lucide/icons/hexagon.svg' width='20' alt=''/> Hidden segment?"}}
+    Excludes -- no --> Hidden{{"<img src='../../tools/lucide/icons/hexagon.svg' width='20' alt=''/><br/>Hidden segment?"}}
     Hidden -- yes --> Skip
-    Hidden -- no --> Doc("<img src='../../tools/lucide/icons/file-text.svg' width='20' alt=''/> Document")
-    Doc --> Sorted("<img src='../../tools/lucide/icons/file-text.svg' width='20' alt=''/> Sorted Document list <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Hidden -- no --> Doc("<img src='../../tools/lucide/icons/file-text.svg' width='20' alt=''/><br/>Document")
+    Doc --> Sorted("<img src='../../tools/lucide/icons/file-text.svg' width='20' alt=''/><br/><u>Sorted Document list</u>")
     click Excludes href "config.go.md"
     click Sorted href "site.go.md"
     class Root folder

@@ -2,10 +2,10 @@
 
 ```mermaid
 flowchart TD
-    MD("<img src='../../tools/lucide/icons/file-text.svg' width='20' alt=''/> Markdown source") --> GM("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> goldmark + GFM")
-    GM --> Links("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> RewriteDocLink pass<br/>href rewriting <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Links --> Mermaid("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> Mermaid block pass<br/>fences become pre.mermaid <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Mermaid --> HTML("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/> HTML fragment")
+    MD("<img src='../../tools/lucide/icons/file-text.svg' width='20' alt=''/><br/>Markdown source") --> GM("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>goldmark + GFM")
+    GM --> Links("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>RewriteDocLink pass<br/>href rewriting</u>")
+    Links --> Mermaid("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>Mermaid block pass<br/>fences become pre.mermaid</u>")
+    Mermaid --> HTML("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/><br/>HTML fragment")
     click Links href "#link-rewriting"
     click Mermaid href "#mermaid"
     class MD mdFile

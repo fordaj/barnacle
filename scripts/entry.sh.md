@@ -2,11 +2,11 @@
 
 ```mermaid
 flowchart LR
-    Script("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> Any scripts/*.sh") --> Entry("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> entry.sh")
-    Entry --> Env("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> env.sh — cascade<br/>VERSIONER_BIN · LOGAMUFFIN_BIN · … <img src='../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Entry --> Log("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> log LEVEL MESSAGE")
-    Log -->|binary present| Logamuffin("<img src='../tools/lucide/icons/file-code.svg' width='20' alt=''/> logamuffin")
-    Log -->|missing / fresh clone| Fallback("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> printf fallback")
+    Script("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>Any scripts/*.sh") --> Entry("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>entry.sh")
+    Entry --> Env("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>env.sh — cascade<br/>VERSIONER_BIN · LOGAMUFFIN_BIN · …</u>")
+    Entry --> Log("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>log LEVEL MESSAGE")
+    Log -->|binary present| Logamuffin("<img src='../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>logamuffin")
+    Log -->|missing / fresh clone| Fallback("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>printf fallback")
     click Env href "env.sh.md"
     class Script,Entry,Env,Log,Fallback shFile
     class Logamuffin goFile

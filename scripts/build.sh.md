@@ -2,10 +2,10 @@
 
 ```mermaid
 flowchart LR
-    Version("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> version.sh <img src='../tools/lucide/icons/link.svg' width='16' alt=''/>") --> Stamp("<img src='../tools/lucide/icons/file-code.svg' width='20' alt=''/> go build -ldflags -X main.version")
+    Version("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>version.sh</u>") --> Stamp("<img src='../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>go build -ldflags -X main.version")
     Platforms(6 targets<br/>darwin · linux · windows<br/>arm64 · amd64 — CGO off) --> Stamp
-    Stamp --> Dist("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/> dist/&lt;platform&gt;/<br/>barnacle{,.exe}")
-    Dist --> Release("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> release.sh — archives <img src='../tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Stamp --> Dist("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>dist/&lt;platform&gt;/<br/>barnacle{,.exe}")
+    Dist --> Release("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>release.sh — archives</u>")
     click Release href "release.sh.md"
     click Version href "version.sh.md"
     class Version,Release shFile

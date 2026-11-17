@@ -2,11 +2,11 @@
 
 ```mermaid
 flowchart LR
-    Versioner("<img src='../tools/lucide/icons/tag.svg' width='20' alt=''/> versioner <img src='../tools/lucide/icons/link.svg' width='16' alt=''/>") --> Verify("<img src='../tools/lucide/icons/check.svg' width='20' alt=''/> build throwaway<br/>--version matches?")
-    Verify --> Build("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> build.sh — 6 platforms <img src='../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Build --> Package("<img src='../tools/lucide/icons/package.svg' width='20' alt=''/> archives<br/>+ checksums.txt")
-    Package --> Tag("<img src='../tools/lucide/icons/tag.svg' width='20' alt=''/> tag HEAD + push")
-    Tag --> GH("<img src='../tools/lucide/icons/tag.svg' width='20' alt=''/> gh release create<br/>or refresh assets")
+    Versioner("<img src='../tools/lucide/icons/tag.svg' width='20' alt=''/><br/><u>versioner</u>") --> Verify("<img src='../tools/lucide/icons/check.svg' width='20' alt=''/><br/>build throwaway<br/>--version matches?")
+    Verify --> Build("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>build.sh — 6 platforms</u>")
+    Build --> Package("<img src='../tools/lucide/icons/package.svg' width='20' alt=''/><br/>archives<br/>+ checksums.txt")
+    Package --> Tag("<img src='../tools/lucide/icons/tag.svg' width='20' alt=''/><br/>tag HEAD + push")
+    Tag --> GH("<img src='../tools/lucide/icons/tag.svg' width='20' alt=''/><br/>gh release create<br/>or refresh assets")
     click Build href "build.sh.md"
     click Versioner href "version.sh.md"
     class Versioner,Tag,GH tagNode

@@ -2,14 +2,14 @@
 
 ```mermaid
 flowchart LR
-    Gh("<img src='../../tools/lucide/icons/tag.svg' width='20' alt=''/> fordaj/* release") --> Resolve("<img src='../../tools/lucide/icons/terminal.svg' width='20' alt=''/> resolve tag")
-    Resolve --> Download("<img src='../../tools/lucide/icons/download.svg' width='20' alt=''/> gh release download")
-    Download --> Check{{"<img src='../../tools/lucide/icons/hexagon.svg' width='20' alt=''/> checksums present?"}}
-    Check -->|yes| Verify("<img src='../../tools/lucide/icons/check.svg' width='20' alt=''/> verify — mismatch is fatal")
+    Gh("<img src='../../tools/lucide/icons/tag.svg' width='20' alt=''/><br/>fordaj/* release") --> Resolve("<img src='../../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>resolve tag")
+    Resolve --> Download("<img src='../../tools/lucide/icons/download.svg' width='20' alt=''/><br/>gh release download")
+    Download --> Check{{"<img src='../../tools/lucide/icons/hexagon.svg' width='20' alt=''/><br/>checksums present?"}}
+    Check -->|yes| Verify("<img src='../../tools/lucide/icons/check.svg' width='20' alt=''/><br/>verify — mismatch is fatal")
     Check -->|no| Warn(warn and continue)
-    Verify --> Stage("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/> stage in temp dir")
+    Verify --> Stage("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>stage in temp dir")
     Warn --> Stage
-    Stage --> Swap("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/> atomic swap · delete superseded v*")
+    Stage --> Swap("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>atomic swap · delete superseded v*")
     class Gh tagNode
     class Resolve shFile
     class Download dlNode

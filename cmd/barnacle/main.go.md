@@ -2,11 +2,11 @@
 
 ```mermaid
 flowchart LR
-    CLI("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/> cmd/barnacle") --> Config("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> LoadConfig <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Config --> Generate("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> Generate <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Generate --> Scan("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> Scan <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Generate --> Render("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> MarkdownToHTML <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Scan --> Site("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/> site/")
+    CLI("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>cmd/barnacle") --> Config("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>LoadConfig</u>")
+    Config --> Generate("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>Generate</u>")
+    Generate --> Scan("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>Scan</u>")
+    Generate --> Render("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>MarkdownToHTML</u>")
+    Scan --> Site("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>site/")
     Render --> Site
     click Config href "../../internal/barnacle/config.go.md"
     click Generate href "../../internal/barnacle/site.go.md"

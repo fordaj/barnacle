@@ -2,11 +2,11 @@
 
 ```mermaid
 flowchart LR
-    Docs("<img src='../../tools/lucide/icons/file-text.svg' width='20' alt=''/> Sorted documents") --> Tree("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> buildTree <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Tree --> Nav("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> renderNav<br/>sidebar per page")
-    Tree --> Index("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> renderIndex<br/>landing page body")
-    Nav --> Page("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> pageTemplate <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Index --> Landing("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/> index.html")
+    Docs("<img src='../../tools/lucide/icons/file-text.svg' width='20' alt=''/><br/>Sorted documents") --> Tree("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>buildTree</u>")
+    Tree --> Nav("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>renderNav<br/>sidebar per page")
+    Tree --> Index("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>renderIndex<br/>landing page body")
+    Nav --> Page("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>pageTemplate</u>")
+    Index --> Landing("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/><br/>index.html")
     click Tree href "site.go.md"
     click Page href "template.go.md"
     class Docs mdFile

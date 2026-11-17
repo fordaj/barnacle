@@ -2,13 +2,13 @@
 
 ```mermaid
 flowchart TD
-    Generate("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> Generate<br/>site.go <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>") --> Scan("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> Scan<br/>scan.go <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Generate --> Render("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> MarkdownToHTML<br/>render.go <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Generate --> Nav("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> renderNav<br/>nav.go <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Generate --> Template("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> pageTemplate<br/>template.go <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Generate("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>Generate<br/>site.go</u>") --> Scan("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>Scan<br/>scan.go</u>")
+    Generate --> Render("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>MarkdownToHTML<br/>render.go</u>")
+    Generate --> Nav("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>renderNav<br/>nav.go</u>")
+    Generate --> Template("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>pageTemplate<br/>template.go</u>")
     Render --> Template
     Nav --> Template
-    Generate -.->|reads once| Config("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> LoadConfig<br/>config.go <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Generate -.->|reads once| Config("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>LoadConfig<br/>config.go</u>")
     click Generate href "site.go.md"
     click Scan href "scan.go.md"
     click Render href "render.go.md"

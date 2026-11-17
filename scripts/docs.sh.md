@@ -2,9 +2,9 @@
 
 ```mermaid
 flowchart LR
-    Src("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/> Source tree<br/>.md / .mmd next to code") --> Barnacle("<img src='../tools/lucide/icons/file-code.svg' width='20' alt=''/> BARNACLE_BIN")
-    Cascade("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> env.sh cascade<br/>dist/&lt;platform&gt;/barnacle <img src='../tools/lucide/icons/link.svg' width='16' alt=''/>") --> Barnacle
-    Barnacle --> Site("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/> ./site<br/>static HTML")
+    Src("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>Source tree<br/>.md / .mmd next to code") --> Barnacle("<img src='../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>BARNACLE_BIN")
+    Cascade("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>env.sh cascade<br/>dist/&lt;platform&gt;/barnacle</u>") --> Barnacle
+    Barnacle --> Site("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>./site<br/>static HTML")
     click Cascade href "env.sh.md"
     class Src,Site folder
     class Cascade shFile

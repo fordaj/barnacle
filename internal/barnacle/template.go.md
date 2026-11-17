@@ -2,11 +2,11 @@
 
 ```mermaid
 flowchart LR
-    Data("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> pageData <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>") --> Shell("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/> pageTemplate<br/>html/template")
-    Shell --> Page("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/> Every generated<br/>page")
-    Page --> Aside("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/> Sidebar<br/>site title + nav <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Page --> Main("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/> Content<br/>template.HTML <img src='../../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Main --> Mermaid("<img src='../../tools/lucide/icons/zap.svg' width='20' alt=''/> mermaid.min.js<br/>only when needed")
+    Data("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>pageData</u>") --> Shell("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>pageTemplate<br/>html/template")
+    Shell --> Page("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/><br/>Every generated<br/>page")
+    Page --> Aside("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/><br/><u>Sidebar<br/>site title + nav</u>")
+    Page --> Main("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/><br/><u>Content<br/>template.HTML</u>")
+    Main --> Mermaid("<img src='../../tools/lucide/icons/zap.svg' width='20' alt=''/><br/>mermaid.min.js<br/>only when needed")
     click Data href "#pagedata"
     click Main href "render.go.md"
     click Aside href "nav.go.md"

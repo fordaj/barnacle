@@ -2,13 +2,13 @@
 
 ```mermaid
 flowchart LR
-    uv("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> uv run") --> FFT("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> formattington")
-    Config("<img src='../tools/lucide/icons/braces.svg' width='20' alt=''/> .formattington.json") --> FFT
-    FFT --> Prettier("<img src='../tools/lucide/icons/file-text.svg' width='20' alt=''/> prettier — md/json/yml")
+    uv("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>uv run") --> FFT("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>formattington")
+    Config("<img src='../tools/lucide/icons/braces.svg' width='20' alt=''/><br/>.formattington.json") --> FFT
+    FFT --> Prettier("<img src='../tools/lucide/icons/file-text.svg' width='20' alt=''/><br/>prettier — md/json/yml")
     FFT --> Black(black — py)
-    FFT --> Shfmt("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> shfmt -i 2 — sh")
-    FFT --> Taplo("<img src='../tools/lucide/icons/braces.svg' width='20' alt=''/> taplo — toml")
-    Check("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> ci/format_check.sh --check") -.->|same config, exit 1 on diff| FFT
+    FFT --> Shfmt("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>shfmt -i 2 — sh")
+    FFT --> Taplo("<img src='../tools/lucide/icons/braces.svg' width='20' alt=''/><br/>taplo — toml")
+    Check("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>ci/format_check.sh --check") -.->|same config, exit 1 on diff| FFT
     class uv,FFT shFile
     class Config jsonFile
     class Prettier mdFile

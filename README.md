@@ -2,10 +2,10 @@
 
 ```mermaid
 flowchart TD
-    Root("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/> barnacle")
-    Cmd("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/> cmd/barnacle<br/>process boundary <img src='tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Internal("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/> internal/barnacle<br/>the implementation <img src='tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Scripts("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/> scripts/<br/>build · release · docs · format <img src='tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Root("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>barnacle")
+    Cmd("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/><br/><u>cmd/barnacle<br/>process boundary</u>")
+    Internal("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/><br/><u>internal/barnacle<br/>the implementation</u>")
+    Scripts("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/><br/><u>scripts/<br/>build · release · docs · format</u>")
     Root --> Cmd
     Root --> Internal
     Root --> Scripts
@@ -60,7 +60,7 @@ The result is a visual map of your codebase that developers and coding agents ca
 
 - **Documentation alongside code** — Keep `.md` and `.mmd` files parallel to the source files they describe.
 - **Mermaid-forward** — Every page should open with a Mermaid diagram at the top, so a brand-new reader gets a visual map before a wall of prose. Barnacle guides you (and your agents) toward that; it never forces it.
-- **Diagram conventions** — Per-file-kind node colors, hexagon decisions, and inline Lucide glyphs (file kind first, chain link last when clickable): conventions this repository follows and this README documents; nothing Barnacle enforces. See [Diagram conventions](#diagram-conventions).
+- **Diagram conventions** — Per-file-kind node colors, hexagon decisions, and inline Lucide glyphs (file-kind glyph above the label; clickable nodes underlined): conventions this repository follows and this README documents; nothing Barnacle enforces. See [Diagram conventions](#diagram-conventions).
 - **Clickable diagrams** — `click` directives make diagram nodes and edges navigable; Barnacle rewrites documentation targets (`.md`/`.mmd`) inside them to the generated pages. See [Clickable diagrams](#clickable-diagrams).
 - **Navigable documentation** — Generated pages link to one another using relative paths.
 - **Retained suffixes** — `main.py.md`, `main.cpp.md`, `main.rs.md` — documentation files keep the source file's suffix, so different files that share a base name stay individually documentable.
@@ -197,8 +197,8 @@ Mermaid flowcharts natively support `click` directives, which make individual no
 
 ```mermaid
 flowchart LR
-    Src("main.py <img src='tools/lucide/icons/link.svg' width='16' alt=''/>") --> Doc(main.py.md)
-    Doc --> Barnacle("barnacle <img src='tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Src("<u>main.py</u>") --> Doc(main.py.md)
+    Doc --> Barnacle("<u>barnacle</u>")
     Barnacle --> Site(main.py.html)
     click Src href "cmd/barnacle/main.go.md" "What the command does"
     click Barnacle href "internal/barnacle/README.md"
@@ -258,8 +258,8 @@ Mermaid's own features get you a lot of polish for free — colored classes, com
 
 ```mermaid
 flowchart LR
-    Go("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/> scan.go — Go") --> Sh("<img src='tools/lucide/icons/terminal.svg' width='20' alt=''/> build.sh — Bash") --> Json("<img src='tools/lucide/icons/braces.svg' width='20' alt=''/> .barnacle.json — JSON") --> Md("<img src='tools/lucide/icons/file-text.svg' width='20' alt=''/> README.md — Markdown") --> Html("<img src='tools/lucide/icons/app-window.svg' width='20' alt=''/> index.html — generated") --> Js("<img src='tools/lucide/icons/zap.svg' width='20' alt=''/> mermaid.min.js — JavaScript")
-    Tag("<img src='tools/lucide/icons/tag.svg' width='20' alt=''/> v0.1.0 — release tag") --> Dl("<img src='tools/lucide/icons/download.svg' width='20' alt=''/> gh release download") --> Check("<img src='tools/lucide/icons/check.svg' width='20' alt=''/> verify checksums") --> Box("<img src='tools/lucide/icons/package.svg' width='20' alt=''/> dist/barnacle.tar.gz")
+    Go("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>scan.go — Go") --> Sh("<img src='tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>build.sh — Bash") --> Json("<img src='tools/lucide/icons/braces.svg' width='20' alt=''/><br/>.barnacle.json — JSON") --> Md("<img src='tools/lucide/icons/file-text.svg' width='20' alt=''/><br/>README.md — Markdown") --> Html("<img src='tools/lucide/icons/app-window.svg' width='20' alt=''/><br/>index.html — generated") --> Js("<img src='tools/lucide/icons/zap.svg' width='20' alt=''/><br/>mermaid.min.js — JavaScript")
+    Tag("<img src='tools/lucide/icons/tag.svg' width='20' alt=''/><br/>v0.1.0 — release tag") --> Dl("<img src='tools/lucide/icons/download.svg' width='20' alt=''/><br/>gh release download") --> Check("<img src='tools/lucide/icons/check.svg' width='20' alt=''/><br/>verify checksums") --> Box("<img src='tools/lucide/icons/package.svg' width='20' alt=''/><br/>dist/barnacle.tar.gz")
     class Go goFile
     class Sh shFile
     class Json jsonFile
@@ -284,12 +284,12 @@ flowchart LR
 
 Assign them with `class NodeA,NodeB goFile` — the `:::` shorthand works too, but one form everywhere keeps the source greppable.
 
-**Inline glyphs — file kind first, chain link on clickable nodes.** Icons are the real [Lucide](https://lucide.dev) set, vendored at `tools/lucide/` (ISC-licensed; see `tools/lucide/LICENSE`) and referenced straight from the diagram source as plain Markdown inline images. Labels are HTML, so an inline `<img>` just works under `securityLevel: 'strict'`; barnacle inlines local `.svg` references itself at generation time, so no request ever goes out to disk.
+**Inline glyphs — file-kind glyph above the label; clickable nodes underlined.** Icons are the real [Lucide](https://lucide.dev) set, vendored at `tools/lucide/` (ISC-licensed; see `tools/lucide/LICENSE`) and referenced straight from the diagram source as plain Markdown inline images. Labels are HTML, so an inline `<img>` just works under `securityLevel: 'strict'`; barnacle inlines local `.svg` references itself at generation time, so no request ever goes out to disk. The file-kind glyph sits on the line above the text (`<img …/><br/>Label`); a node with a `click` directive carries an underlined label instead of any badge (`<u>Label</u>`).
 
 ```mermaid
 flowchart LR
-    Scan("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/> Scan <img src='tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Site("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/> site/ <img src='tools/lucide/icons/link.svg' width='16' alt=''/>")
+    Scan("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>Scan</u>")
+    Site("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/><br/><u>site/</u>")
     Scan --> Site
     click Scan href "internal/barnacle/scan.go.md"
     click Site href "internal/barnacle/site.go.md"
@@ -299,7 +299,7 @@ flowchart LR
     classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
 ```
 
-The file-kind glyph is picked to match the class — a folder for `scripts/`, `</>`-style code for Go source, a terminal prompt for shell, braces for JSON, a page for Markdown, a window for HTML, a bolt for JavaScript, a tag for releases, an arrow for downloads, a check for verifications, a box for archives, a hexagon outline for decisions, an exclamation circle for fatal exits. The chain link appears **only** on nodes with a `click` directive; unclickable nodes carry nothing. Everything happens inside the label flow — no absolute positioning, no magic offsets, so it works for any node shape and any wrap; you decide where the line breaks (`<br/>`) and where the `<img>` goes. Notes:
+The file-kind glyph is picked to match the class — a folder for `scripts/`, `</>`-style code for Go source, a terminal prompt for shell, braces for JSON, a page for Markdown, a window for HTML, a bolt for JavaScript, a tag for releases, an arrow for downloads, a check for verifications, a box for archives, a hexagon outline for decisions, an exclamation circle for fatal exits. The underline appears **only** on nodes with a `click` directive — it is the clickable-node marker now, replacing any badge icon; unclickable nodes render plain. Everything happens inside the label flow — no absolute positioning, no magic offsets, so it works for any node shape and any wrap; the file-kind glyph goes on the first line of the label (`<img …/><br/>Label`) and the label follows, wrapped in `<u>…</u>` when the node is clickable. Notes:
 
 - Mermaid treats the label as HTML and handles `<`, `>`, `&` and quotes for you; escaped-text entities work in labels (`&lt;name&gt;` for a literal `<name>`, `<br/>` for a line break).
 - A relative `<img src='…/file.svg'>` is inlined by barnacle as inline `<svg>`; an absolute URL or `data:` URI is left alone; a missing or unreadable file (or a path that escapes the repository root) fails the render with a clear error naming the page.
@@ -312,7 +312,7 @@ The file-kind glyph is picked to match the class — a folder for `scripts/`, `<
 
 ```mermaid
 flowchart TD
-    Parse{{"<img src='tools/lucide/icons/hexagon.svg' width='20' alt=''/> Valid JSON?"}} -->|no| Error("<img src='tools/lucide/icons/circle-exclamation-point.svg' width='20' alt=''/> Error → exit 1")
+    Parse{{"<img src='tools/lucide/icons/hexagon.svg' width='20' alt=''/><br/>Valid JSON?"}} -->|no| Error("<img src='tools/lucide/icons/circle-exclamation-point.svg' width='20' alt=''/><br/>Error → exit 1")
     Parse -->|yes| Config(Config)
     class Parse hexNode
     class Error errNode
@@ -320,7 +320,7 @@ flowchart TD
     classDef errNode fill:#f6b8b8,stroke:#b91c1c,color:#450a0a
 ```
 
-**Putting it together** — a small node glossary this repository sticks to: tinted text nodes everywhere (following the `folder`/`goFile`/`shFile`/`jsonFile`/`mdFile`/`htmlFile`/`jsFile` classes for the corresponding file kinds), `hexNode` for decisions, `errNode` for fatal exits, `tagNode` for releases and tags, `dlNode` for downloads, `checkNode` for verifications, `boxNode` for archives — and inline glyphs to match: file-kind glyph first in the label, chain link last iff the node is clickable (`click` directive). When a step maps cleanly onto one of those, use it; otherwise leave the node unclassed rather than inventing a new shade.
+**Putting it together** — a small node glossary this repository sticks to: tinted text nodes everywhere (following the `folder`/`goFile`/`shFile`/`jsonFile`/`mdFile`/`htmlFile`/`jsFile` classes for the corresponding file kinds), `hexNode` for decisions, `errNode` for fatal exits, `tagNode` for releases and tags, `dlNode` for downloads, `checkNode` for verifications, `boxNode` for archives — and inline glyphs to match: file-kind glyph on the line above the label, underlined label iff the node is clickable (`click` directive). When a step maps cleanly onto one of those, use it; otherwise leave the node unclassed rather than inventing a new shade.
 
 None of this is linter-enforced. The rule is the one at the top of the README: a reader who has never seen the page should get the map before the territory — everything else is seasoning.
 

@@ -2,10 +2,10 @@
 
 ```mermaid
 flowchart TD
-    Entry("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> entry.sh<br/>sources env.sh + log() <img src='../tools/lucide/icons/link.svg' width='16' alt=''/>") --> Env("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> env.sh<br/>cascade locator/anchor <img src='../tools/lucide/icons/link.svg' width='16' alt=''/>")
-    Env --> Common("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .common.env")
-    Env --> Plat("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/> .os-arch.env<br/>one per platform")
-    Common --> Tools("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/> tools/&lt;name&gt;/v*<br/>pinned binaries")
+    Entry("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>entry.sh<br/>sources env.sh + log()</u>") --> Env("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>env.sh<br/>cascade locator/anchor</u>")
+    Env --> Common("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>.common.env")
+    Env --> Plat("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>.os-arch.env<br/>one per platform")
+    Common --> Tools("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>tools/&lt;name&gt;/v*<br/>pinned binaries")
     Plat --> Tools
     click Entry href "entry.sh.md"
     click Env href "env.sh.md"
