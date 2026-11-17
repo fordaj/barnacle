@@ -13,6 +13,7 @@
 # barnacle's local-SVG inlining). Layout after a successful run:
 #   tools/lucide/
 #     update.sh
+#     lucide.go         # go:embed of icons/LICENSE/VERSION (persists; this script never touches it)
 #     VERSION           # the release tag, without a leading v
 #     LICENSE           # the upstream slash-delimited license text
 #     icons/<name>.svg  # stroke="currentColor", 24x24 viewBox

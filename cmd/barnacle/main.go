@@ -4,9 +4,11 @@
 // Usage:
 //
 //	barnacle [--config <path>] [--site <path>]
+//	barnacle list-icons
 //
 // With no flags, barnacle reads ./.barnacle.json (if it exists) and writes
-// the generated site to ./site.
+// the generated site to ./site. The list-icons subcommand prints the
+// Lucide icons embedded in the binary, with attribution, and exits.
 package main
 
 import (
@@ -27,6 +29,11 @@ const usageText = `barnacle — build a navigable, diagram-centric documentation
 
 Usage:
   barnacle [options]
+  barnacle list-icons
+
+Subcommands:
+  list-icons      Print the Lucide icons embedded in this binary (one per line,
+                  with attribution) and exit
 
 Options:
   --config <path>  Path to a Barnacle configuration file (default: ./.barnacle.json)
@@ -49,6 +56,18 @@ func main() {
 }
 
 func run(args []string, stdout, stderr io.Writer) int {
+	if len(args) > 0 && args[0] == "list-icons" {
+		if len(args) > 1 {
+			fmt.Fprintf(stderr, "barnacle: list-icons takes no arguments\n\n%s", usageText)
+			return 2
+		}
+		if err := barnacle.ListIcons(stdout); err != nil {
+			fmt.Fprintf(stderr, "barnacle: %v\n", err)
+			return 1
+		}
+		return 0
+	}
+
 	fs := flag.NewFlagSet("barnacle", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 

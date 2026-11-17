@@ -59,16 +59,16 @@ Releases go through `scripts/release.sh` (`--build-only` and `--dry-run` are the
 ## Repository Layout
 
 ```text
-cmd/barnacle/     the process boundary (main.go — flag parsing, exit codes)
-internal/barnacle/ the whole implementation (config, scan, render, nav, site, template)
+cmd/barnacle/     the process boundary (main.go — flag parsing, subcommands, exit codes)
+internal/barnacle/ the whole implementation (config, scan, render, nav, site, template, icons)
 scripts/          build/release/docs tooling (+ hidden .common.env / .<platform>.env cascade)
-tools/            pinned helper binaries, each with an update.sh (not Go deps)
+tools/            pinned helper binaries, each with an update.sh (not Go deps); tools/lucide additionally carries lucide.go, which embeds the icon set into barnacle
 ci/               format check for CI
 scripts/format.sh  formatter (formattington via uv)
 site/             generated documentation (git-ignored)
 ```
 
-Important files include `cmd/barnacle/main.go`, `internal/barnacle/{config,scan,render,nav,site,template}.go`, `internal/barnacle/assets/{barnacle.css,mermaid.min.js}` (embedded), and the scripts under `scripts/`.
+Important files include `cmd/barnacle/main.go`, `internal/barnacle/{config,scan,render,nav,site,template,icons}.go`, `internal/barnacle/assets/{barnacle.css,mermaid.min.js}` (embedded), `tools/lucide/lucide.go` (embeds the icon set), and the scripts under `scripts/`.
 
 ## Documentation files (barnacle)
 
@@ -78,7 +78,7 @@ Layout — documentation lives next to the code it describes:
 
 - One sibling `.md` per Go file in `cmd/barnacle/` and `internal/barnacle/` (for example `scan.go` → `scan.go.md`), plus `internal/barnacle/README.md` as the package hub.
 - One sibling `.md` per bash script (`scripts/entry.sh` → `entry.sh.md`, `scripts/env.sh` → `env.sh.md`, `scripts/version.sh` → `version.sh.md`, `scripts/docs.sh` → `docs.sh.md`, `scripts/build.sh` → `build.sh.md`, `scripts/release.sh` → `release.sh.md`, `scripts/format.sh` → `scripts/format.sh.md`), plus `scripts/README.md` as the hub.
-- One sibling `.md` per bundle in `tools/` (`tools/<name>/update.sh.md`), plus `tools/README.md` as the hub. `tools/` is excluded from the generated site via `.barnacle.json` (the pinned binaries carry their own upstream docs), so these pages exist for the repository, not the site.
+- One sibling `.md` per bundle in `tools/` (`tools/<name>/update.sh.md`), plus `tools/README.md` as the hub. `tools/` is excluded from the generated site via `.barnacle.json` (the pinned binaries carry their own upstream docs), so these pages exist for the repository, not the site. `tools/lucide/lucide.go` is a Go package, not a helper binary; its sibling page is `tools/lucide/lucide.go.md`.
 
 Naming rules:
 

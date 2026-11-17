@@ -4,7 +4,7 @@
 flowchart LR
     Version("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>version.sh</u>") --> Stamp("<img src='../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>go build -ldflags -X main.version")
     Platforms(6 targets<br/>darwin · linux · windows<br/>arm64 · amd64 — CGO off) --> Stamp
-    Stamp --> Dist("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>dist/&lt;platform&gt;/<br/>barnacle{,.exe}")
+    Stamp --> Dist("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>dist/&lt;platform&gt;/<br/>barnacle{,.exe} + LUCIDE-LICENSE")
     Dist --> Release("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>release.sh — archives</u>")
     click Release href "release.sh.md"
     click Version href "version.sh.md"
@@ -24,7 +24,8 @@ Cross-compiles barnacle for every supported platform into `dist/<platform>/barna
 2. Resolves the version: `$VERSION` if set, otherwise `eval "$(scripts/version.sh --format shell)"`.
 3. Fails early if the `go` toolchain is not on `PATH`.
 4. Builds six targets with `CGO_ENABLED=0`, `-trimpath`, and `-ldflags "-s -w -X main.version=$VERSION"`: `macos-arm64`, `macos-x86_64`, `linux-arm64`, `linux-x86_64`, `windows-arm64`, `windows-x86_64` (GOOS/GOARCH `darwin`/`linux`/`windows` × `arm64`/`amd64`).
-5. Writes each binary to `dist/<platform>/` and logs progress through `log()`.
+5. Copies `tools/lucide/LICENSE` into `dist/<platform>/LUCIDE-LICENSE` — the Lucide icons are embedded into the binary itself (`tools/lucide/lucide.go`), and their license travels next to every executable, `.exe` included.
+6. Writes each binary and its `LUCIDE-LICENSE` to `dist/<platform>/` and logs progress through `log()`.
 
 `dist/` is git-ignored and always excluded from the scan.
 

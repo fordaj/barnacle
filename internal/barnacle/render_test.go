@@ -303,3 +303,57 @@ func TestInlineLocalSVGSetAltBecomesAriaLabel(t *testing.T) {
 		t.Errorf("aria-label alt must suppress aria-hidden\n%s", out)
 	}
 }
+
+func TestInlineBarnacleIconsRewritesEmbeddedRefs(t *testing.T) {
+	root := t.TempDir()
+	src := []byte("# Title\n\n<img src=\"barnacle:folder.svg\" width=\"20\" alt=\"a folder\"/>\n")
+	out, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: root}, src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, `<svg`) || !strings.Contains(out, `aria-label="a folder"`) {
+		t.Errorf("embedded icon was not inlined with the img attributes\n%s", out)
+	}
+	if strings.Contains(out, `src="barnacle:folder.svg"`) {
+		t.Errorf("barnacle: reference not rewritten\n%s", out)
+	}
+}
+
+func TestInlineBarnacleIconsInMermaidLabelRefs(t *testing.T) {
+	root := t.TempDir()
+	src := []byte("# Diagram\n\n```mermaid\nflowchart LR\n  A[\"<img src='barnacle:file-code.svg' width='15'/>main\"] --> B\n```\n")
+	out, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: root}, src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, `&lt;svg`) {
+		t.Errorf("embedded icon in mermaid label was not inlined\n%s", out)
+	}
+}
+
+func TestInlineBarnacleIconsUnknownFails(t *testing.T) {
+	root := t.TempDir()
+	for _, dest := range []string{
+		`barnacle:not-a-real-icon.svg`,
+		`barnacle:Folder.svg`, // names are lowercase
+		`barnacle:folder`,     // missing .svg suffix
+		`barnacle:../escape.svg`,
+		`barnacle:a/b.svg`,
+	} {
+		src := []byte("# Title\n\n<img src=\"" + dest + "\"/>\n")
+		if _, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: root}, src); err == nil {
+			t.Errorf("dest %q: expected error", dest)
+		}
+	}
+}
+
+func TestInlineBarnacleIconsZeroContextSkips(t *testing.T) {
+	src := []byte("# Title\n\n<img src=\"barnacle:folder.svg\"/>\n")
+	out, err := MarkdownToHTML(RenderContext{}, src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, `src="barnacle:folder.svg"`) {
+		t.Errorf("zero context must skip inlining, got\n%s", out)
+	}
+}

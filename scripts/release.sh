@@ -6,7 +6,11 @@
 # One archive is produced per platform:
 #
 #   barnacle-<platform>.tar.gz   (.zip on Windows)
-#   containing barnacle (barnacle.exe), LICENSE and README.md
+#   containing barnacle (barnacle.exe), LICENSE, README.md and LUCIDE-LICENSE
+#
+# LUCIDE-LICENSE is the Lucide icon set's license (tools/lucide/LICENSE);
+# the icons are embedded in the binary itself, and their license ships in
+# every archive alongside it.
 #
 # The binaries are produced with CGO disabled and are statically linked and
 # portable. The program version is dynamic via versioner (.versioner.json);
@@ -226,6 +230,7 @@ for platform_dir in "$DIST_DIR"/*/; do
   cp "$platform_dir/$binary" "$tree/$binary"
   cp "$REPO_ROOT/LICENSE" "$tree/LICENSE"
   cp "$REPO_ROOT/README.md" "$tree/README.md"
+  cp "$REPO_ROOT/tools/lucide/LICENSE" "$tree/LUCIDE-LICENSE"
 
   archive="$DIST_DIR/barnacle-$platform.$extension"
   package_tree "$tree" "$archive"

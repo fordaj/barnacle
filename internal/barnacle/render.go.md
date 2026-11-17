@@ -50,20 +50,21 @@ Mechanics:
 
 ## Local SVG inlining
 
-Barnacle rewrites `<img>` tags whose destination is a relative `.svg` path to **inline `<svg>` markup** at generation time, so diagrams (and body content) can inline real icon files without any external requests — sites stay fully self-contained and work from any base URL. This repository uses the vendored [Lucide](https://lucide.dev) icon set living in `tools/lucide/` for its own diagram icons.
+Barnacle rewrites `<img>` tags whose destination is a relative `.svg` path to **inline `<svg>` markup** at generation time, so diagrams (and body content) can inline real icon files without any external requests — sites stay fully self-contained and work from any base URL. This repository uses the vendored [Lucide](https://lucide.dev) icon set living in `tools/lucide/` for its own diagram icons. The same set is embedded in the binary itself (`tools/lucide/lucide.go`), and `<img src="barnacle:<name>.svg">` inlines an embedded icon with no repository-relative path at all.
 
 The rules:
 
 - Only relative `.svg` destinations are inlined (case-insensitive), resolved against the **document's own directory** — a reference must resolve beneath the repository root, or the page fails to render with an error naming the path and the page.
 - External URLs, `data:` URIs, protocol-relative URLs, fragments and anything else are left untouched.
 - Missing or unreadable files fail the render (`Fail loudly`).
+- The `barnacle:<name>.svg` shorthand (case-insensitive prefix) selects icon `<name>` from the embedded Lucide set: `name` must be exactly the vendored hyphenated lowercase name plus the `.svg` suffix — anything else (unknown icon, path separators, missing suffix, non-lowercase) fails the render with an error pointing at `barnacle list-icons`. The output goes through the same inlining rules as a file read from disk, so a diagram can use `barnacle:file-code.svg` and get the identical inline `<svg>`. The prefix deliberately is not a filesystem path, so it can never clash with a documented project's own layout.
 - Only `.svg` is handled. The file is parsed as a single `<svg>` element; its own attributes on that root (`fill`, `stroke`, `stroke-width`, `stroke-linecap`, `stroke-linejoin`, `aria-*`, `class`, `viewBox`, …) pass through verbatim — including `fill="none"` and `stroke="currentColor"`, which are what make Lucide's stroke-only glyphs render correctly under mermaid's theme.
 - **The one interjection**: mermaid's default theme paints every `.node path` with `fill:#ECECFF; stroke:#9370DB; stroke-width:1px`. To keep stroke-only icons stroke-only, barnacle projects the SVG's own visual attributes (`fill`, `stroke`, `stroke-width`, `stroke-linecap`, `stroke-linejoin`) onto each shape as an inline `style`, which outranks the theme rule. Nothing is invented by the interjection — only the file's own values are re-applied inline. A shape that already declares one of those properties keeps its own value. When the file declares no visual attributes at all, the near-universal icon defaults (`fill="none"; stroke="currentColor"`) are projected instead.
 - `<img>`'s `alt` attribute becomes `aria-label` on the inlined SVG; an SVG with no equivalent attribute is marked `aria-hidden="true"` (decorative by default).
 - Everything applies to Markdown content and to Mermaid diagrams alike (diagram labels may reference an icon file; e.g. `<img src='icon.svg'/>`), and to standalone `.mmd` pages.
 - `MarkdownToHTML` and `MermaidPageHTML` take a `RenderContext{SourceDir, Root}` identifying the source file's directory and the repository root. Passing the zero context leaves `<img>` tags untouched — useful for tests and callers that render detached content.
 
-This is how the icons in this repository's own diagrams appear in the browser with no network requests: the generator reads each `<img>` from disk and bakes it into the page.
+This is how the icons in this repository's own diagrams appear in the browser with no network requests: the generator reads each `<img>` from disk — or, for `barnacle:<name>.svg`, from the embedded set — and bakes it into the page. `barnacle list-icons` prints the embedded names with attribution (see [icons.go.md](icons.go.md)).
 
 ## Related pages
 

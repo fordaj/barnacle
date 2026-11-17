@@ -3,6 +3,7 @@
 ```mermaid
 flowchart LR
     CLI("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>cmd/barnacle") --> Config("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>LoadConfig</u>")
+    CLI --> ListIcons("<img src='../../tools/lucide/icons/list.svg' width='20' alt=''/><br/><u>list-icons</u>")
     Config --> Generate("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>Generate</u>")
     Generate --> Scan("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>Scan</u>")
     Generate --> Render("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>MarkdownToHTML</u>")
@@ -12,13 +13,24 @@ flowchart LR
     click Generate href "../../internal/barnacle/site.go.md"
     click Scan href "../../internal/barnacle/scan.go.md"
     click Render href "../../internal/barnacle/render.go.md"
+    click ListIcons href "../../internal/barnacle/icons.go.md"
     class CLI,Site folder
+    class ListIcons shFile
     class Config,Generate,Scan,Render goFile
     classDef folder fill:#f0c558,stroke:#8a6d1c,color:#332a05
+    classDef shFile fill:#abe07a,stroke:#3f6212,color:#16280a
     classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
 ```
 
-The `barnacle` command turns the Markdown and Mermaid files that live alongside source code into a static, interconnected website.
+The `barnacle` command turns the Markdown and Mermaid files that live alongside source code into a static, interconnected website. It takes one subcommand: `barnacle list-icons`.
+
+## Subcommands
+
+| Subcommand   | Description                                                                                                                                                 |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `list-icons` | Print the Lucide icons embedded in the binary (one per line, with the Lucide attribution) and exit. See [icons.go.md](../../internal/barnacle/icons.go.md). |
+
+`list-icons` is dispatched before flag parsing, takes no arguments (anything after it is exit code `2`), and reads nothing from the filesystem or the configuration.
 
 ## Flags
 
@@ -35,7 +47,7 @@ The `barnacle` command turns the Markdown and Mermaid files that live alongside 
 
 - `0` — success.
 - `1` — runtime failure (unreadable or invalid config, scan/render error, unwritable output).
-- `2` — usage error (unknown flag, unexpected positional argument, `--help`).
+- `2` — usage error (unknown flag, unexpected positional argument, `--help`, arguments after `list-icons`).
 
 `version` is `dev` unless stamped by the release scripts (`-ldflags "-X main.version=<v>"`, see `scripts/version.sh.md` and `scripts/release.sh.md`).
 
@@ -61,6 +73,7 @@ After a successful generation, barnacle prints a non-fatal note to stderr listin
 ## Related pages
 
 - [internal/barnacle/README.md](../../internal/barnacle/README.md) — the package that does the work
+- [The icon lister](../../internal/barnacle/icons.go.md) — the `list-icons` subcommand and its attribution output
 - [Configuration](../../internal/barnacle/config.go.md) — how `.barnacle.json` is loaded
 - [The scanner](../../internal/barnacle/scan.go.md) — how documentation files are discovered
 - [The site generator](../../internal/barnacle/site.go.md) — how the output is assembled

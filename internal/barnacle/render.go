@@ -14,6 +14,8 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	goldhtml "github.com/yuin/goldmark/renderer/html"
+
+	"github.com/fordaj/barnacle/tools/lucide"
 )
 
 var markdown = goldmark.New(
@@ -39,7 +41,9 @@ type RenderContext struct {
 // generated .html pages — in ordinary links and inside Mermaid `click`
 // directives — and Mermaid code fences are turned into <pre class="mermaid">
 // blocks so they render in the browser. Local SVG references in <img> tags
-// are inlined as data URIs (unless the context is the zero value).
+// are inlined as inline <svg> elements — both relative filesystem paths and
+// barnacle:<name>.svg references to the embedded Lucide set (unless the
+// context is the zero value).
 func MarkdownToHTML(ctx RenderContext, source []byte) (string, error) {
 	var buf bytes.Buffer
 	if err := markdown.Convert(source, &buf); err != nil {
@@ -277,6 +281,13 @@ var imgTagRe = regexp.MustCompile(`<img\b[^>]*>`)
 // External URLs, data: URIs, fragments and non-SVG files are left untouched;
 // a reference to a missing or unreadable SVG fails the render, and a path
 // escaping the repository root is an error, never a read.
+//
+// In addition to filesystem paths, the destination "barnacle:<name>.svg"
+// selects an icon from the Lucide set embedded in the binary (see
+// inlineBarnacleIcon), so diagrams can use the bundled icons without any
+// repository-relative path that could clash with the documented project's
+// own layout. The zero context disables all of these rewrites, exactly as
+// for filesystem references.
 func inlineLocalSVGs(rendered string, ctx RenderContext) (string, error) {
 	if ctx.Root == "" || ctx.SourceDir == "" {
 		return rendered, nil
@@ -300,13 +311,17 @@ func inlineLocalSVGs(rendered string, ctx RenderContext) (string, error) {
 }
 
 // inlineImgTag inlines one <img> tag whose destination is a relative .svg
-// file. Tags that reference anything else (external URLs, data: URIs,
-// fragments, non-SVG files) are returned unchanged. A reference to a
-// missing or unreadable SVG, or a path escaping the repository root, is
-// an error — never a silent pass-through.
+// file, or a barnacle:<name>.svg reference to the embedded Lucide set. Tags
+// that reference anything else (external URLs, data: URIs, fragments,
+// non-SVG files) are returned unchanged. A reference to a missing or
+// unreadable SVG, or a path escaping the repository root, is an error —
+// never a silent pass-through.
 func inlineImgTag(tag, srcDir, root string) (string, error) {
 	attrs := parseImgAttrs(tag)
 	dest := attrs["src"]
+	if strings.HasPrefix(strings.ToLower(dest), barnacleScheme) {
+		return inlineBarnacleIcon(dest, attrs)
+	}
 	if !isLocalSVG(dest) {
 		return tag, nil
 	}
@@ -322,6 +337,36 @@ func inlineImgTag(tag, srcDir, root string) (string, error) {
 	inline, err := svgToInline(data, attrs)
 	if err != nil {
 		return "", fmt.Errorf("svg reference %q: %w", dest, err)
+	}
+	return inline, nil
+}
+
+// barnacleScheme is the destination prefix that selects an icon from the
+// Lucide set embedded in the binary: barnacle:<name>.svg. It is deliberately
+// not a filesystem path, so a repository that happens to contain a
+// "barnacle:" directory (or a file literally named "barnacle:folder.svg")
+// is never misread.
+const barnacleScheme = "barnacle:"
+
+// inlineBarnacleIcon resolves a barnacle:<name>.svg destination against the
+// embedded Lucide icons and inlines it like any local SVG. The name must be
+// exactly the vendored icon name (lowercase, hyphenated) plus the .svg
+// suffix — anything else is an error naming 'barnacle list-icons', never a
+// pass-through. The .svg suffix keeps the shorthand parallel to the local
+// file convention and leaves room for other embedded kinds later.
+func inlineBarnacleIcon(dest string, attrs map[string]string) (string, error) {
+	rest := dest[len(barnacleScheme):]
+	if !strings.HasSuffix(strings.ToLower(rest), ".svg") {
+		return "", fmt.Errorf("barnacle icon reference %q: expected the form \"barnacle:<name>.svg\" (run 'barnacle list-icons' to see the embedded set)", dest)
+	}
+	name := rest[:len(rest)-len(".svg")]
+	data, err := lucide.Icon(name)
+	if err != nil {
+		return "", fmt.Errorf("barnacle icon reference %q: %w", dest, err)
+	}
+	inline, err := svgToInline(data, attrs)
+	if err != nil {
+		return "", fmt.Errorf("barnacle icon reference %q: %w", dest, err)
 	}
 	return inline, nil
 }

@@ -43,7 +43,7 @@ tools/<name>/
 | [logamuffin](logamuffin/update.sh.md) | Structured logging backend for `log()` in the scripts | [update.sh](logamuffin/update.sh.md) |
 | [runner-spawner](runner-spawner/update.sh.md) | Manages the self-hosted CI runners (see `.runner-spawner.json` and `.github/workflows/ci.yml`) | [update.sh](runner-spawner/update.sh.md) |
 | [versioner](versioner/update.sh.md) | Computes the repository version for builds and releases | [update.sh](versioner/update.sh.md) |
-| [lucide](lucide/update.sh.md) | Vendored [Lucide](https://lucide.dev) icons (ISC) used by the diagram conventions; inlined into the generated site by barnacle | [update.sh](lucide/update.sh.md) |
+| [lucide](lucide/update.sh.md) | Vendored [Lucide](https://lucide.dev) icons (ISC) used by the diagram conventions; inlined into the generated site by barnacle, embedded into every binary (`lucide.go`) and referenced via `barnacle:<name>.svg` / `barnacle list-icons` | [update.sh](lucide/update.sh.md) · [lucide.go](lucide/lucide.go.md) |
 
 `scripts/.common.env` and `scripts/.<platform>.env` select these via `*_VERSION_DIR`/`*_BIN`; see [scripts/env.sh.md](../scripts/env.sh.md). (Those env files are barnacle-hidden; `scripts/env.sh.md` documents them.)
 

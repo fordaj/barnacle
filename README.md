@@ -68,6 +68,7 @@ The result is a visual map of your codebase that developers and coding agents ca
 - **Browser-rendered diagrams** — Mermaid diagrams are rendered by the browser.
 - **Portable** — Generated sites can be hosted anywhere static files can be served.
 - **Cross-platform binaries** — Written in Go and distributed as precompiled binaries for major operating systems and architectures.
+- **Self-contained icons** — The [Lucide](https://lucide.dev) icon set (ISC-licensed) is embedded in every binary; `<img src="barnacle:directory.svg">` references it from your diagrams without any local path, and `barnacle list-icons` prints the embedded set with attribution.
 
 ## Getting started
 
@@ -96,12 +97,14 @@ Open the generated site in a browser to explore your documentation.
 
 ```bash
 barnacle [options]
+barnacle list-icons
 ```
 
-| Option            | Description                                                       |
-| ----------------- | ----------------------------------------------------------------- |
-| `--config <path>` | Path to a Barnacle configuration file.                            |
-| `--site <path>`   | Output directory for the generated website. Defaults to `./site`. |
+| Option            | Description                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| `--config <path>` | Path to a Barnacle configuration file.                                                   |
+| `--site <path>`   | Output directory for the generated website. Defaults to `./site`.                        |
+| `list-icons`      | Print the Lucide icons embedded in the binary (one per line, with attribution) and exit. |
 
 Examples:
 
@@ -117,6 +120,9 @@ barnacle --site ./public
 
 # Specify both
 barnacle --config ./config/barnacle.json --site ./build/site
+
+# List the embedded Lucide icons (and where they come from)
+barnacle list-icons
 ```
 
 ## Documentation files
@@ -284,7 +290,7 @@ flowchart LR
 
 Assign them with `class NodeA,NodeB goFile` — the `:::` shorthand works too, but one form everywhere keeps the source greppable.
 
-**Inline glyphs — file-kind glyph above the label; clickable nodes underlined.** Icons are the real [Lucide](https://lucide.dev) set, vendored at `tools/lucide/` (ISC-licensed; see `tools/lucide/LICENSE`) and referenced straight from the diagram source as plain Markdown inline images. Labels are HTML, so an inline `<img>` just works under `securityLevel: 'strict'`; barnacle inlines local `.svg` references itself at generation time, so no request ever goes out to disk. The file-kind glyph sits on the line above the text (`<img …/><br/>Label`); a node with a `click` directive carries an underlined label instead of any badge (`<u>Label</u>`).
+**Inline glyphs — file-kind glyph above the label; clickable nodes underlined.** Icons are the real [Lucide](https://lucide.dev) set, vendored at `tools/lucide/` (ISC-licensed; see `tools/lucide/LICENSE`) and referenced straight from the diagram source as plain Markdown inline images — either as a relative `<img src="…/icon.svg">` path, or through the embedded copy in the binary as `<img src="barnacle:directory.svg">`, which never depends on where the repository lives. Labels are HTML, so an inline `<img>` just works under `securityLevel: 'strict'`; barnacle inlines the icons itself at generation time, so no request ever goes out to disk. `barnacle list-icons` prints the names of every embedded icon, with the Lucide attribution. The file-kind glyph sits on the line above the text (`<img …/><br/>Label`); a node with a `click` directive carries an underlined label instead of any badge (`<u>Label</u>`).
 
 ```mermaid
 flowchart LR
@@ -303,6 +309,7 @@ The file-kind glyph is picked to match the class — a folder for `scripts/`, `<
 
 - Mermaid treats the label as HTML and handles `<`, `>`, `&` and quotes for you; escaped-text entities work in labels (`&lt;name&gt;` for a literal `<name>`, `<br/>` for a line break).
 - A relative `<img src='…/file.svg'>` is inlined by barnacle as inline `<svg>`; an absolute URL or `data:` URI is left alone; a missing or unreadable file (or a path that escapes the repository root) fails the render with a clear error naming the page.
+- `<img src="barnacle:<name>.svg">` inlines the icon `<name>` from the set embedded in the binary — no repository-relative path, no chance of clashing with your project's own `barnacle:…` layout. Names are the vendored hyphenated lowercase ones (`barnacle list-icons` prints them all); an unknown or malformed name fails the render with a clear error. The `.svg` suffix is required. The zero-context render path (used in barnacle's tests) leaves `barnacle:` references untouched, exactly like filesystem references.
 - The SVG's own root attributes (`fill`, `stroke`, `stroke-width`, `stroke-linecap`, `stroke-linejoin`, `stroke-miterlimit`) pass through verbatim. The one interjection is a minimal inline-style projection of those same attributes onto every shape, which is what stops mermaid's built-in theme rules (`.node path { fill:\#ECECFF; stroke:\#9370DB }`) from repainting stroke-only glyphs as solid lavender blobs. Nothing is added that the file itself does not declare.
 - `<img>`'s `alt` attribute becomes `aria-label` on the inlined SVG; an SVG with no `alt` is marked `aria-hidden="true"` (decorative by convention).
 - Icons stroke in `currentColor`, so they follow the node's **text color** — control it with `classDef … color:#xyz`. The `style id fill:…, stroke:…` directive only restyles the node's outer shape; it does not recolor the icons (they inherit the label's text color). To color icons independently of the text, set `color:` in the classDef.
@@ -409,7 +416,7 @@ scripts/build.sh          # cross-compile into dist/<platform>/barnacle{,.exe}
 
 The suite includes an end-to-end layer that generates a fixture site and verifies it two ways: statically, every relative `href`/`src`/`xlink:href` in the generated site (including the anchors Mermaid renders for `click` directives) must resolve to a real file, and no local `.md`/`.mmd` target may remain; and in a real browser, every generated page is loaded headlessly and every unique anchor target found on those pages is navigated to. The browser layer needs Chrome or Chromium (it is skipped otherwise; the static layer always runs) — set `BARNACLE_CHROME` to the executable's path to force a specific browser, for example on CI machines with an unusual install.
 
-`scripts/build.sh` emits binaries for macOS, Linux, and Windows on ARM64 and x86_64, stamping the version computed by `scripts/version.sh` into each binary.
+`scripts/build.sh` emits binaries for macOS, Linux, and Windows on ARM64 and x86_64, stamping the version computed by `scripts/version.sh` into each binary. The icons and their license travel with every binary: the Lucide set is embedded (`tools/lucide/lucide.go`), and `LUCIDE-LICENSE` is copied next to each `barnacle`/`barnacle.exe` in `dist/<platform>/`.
 
 ## Formatting and CI
 
@@ -430,7 +437,7 @@ scripts/release.sh --dry-run      # compute version, verify, build, touch nothin
 scripts/release.sh                # tag HEAD, push the tag, create the GitHub release
 ```
 
-`scripts/release.sh` computes the version with versioner, verifies the binary reports it, cross-compiles every supported platform, and attaches one archive per platform (`barnacle-<platform>.tar.gz`, `.zip` on Windows, containing the binary, `LICENSE`, and `README.md`) plus a `checksums.txt` manifest to a GitHub release. Re-running it against an existing tag attaches or refreshes the assets instead of failing. Requires `gh` authenticated for a real release; the working tree must be clean.
+`scripts/release.sh` computes the version with versioner, verifies the binary reports it, cross-compiles every supported platform, and attaches one archive per platform (`barnacle-<platform>.tar.gz`, `.zip` on Windows, containing the binary, `LICENSE`, `README.md` and `LUCIDE-LICENSE`) plus a `checksums.txt` manifest to a GitHub release. Re-running it against an existing tag attaches or refreshes the assets instead of failing. Requires `gh` authenticated for a real release; the working tree must be clean. The Lucide license ships in every archive because the icon set is embedded in every binary (`tools/lucide/lucide.go`) and `barnacle list-icons` prints the attribution.
 
 ## Built with Go
 

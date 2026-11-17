@@ -6,7 +6,10 @@
 #
 # Writes dist/<platform>/barnacle (barnacle.exe on Windows) for each
 # target platform, using the version computed by versioner (see
-# scripts/version.sh) stamped into the binary via -ldflags.
+# scripts/version.sh) stamped into the binary via -ldflags. The Lucide
+# license (tools/lucide/LICENSE) is copied next to every binary as
+# LUCIDE-LICENSE — the icons themselves are embedded, and their license
+# travels with each binary.
 #
 # Environment:
 #   VERSION   Override the version string embedded in the binaries.
@@ -56,6 +59,12 @@ for entry in "${PLATFORMS[@]}"; do
   GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 \
     go build -trimpath -ldflags "-s -w -X main.version=$VERSION" \
     -o "$out_dir/$bin" ./cmd/barnacle
+
+  # The Lucide icons are embedded in the binary (see tools/lucide/lucide.go)
+  # and their license must travel with every binary: ship it next to the
+  # executable as well, so the dist/ tree is self-describing even without
+  # the release archives.
+  cp "$REPO_ROOT/tools/lucide/LICENSE" "$out_dir/LUCIDE-LICENSE"
 done
 
 log INFO "done: binaries in dist/"

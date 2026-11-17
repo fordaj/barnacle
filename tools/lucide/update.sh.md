@@ -24,9 +24,11 @@ flowchart LR
 
 The [Lucide](https://lucide.dev) icon set, vendored at a pinned version so this repository's documentation (and anything else that reads these files) can use real, recognizable SVG icons instead of hand-drawn placeholders. Every icon is a 24×24 viewBox stroke-`currentColor` glyph; the same ones are used in the diagram glyphs throughout this documentation.
 
+Since `lucide.go` was added, the set is also **embedded into every barnacle binary** (`go:embed icons LICENSE VERSION`) — users reference it as `<img src="barnacle:<name>.svg">` and list it with `barnacle list-icons`. The vendored files in this directory remain the single source of truth; refreshing the bundle and rebuilding is all that is needed for the embedded set to follow.
+
 The "icons json" twins for JS consumers are deliberately not vendored — this bundle is content only, and icons are inlined straight into diagram labels instead of being loaded at runtime (see [`scripts/docs.sh.md`](../../scripts/docs.sh.md) for how barnacle inlines local SVG `<img>` tags into the generated site, so nothing but the diagram source reaches the browser).
 
-**Credit applies to the vendored set**: Lucide is ISC-licensed and a Feather-derivative section of the license retains Nodebird's MIT text — both are in `LICENSE` in this directory, kept verbatim by `update.sh`. Attribution lives here and in the README's diagram conventions; the rendered site itself carries no per-icon credit line.
+**Credit applies to the vendored set**: Lucide is ISC-licensed and a Feather-derivative section of the license retains Nodebird's MIT text — both are in `LICENSE` in this directory, kept verbatim by `update.sh`. Attribution lives here, in the README's diagram conventions, in `barnacle list-icons` output, and in the embedded copy of `LICENSE` shipped inside every binary and next to it as `LUCIDE-LICENSE` (see [lucide.go.md](lucide.go.md), [`scripts/build.sh.md`](../../scripts/build.sh.md) and [`scripts/release.sh.md`](../../scripts/release.sh.md)); the rendered site itself carries no per-icon credit line.
 
 ## `update.sh`
 
@@ -37,6 +39,8 @@ Only the SVG icons are vendored; the `.json` twins are dropped. Layout after a s
 ```text
 tools/lucide/
   update.sh
+  lucide.go         # go:embed icons LICENSE VERSION — see lucide.go.md
+  lucide.go.md      # documents lucide.go
   VERSION           # e.g. 1.73.0
   LICENSE           # ISC + the Feather-derived MIT section
   icons/<name>.svg  # 2055 files as of 1.73.0
@@ -47,5 +51,6 @@ tools/lucide/
 ## Related pages
 
 - [../README.md](../README.md) — the bundle index
+- [lucide.go.md](lucide.go.md) — the `go:embed` package that ships the set inside every barnacle binary
 - [../../scripts/docs.sh.md](../../scripts/docs.sh.md) — the docs generator that consumes these icons
 - [../../README.md](../../README.md) — diagram conventions showing the glyphs in use

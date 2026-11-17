@@ -26,8 +26,10 @@ One archive is produced per platform:
 ```text
 barnacle-<platform>.tar.gz    (.zip on Windows)
 barnacle-<platform>/          (top-level directory in the archive)
-  barnacle{,.exe}  LICENSE  README.md
+  barnacle{,.exe}  LICENSE  README.md  LUCIDE-LICENSE
 ```
+
+`LUCIDE-LICENSE` is the Lucide icon set's license (`tools/lucide/LICENSE`); the icons are embedded in every binary, and their license ships in every archive alongside the binary.
 
 The binaries are built with CGO disabled and are statically linked and portable. The program version is dynamic via versioner (`.versioner.json`); it is stamped into every cross-compiled binary with `-ldflags -X`, so the tag and `barnacle --version` agree by construction.
 
@@ -51,7 +53,7 @@ scripts/release.sh --dry-run      # compute + verify + build, touch nothing remo
 2. Refuses to continue on a dirty tree (except `--build-only`/`--dry-run`, which warn); best-effort `git fetch origin --tags`.
 3. Computes `VERSION`/`TAG` with `versioner --repo-dir "$REPO_ROOT" --quiet` (extraction shared with version.sh via `parse_versioner_output()` in [entry.sh.md](entry.sh.md)); the tag must match `vX.Y.Z...`.
 4. **Verifies**: builds a throwaway binary stamped with `$VERSION` and requires `barnacle --version` to report it.
-5. Cross-compiles into `dist/` via [build.sh.md](build.sh.md) (`VERSION="$VERSION"`), then packages each `dist/<platform>/` into `dist/barnacle-<platform>.tar.gz`/`.zip` staging in a temp directory (binary + `LICENSE` + `README.md`), and writes `dist/checksums.txt` (`shasum -a 256` or `sha256sum`).
+5. Cross-compiles into `dist/` via [build.sh.md](build.sh.md) (`VERSION="$VERSION"`), then packages each `dist/<platform>/` into `dist/barnacle-<platform>.tar.gz`/`.zip` staging in a temp directory (binary + `LICENSE` + `README.md` + `tools/lucide/LICENSE` as `LUCIDE-LICENSE`), and writes `dist/checksums.txt` (`shasum -a 256` or `sha256sum`).
 6. `--build-only`: stops here. Otherwise tags HEAD (an existing tag is reused), pushes it, and either creates the GitHub release (`gh release create --generate-notes`) or, if it already exists, re-uploads the assets with `--clobber` — the script is idempotent and safe to re-run to (re)attach binaries.
 
 ## Related pages
