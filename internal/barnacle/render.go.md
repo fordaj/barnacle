@@ -2,10 +2,10 @@
 
 ```mermaid
 flowchart TD
-    MD("<img src='../../tools/lucide/icons/file-text.svg' width='20' alt=''/><br/>Markdown source") --> GM("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>goldmark + GFM")
-    GM --> Links("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>RewriteDocLink pass<br/>href rewriting</u>")
-    Links --> Mermaid("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>Mermaid block pass<br/>fences become pre.mermaid</u>")
-    Mermaid --> HTML("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/><br/>HTML fragment")
+    MD("<img src='barnacle:file-text.svg' width='20' alt=''/><br/>Markdown source") --> GM("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>goldmark + GFM")
+    GM --> Links("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>RewriteDocLink pass<br/>href rewriting</u>")
+    Links --> Mermaid("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>Mermaid block pass<br/>fences become pre.mermaid</u>")
+    Mermaid --> HTML("<img src='barnacle:app-window.svg' width='20' alt=''/><br/>HTML fragment")
     click Links href "#link-rewriting"
     click Mermaid href "#mermaid"
     class MD mdFile
@@ -50,7 +50,7 @@ Mechanics:
 
 ## Local SVG inlining
 
-Barnacle rewrites `<img>` tags whose destination is a relative `.svg` path to **inline `<svg>` markup** at generation time, so diagrams (and body content) can inline real icon files without any external requests — sites stay fully self-contained and work from any base URL. This repository uses the vendored [Lucide](https://lucide.dev) icon set living in `tools/lucide/` for its own diagram icons. The same set is embedded in the binary itself (`tools/lucide/lucide.go`), and `<img src="barnacle:<name>.svg">` inlines an embedded icon with no repository-relative path at all.
+Barnacle rewrites `<img>` tags whose destination is a relative `.svg` path to **inline `<svg>` markup** at generation time, so diagrams (and body content) can inline real icon files without any external requests — sites stay fully self-contained and work from any base URL. This repository references the embedded icons via `<img src="barnacle:<name>.svg">` in its own diagrams; the same set lives in `tools/lucide/` for refresh purposes.
 
 The rules:
 

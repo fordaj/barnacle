@@ -2,21 +2,21 @@
 
 ```mermaid
 flowchart TD
-    Uname("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>uname -s : -m") --> Check{{"<img src='../tools/lucide/icons/hexagon.svg' width='20' alt=''/><br/>platform?"}}
-    Check -->|Darwin:arm64| MacArm("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>.macos-arm64.env")
-    Check -->|Darwin:x86_64| Mac86("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>.macos-x86_64.env")
-    Check -->|Linux:aarch64| LinArm("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>.linux-arm64.env")
-    Check -->|Linux:x86_64| Lin86("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>.linux-x86_64.env")
-    Check -->|Windows:x86_64| Win86("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>.windows-x86_64.env")
-    Check -->|Windows:arm64| WinArm("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>.windows-arm64.env")
-    Check -->|other| Error("<img src='../tools/lucide/icons/circle-exclamation-point.svg' width='20' alt=''/><br/>Error → return 1")
-    MacArm --> Anchor("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>Anchor *_BIN to repo root")
+    Uname("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>uname -s : -m") --> Check{{"<img src='barnacle:hexagon.svg' width='20' alt=''/><br/>platform?"}}
+    Check -->|Darwin:arm64| MacArm("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>.macos-arm64.env")
+    Check -->|Darwin:x86_64| Mac86("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>.macos-x86_64.env")
+    Check -->|Linux:aarch64| LinArm("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>.linux-arm64.env")
+    Check -->|Linux:x86_64| Lin86("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>.linux-x86_64.env")
+    Check -->|Windows:x86_64| Win86("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>.windows-x86_64.env")
+    Check -->|Windows:arm64| WinArm("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>.windows-arm64.env")
+    Check -->|other| Error("<img src='barnacle:circle-exclamation-point.svg' width='20' alt=''/><br/>Error → return 1")
+    MacArm --> Anchor("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>Anchor *_BIN to repo root")
     Mac86 --> Anchor
     LinArm --> Anchor
     Lin86 --> Anchor
     Win86 --> Anchor
     WinArm --> Anchor
-    Common("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>.common.env") -.-> Anchor
+    Common("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>.common.env") -.-> Anchor
     class Uname,Anchor shFile
     class Check hexNode
     class MacArm,Mac86,LinArm,Lin86,Win86,WinArm,Common shFile

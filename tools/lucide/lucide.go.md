@@ -2,10 +2,10 @@
 
 ```mermaid
 flowchart LR
-    Update("<img src='../../tools/lucide/icons/download.svg' width='20' alt=''/><br/>update.sh<br/>refreshes from upstream") --> Files("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>icons/ · LICENSE · VERSION")
-    Files --> Embed("<img src='../../tools/lucide/icons/box.svg' width='20' alt=''/><br/>go:embed<br/>lucide.go")
-    Embed --> Render("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>renderer<br/>barnacle:&lt;name&gt;.svg</u>")
-    Embed --> List("<img src='../../tools/lucide/icons/list.svg' width='20' alt=''/><br/><u>barnacle list-icons<br/>icons.go</u>")
+    Update("<img src='barnacle:download.svg' width='20' alt=''/><br/>update.sh<br/>refreshes from upstream") --> Files("<img src='barnacle:folder.svg' width='20' alt=''/><br/>icons/ · LICENSE · VERSION")
+    Files --> Embed("<img src='barnacle:box.svg' width='20' alt=''/><br/>go:embed<br/>lucide.go")
+    Embed --> Render("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>renderer<br/>barnacle:&lt;name&gt;.svg</u>")
+    Embed --> List("<img src='barnacle:list.svg' width='20' alt=''/><br/><u>barnacle list-icons<br/>icons.go</u>")
     click Render href "../../internal/barnacle/render.go.md"
     click List href "../../internal/barnacle/icons.go.md"
     click Update href "update.sh.md"

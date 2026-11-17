@@ -2,12 +2,12 @@
 
 ```mermaid
 flowchart LR
-    CLI("<img src='../../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>barnacle list-icons") --> List("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>ListIcons<br/>icons.go</u>")
-    List --> Names("<img src='../../tools/lucide/icons/list.svg' width='20' alt=''/><br/>IconNames")
-    List --> Version("<img src='../../tools/lucide/icons/tag.svg' width='20' alt=''/><br/>Version")
-    Names --> Embed("<img src='../../tools/lucide/icons/box.svg' width='20' alt=''/><br/>tools/lucide (go:embed)")
+    CLI("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>barnacle list-icons") --> List("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>ListIcons<br/>icons.go</u>")
+    List --> Names("<img src='barnacle:list.svg' width='20' alt=''/><br/>IconNames")
+    List --> Version("<img src='barnacle:tag.svg' width='20' alt=''/><br/>Version")
+    Names --> Embed("<img src='barnacle:box.svg' width='20' alt=''/><br/>tools/lucide (go:embed)")
     Version --> Embed
-    List --> Out("<img src='../../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>stdout")
+    List --> Out("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>stdout")
     click List href "../../cmd/barnacle/main.go.md"
     class CLI,Out,Names,Version shFile
     class List goFile

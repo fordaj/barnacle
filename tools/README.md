@@ -2,10 +2,10 @@
 
 ```mermaid
 flowchart LR
-    Gh("<img src='../tools/lucide/icons/tag.svg' width='20' alt=''/><br/>GitHub release<br/>fordaj/*") --> Update("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>update.sh")
-    Update --> Verify("<img src='../tools/lucide/icons/check.svg' width='20' alt=''/><br/>checksums<br/>when present")
-    Verify --> Stage("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>stage in<br/>temp dir")
-    Stage --> Swap("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>atomic swap<br/>delete superseded v*")
+    Gh("<img src='barnacle:tag.svg' width='20' alt=''/><br/>GitHub release<br/>fordaj/*") --> Update("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>update.sh")
+    Update --> Verify("<img src='barnacle:check.svg' width='20' alt=''/><br/>checksums<br/>when present")
+    Verify --> Stage("<img src='barnacle:folder.svg' width='20' alt=''/><br/>stage in<br/>temp dir")
+    Stage --> Swap("<img src='barnacle:folder.svg' width='20' alt=''/><br/>atomic swap<br/>delete superseded v*")
     class Gh tagNode
     class Update shFile
     class Verify checkNode

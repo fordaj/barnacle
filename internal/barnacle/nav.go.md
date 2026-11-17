@@ -2,11 +2,11 @@
 
 ```mermaid
 flowchart LR
-    Docs("<img src='../../tools/lucide/icons/file-text.svg' width='20' alt=''/><br/>Sorted documents") --> Tree("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>buildTree</u>")
-    Tree --> Nav("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>renderNav<br/>sidebar per page")
-    Tree --> Index("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>renderIndex<br/>landing page body")
-    Nav --> Page("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>pageTemplate</u>")
-    Index --> Landing("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/><br/>index.html")
+    Docs("<img src='barnacle:file-text.svg' width='20' alt=''/><br/>Sorted documents") --> Tree("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>buildTree</u>")
+    Tree --> Nav("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>renderNav<br/>sidebar per page")
+    Tree --> Index("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>renderIndex<br/>landing page body")
+    Nav --> Page("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>pageTemplate</u>")
+    Index --> Landing("<img src='barnacle:app-window.svg' width='20' alt=''/><br/>index.html")
     click Tree href "site.go.md"
     click Page href "template.go.md"
     class Docs mdFile

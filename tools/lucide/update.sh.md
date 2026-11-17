@@ -2,12 +2,12 @@
 
 ```mermaid
 flowchart LR
-    Gh("<img src='../../tools/lucide/icons/tag.svg' width='20' alt=''/><br/>lucide-icons/* release") --> Resolve("<img src='../../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>resolve tag")
-    Resolve --> Download("<img src='../../tools/lucide/icons/download.svg' width='20' alt=''/><br/>icons zip")
-    Download --> Check{{"<img src='../../tools/lucide/icons/hexagon.svg' width='20' alt=''/><br/>sha256 matches?"}}
-    Check -->|yes| Stage("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>stage in temp dir")
-    Check -->|no| Error("<img src='../../tools/lucide/icons/circle-exclamation-point.svg' width='20' alt=''/><br/>fatal — keep old icons")
-    Stage --> Swap("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>atomic swap")
+    Gh("<img src='barnacle:tag.svg' width='20' alt=''/><br/>lucide-icons/* release") --> Resolve("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>resolve tag")
+    Resolve --> Download("<img src='barnacle:download.svg' width='20' alt=''/><br/>icons zip")
+    Download --> Check{{"<img src='barnacle:hexagon.svg' width='20' alt=''/><br/>sha256 matches?"}}
+    Check -->|yes| Stage("<img src='barnacle:folder.svg' width='20' alt=''/><br/>stage in temp dir")
+    Check -->|no| Error("<img src='barnacle:circle-exclamation-point.svg' width='20' alt=''/><br/>fatal — keep old icons")
+    Stage --> Swap("<img src='barnacle:folder.svg' width='20' alt=''/><br/>atomic swap")
     class Gh tagNode
     class Resolve shFile
     class Download dlNode

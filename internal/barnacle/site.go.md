@@ -2,13 +2,13 @@
 
 ```mermaid
 flowchart TD
-    Config("<img src='../../tools/lucide/icons/braces.svg' width='20' alt=''/><br/><u>.barnacle.json</u>") --> Generate("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>Generate")
-    Generate --> Scan("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>Scan (walk .md/.mmd)</u>")
-    Scan --> Render("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>MarkdownToHTML</u>")
-    Render --> Pages("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/><br/>Per-page HTML<br/>+ list of pages without a diagram")
-    Generate --> Index("<img src='../../tools/lucide/icons/app-window.svg' width='20' alt=''/><br/><u>index.html<br/>landing page</u>")
-    Pages --> Assets("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>assets/<br/>barnacle.css · mermaid.min.js")
-    Pages --> Out("<img src='../../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>site/")
+    Config("<img src='barnacle:braces.svg' width='20' alt=''/><br/><u>.barnacle.json</u>") --> Generate("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>Generate")
+    Generate --> Scan("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>Scan (walk .md/.mmd)</u>")
+    Scan --> Render("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>MarkdownToHTML</u>")
+    Render --> Pages("<img src='barnacle:app-window.svg' width='20' alt=''/><br/>Per-page HTML<br/>+ list of pages without a diagram")
+    Generate --> Index("<img src='barnacle:app-window.svg' width='20' alt=''/><br/><u>index.html<br/>landing page</u>")
+    Pages --> Assets("<img src='barnacle:folder.svg' width='20' alt=''/><br/>assets/<br/>barnacle.css · mermaid.min.js")
+    Pages --> Out("<img src='barnacle:folder.svg' width='20' alt=''/><br/>site/")
     Index --> Out
     Assets --> Out
     click Scan href "scan.go.md"

@@ -2,11 +2,11 @@
 
 ```mermaid
 flowchart LR
-    Git(Git history) --> Versioner("<img src='../tools/lucide/icons/tag.svg' width='20' alt=''/><br/>versioner --quiet")
-    Rules("<img src='../tools/lucide/icons/braces.svg' width='20' alt=''/><br/>.versioner.json") --> Versioner
-    Versioner --> Out("<img src='../tools/lucide/icons/file-text.svg' width='20' alt=''/><br/>VERSION / TAG<br/>text · shell · json")
-    Out --> Build("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>build.sh — stamp binary</u>")
-    Out --> Release("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>release.sh — next tag</u>")
+    Git(Git history) --> Versioner("<img src='barnacle:tag.svg' width='20' alt=''/><br/>versioner --quiet")
+    Rules("<img src='barnacle:braces.svg' width='20' alt=''/><br/>.versioner.json") --> Versioner
+    Versioner --> Out("<img src='barnacle:file-text.svg' width='20' alt=''/><br/>VERSION / TAG<br/>text · shell · json")
+    Out --> Build("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>build.sh — stamp binary</u>")
+    Out --> Release("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>release.sh — next tag</u>")
     click Build href "build.sh.md"
     click Release href "release.sh.md"
     class Versioner tagNode

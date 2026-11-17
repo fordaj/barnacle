@@ -2,10 +2,10 @@
 
 ```mermaid
 flowchart TD
-    Root("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>barnacle")
-    Cmd("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/><br/><u>cmd/barnacle<br/>process boundary</u>")
-    Internal("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/><br/><u>internal/barnacle<br/>the implementation</u>")
-    Scripts("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/><br/><u>scripts/<br/>build · release · docs · format</u>")
+    Root("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>barnacle")
+    Cmd("<img src='barnacle:folder.svg' width='20' alt=''/><br/><u>cmd/barnacle<br/>process boundary</u>")
+    Internal("<img src='barnacle:folder.svg' width='20' alt=''/><br/><u>internal/barnacle<br/>the implementation</u>")
+    Scripts("<img src='barnacle:folder.svg' width='20' alt=''/><br/><u>scripts/<br/>build · release · docs · format</u>")
     Root --> Cmd
     Root --> Internal
     Root --> Scripts
@@ -264,8 +264,8 @@ Mermaid's own features get you a lot of polish for free — colored classes, com
 
 ```mermaid
 flowchart LR
-    Go("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>scan.go — Go") --> Sh("<img src='tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>build.sh — Bash") --> Json("<img src='tools/lucide/icons/braces.svg' width='20' alt=''/><br/>.barnacle.json — JSON") --> Md("<img src='tools/lucide/icons/file-text.svg' width='20' alt=''/><br/>README.md — Markdown") --> Html("<img src='tools/lucide/icons/app-window.svg' width='20' alt=''/><br/>index.html — generated") --> Js("<img src='tools/lucide/icons/zap.svg' width='20' alt=''/><br/>mermaid.min.js — JavaScript")
-    Tag("<img src='tools/lucide/icons/tag.svg' width='20' alt=''/><br/>v0.1.0 — release tag") --> Dl("<img src='tools/lucide/icons/download.svg' width='20' alt=''/><br/>gh release download") --> Check("<img src='tools/lucide/icons/check.svg' width='20' alt=''/><br/>verify checksums") --> Box("<img src='tools/lucide/icons/package.svg' width='20' alt=''/><br/>dist/barnacle.tar.gz")
+    Go("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>scan.go — Go") --> Sh("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>build.sh — Bash") --> Json("<img src='barnacle:braces.svg' width='20' alt=''/><br/>.barnacle.json — JSON") --> Md("<img src='barnacle:file-text.svg' width='20' alt=''/><br/>README.md — Markdown") --> Html("<img src='barnacle:app-window.svg' width='20' alt=''/><br/>index.html — generated") --> Js("<img src='barnacle:zap.svg' width='20' alt=''/><br/>mermaid.min.js — JavaScript")
+    Tag("<img src='barnacle:tag.svg' width='20' alt=''/><br/>v0.1.0 — release tag") --> Dl("<img src='barnacle:download.svg' width='20' alt=''/><br/>gh release download") --> Check("<img src='barnacle:check.svg' width='20' alt=''/><br/>verify checksums") --> Box("<img src='barnacle:package.svg' width='20' alt=''/><br/>dist/barnacle.tar.gz")
     class Go goFile
     class Sh shFile
     class Json jsonFile
@@ -294,8 +294,8 @@ Assign them with `class NodeA,NodeB goFile` — the `:::` shorthand works too, b
 
 ```mermaid
 flowchart LR
-    Scan("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>Scan</u>")
-    Site("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/><br/><u>site/</u>")
+    Scan("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>Scan</u>")
+    Site("<img src='barnacle:folder.svg' width='20' alt=''/><br/><u>site/</u>")
     Scan --> Site
     click Scan href "internal/barnacle/scan.go.md"
     click Site href "internal/barnacle/site.go.md"
@@ -319,7 +319,7 @@ The file-kind glyph is picked to match the class — a folder for `scripts/`, `<
 
 ```mermaid
 flowchart TD
-    Parse{{"<img src='tools/lucide/icons/hexagon.svg' width='20' alt=''/><br/>Valid JSON?"}} -->|no| Error("<img src='tools/lucide/icons/circle-exclamation-point.svg' width='20' alt=''/><br/>Error → exit 1")
+    Parse{{"<img src='barnacle:hexagon.svg' width='20' alt=''/><br/>Valid JSON?"}} -->|no| Error("<img src='barnacle:circle-exclamation-point.svg' width='20' alt=''/><br/>Error → exit 1")
     Parse -->|yes| Config(Config)
     class Parse hexNode
     class Error errNode

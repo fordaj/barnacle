@@ -2,10 +2,10 @@
 
 ```mermaid
 flowchart TD
-    Entry("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>entry.sh<br/>sources env.sh + log()</u>") --> Env("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>env.sh<br/>cascade locator/anchor</u>")
-    Env --> Common("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>.common.env")
-    Env --> Plat("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>.os-arch.env<br/>one per platform")
-    Common --> Tools("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>tools/&lt;name&gt;/v*<br/>pinned binaries")
+    Entry("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>entry.sh<br/>sources env.sh + log()</u>") --> Env("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>env.sh<br/>cascade locator/anchor</u>")
+    Env --> Common("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>.common.env")
+    Env --> Plat("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>.os-arch.env<br/>one per platform")
+    Common --> Tools("<img src='barnacle:folder.svg' width='20' alt=''/><br/>tools/&lt;name&gt;/v*<br/>pinned binaries")
     Plat --> Tools
     click Entry href "entry.sh.md"
     click Env href "env.sh.md"

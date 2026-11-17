@@ -2,14 +2,14 @@
 
 ```mermaid
 flowchart TD
-    Start("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>LoadConfig") --> Exists{{"<img src='../../tools/lucide/icons/hexagon.svg' width='20' alt=''/><br/>File readable?"}}
-    Exists -- "no, default path" --> Defaults("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>Defaults")
-    Exists -- "no, --config" --> Error("<img src='../../tools/lucide/icons/circle-exclamation-point.svg' width='20' alt=''/><br/><u>Error → exit 1</u>")
-    Exists -- yes --> Parse{{"<img src='../../tools/lucide/icons/hexagon.svg' width='20' alt=''/><br/>Valid JSON?"}}
+    Start("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>LoadConfig") --> Exists{{"<img src='barnacle:hexagon.svg' width='20' alt=''/><br/>File readable?"}}
+    Exists -- "no, default path" --> Defaults("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>Defaults")
+    Exists -- "no, --config" --> Error("<img src='barnacle:circle-exclamation-point.svg' width='20' alt=''/><br/><u>Error → exit 1</u>")
+    Exists -- yes --> Parse{{"<img src='barnacle:hexagon.svg' width='20' alt=''/><br/>Valid JSON?"}}
     Parse -- no --> Error
-    Parse -- yes --> Check{{"<img src='../../tools/lucide/icons/hexagon.svg' width='20' alt=''/><br/>Blank exclude entry?"}}
+    Parse -- yes --> Check{{"<img src='barnacle:hexagon.svg' width='20' alt=''/><br/>Blank exclude entry?"}}
     Check -- yes --> Error
-    Check -- no --> Cfg("<img src='../../tools/lucide/icons/braces.svg' width='20' alt=''/><br/><u>Config<br/>.barnacle.json</u>")
+    Check -- no --> Cfg("<img src='barnacle:braces.svg' width='20' alt=''/><br/><u>Config<br/>.barnacle.json</u>")
     click Error href "../../cmd/barnacle/main.go.md"
     click Cfg href "site.go.md"
     class Start,Defaults goFile

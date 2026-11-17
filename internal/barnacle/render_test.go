@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/fordaj/barnacle/tools/lucide"
 )
 
 func TestRewriteDocLink(t *testing.T) {
@@ -355,5 +357,35 @@ func TestInlineBarnacleIconsZeroContextSkips(t *testing.T) {
 	}
 	if !strings.Contains(out, `src="barnacle:folder.svg"`) {
 		t.Errorf("zero context must skip inlining, got\n%s", out)
+	}
+}
+
+func TestInlineBarnacleIconsMatchRelativeFileInlining(t *testing.T) {
+	root := t.TempDir()
+	// Well-known icons embedded in the binary; the same bytes written to
+	// disk must produce byte-identical output.
+	for _, name := range []string{"folder", "file-code", "tag", "hexagon", "check", "terminal"} {
+		data, err := lucide.Icon(name)
+		if err != nil {
+			t.Fatalf("embedded icon %q unreadable: %v", name, err)
+		}
+		writeFile(t, root, "icons/"+name+".svg", string(data))
+
+		render := func(dest string) string {
+			src := []byte("# Title\n\n<img src=\"" + dest + "\" width=\"20\" alt=\"icon\"/>\n")
+			out, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: root}, src)
+			if err != nil {
+				t.Fatalf("dest %q: %v", dest, err)
+			}
+			return out
+		}
+		viaFile := render("icons/" + name + ".svg")
+		viaEmbed := render("barnacle:" + name + ".svg")
+		if viaFile != viaEmbed {
+			t.Errorf("icon %q: barnacle: and relative-file inlining differ\nfile:  %s\nembed: %s", name, viaFile, viaEmbed)
+		}
+		if !strings.Contains(viaEmbed, "<svg") {
+			t.Errorf("icon %q: barnacle: reference was not inlined\n%s", name, viaEmbed)
+		}
 	}
 }

@@ -2,10 +2,10 @@
 
 ```mermaid
 flowchart LR
-    Version("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>version.sh</u>") --> Stamp("<img src='../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>go build -ldflags -X main.version")
+    Version("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>version.sh</u>") --> Stamp("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>go build -ldflags -X main.version")
     Platforms(6 targets<br/>darwin · linux · windows<br/>arm64 · amd64 — CGO off) --> Stamp
-    Stamp --> Dist("<img src='../tools/lucide/icons/folder.svg' width='20' alt=''/><br/>dist/&lt;platform&gt;/<br/>barnacle{,.exe} + LUCIDE-LICENSE")
-    Dist --> Release("<img src='../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>release.sh — archives</u>")
+    Stamp --> Dist("<img src='barnacle:folder.svg' width='20' alt=''/><br/>dist/&lt;platform&gt;/<br/>barnacle{,.exe} + LUCIDE-LICENSE")
+    Dist --> Release("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>release.sh — archives</u>")
     click Release href "release.sh.md"
     click Version href "version.sh.md"
     class Version,Release shFile

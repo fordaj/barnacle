@@ -2,11 +2,11 @@
 
 ```mermaid
 flowchart LR
-    Code("<img src='tools/lucide/icons/file-code.svg' width='20' alt=''/><br/>Edit source") --> Doc("<img src='tools/lucide/icons/file-text.svg' width='20' alt=''/><br/>Update sibling .md<br/>in the same change")
-    Doc --> Regen("<img src='tools/lucide/icons/terminal.svg' width='20' alt=''/><br/>scripts/docs.sh")
-    Regen --> Site("<img src='tools/lucide/icons/folder.svg' width='20' alt=''/><br/>./site — git-ignored")
-    Site --> Review("<img src='tools/lucide/icons/check.svg' width='20' alt=''/><br/>Self-review<br/>the changed pages")
-    Review --> Commit("<img src='tools/lucide/icons/tag.svg' width='20' alt=''/><br/>Commit source<br/>+ doc together")
+    Code("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>Edit source") --> Doc("<img src='barnacle:file-text.svg' width='20' alt=''/><br/>Update sibling .md<br/>in the same change")
+    Doc --> Regen("<img src='barnacle:terminal.svg' width='20' alt=''/><br/>scripts/docs.sh")
+    Regen --> Site("<img src='barnacle:folder.svg' width='20' alt=''/><br/>./site — git-ignored")
+    Site --> Review("<img src='barnacle:check.svg' width='20' alt=''/><br/>Self-review<br/>the changed pages")
+    Review --> Commit("<img src='barnacle:tag.svg' width='20' alt=''/><br/>Commit source<br/>+ doc together")
     class Code goFile
     class Doc mdFile
     class Regen shFile

@@ -2,15 +2,15 @@
 
 ```mermaid
 flowchart TD
-    Generate("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>Generate<br/>site.go</u>") --> Scan("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>Scan<br/>scan.go</u>")
-    Generate --> Render("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>MarkdownToHTML<br/>render.go</u>")
-    Generate --> Nav("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>renderNav<br/>nav.go</u>")
-    Generate --> Template("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>pageTemplate<br/>template.go</u>")
-    Main("<img src='../../tools/lucide/icons/terminal.svg' width='20' alt=''/><br/><u>list-icons<br/>icons.go</u>") --> Embed("<img src='../../tools/lucide/icons/box.svg' width='20' alt=''/><br/>tools/lucide · go:embed")
+    Generate("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>Generate<br/>site.go</u>") --> Scan("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>Scan<br/>scan.go</u>")
+    Generate --> Render("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>MarkdownToHTML<br/>render.go</u>")
+    Generate --> Nav("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>renderNav<br/>nav.go</u>")
+    Generate --> Template("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>pageTemplate<br/>template.go</u>")
+    Main("<img src='barnacle:terminal.svg' width='20' alt=''/><br/><u>list-icons<br/>icons.go</u>") --> Embed("<img src='barnacle:box.svg' width='20' alt=''/><br/>tools/lucide · go:embed")
     click Main href "../../cmd/barnacle/main.go.md"
     Render --> Template
     Nav --> Template
-    Generate -.->|reads once| Config("<img src='../../tools/lucide/icons/file-code.svg' width='20' alt=''/><br/><u>LoadConfig<br/>config.go</u>")
+    Generate -.->|reads once| Config("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>LoadConfig<br/>config.go</u>")
     click Generate href "site.go.md"
     click Scan href "scan.go.md"
     click Render href "render.go.md"
