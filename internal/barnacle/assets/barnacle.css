@@ -1,13 +1,73 @@
+/* barnacle site stylesheet.
+ *
+ * Theming: three modes — System (default), Light, Dark — selected by the
+ * <html data-theme="…"> attribute, which the head of every page sets from
+ * localStorage before first paint (see the inline script in template.go).
+ * "System" stores no override and lets prefers-color-scheme decide, which
+ * is why the dark palette appears twice below: once under the media query
+ * for un-themed pages, once under [data-theme="dark"] for explicit dark.
+ * Both blocks must carry the same values. The sidebar is dark in every
+ * theme; only the content area adapts.
+ */
+
 :root {
   --sidebar-bg: #0f1722;
   --sidebar-fg: #c9d4e3;
   --sidebar-accent: #7dd3fc;
+  --sidebar-muted: #8fa3b8;
+  --sidebar-hover: rgba(255, 255, 255, 0.08);
+  --sidebar-active: rgba(125, 211, 252, 0.16);
+  --sidebar-field: rgba(255, 255, 255, 0.06);
+  --sidebar-field-focus: rgba(255, 255, 255, 0.1);
   --content-bg: #ffffff;
   --content-fg: #1f2937;
+  --heading: #111827;
   --muted: #6b7280;
   --border: #e5e7eb;
   --code-bg: #f3f4f6;
   --accent: #0369a1;
+  --accent-hover: #075985;
+  --mermaid-bg: #ffffff;
+  --mark-bg: #fde68a;
+  --mark-fg: #422006;
+  --shadow: 0 10px 28px rgba(15, 23, 34, 0.22);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sidebar-bg: #0b111d;
+    --content-bg: #121926;
+    --content-fg: #d3dce8;
+    --heading: #f1f5f9;
+    --muted: #8b98ab;
+    --border: #26324a;
+    --code-bg: #1b2436;
+    --accent: #7dd3fc;
+    --accent-hover: #a5e3ff;
+    --mermaid-bg: #171f30;
+    --mark-bg: #7c5e10;
+    --mark-fg: #fef3c7;
+    --shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --sidebar-bg: #0b111d;
+  --content-bg: #121926;
+  --content-fg: #d3dce8;
+  --heading: #f1f5f9;
+  --muted: #8b98ab;
+  --border: #26324a;
+  --code-bg: #1b2436;
+  --accent: #7dd3fc;
+  --accent-hover: #a5e3ff;
+  --mermaid-bg: #171f30;
+  --mark-bg: #7c5e10;
+  --mark-fg: #fef3c7;
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
 }
 
 * {
@@ -24,6 +84,15 @@ body {
   display: grid;
   grid-template-columns: 300px 1fr;
   min-height: 100vh;
+  transition: grid-template-columns 0.2s ease;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .sidebar {
@@ -34,6 +103,18 @@ body {
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
 }
 
 .site-title {
@@ -42,13 +123,268 @@ body {
   font-weight: 700;
   color: #fff;
   text-decoration: none;
-  padding: 0.25rem 0.5rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  margin-bottom: 0.75rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .site-title:hover {
   color: var(--sidebar-accent);
+}
+
+/* Two icon-only shell buttons share these base styles. */
+.sidebar-toggle,
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  color: var(--sidebar-fg);
+  cursor: pointer;
+  opacity: 0.7;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.sidebar-toggle:hover,
+.theme-toggle:hover {
+  background: var(--sidebar-hover);
+  color: #fff;
+  opacity: 1;
+}
+
+.sidebar-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* The sidebar toggle reads as "active" while the sidebar is collapsed. */
+:root[data-sidebar="collapsed"] .sidebar-toggle {
+  background: var(--sidebar-active);
+  color: var(--sidebar-accent);
+  opacity: 1;
+}
+
+.theme-toggle svg {
+  width: 17px;
+  height: 17px;
+}
+
+.theme-icon {
+  display: none;
+}
+
+:root[data-theme="system"] .theme-icon-system,
+:root:not([data-theme]) .theme-icon-system {
+  display: inline-flex;
+}
+
+:root[data-theme="light"] .theme-icon-light {
+  display: inline-flex;
+}
+
+:root[data-theme="dark"] .theme-icon-dark {
+  display: inline-flex;
+}
+
+/* Sidebar collapse, persisted in localStorage (barnacle-sidebar) and
+   applied pre-paint by the inline head script. On desktop the sidebar
+   collapses to a slim rail holding only the hamburger; on mobile the
+   static sidebar shrinks to its header row. The hamburger reopens it. */
+@media (min-width: 801px) {
+  :root[data-sidebar="collapsed"] body {
+    grid-template-columns: 56px 1fr;
+  }
+
+  :root[data-sidebar="collapsed"] .sidebar {
+    align-items: center;
+    padding: 0.75rem 0;
+    overflow: hidden;
+  }
+
+  :root[data-sidebar="collapsed"] .sidebar-top {
+    border-bottom: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  :root[data-sidebar="collapsed"] .site-title,
+  :root[data-sidebar="collapsed"] .theme-toggle,
+  :root[data-sidebar="collapsed"] .search,
+  :root[data-sidebar="collapsed"] nav {
+    display: none;
+  }
+}
+
+@media (max-width: 800px) {
+  :root[data-sidebar="collapsed"] .search,
+  :root[data-sidebar="collapsed"] nav,
+  :root[data-sidebar="collapsed"] .theme-toggle {
+    display: none;
+  }
+}
+
+/* Search box pinned to the top of the sidebar, above the nav tree. */
+.search {
+  position: relative;
+  margin: 0 0.25rem 0.75rem;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.65rem;
+  top: 0.65rem;
+  width: 15px;
+  height: 15px;
+  color: var(--sidebar-muted);
+  pointer-events: none;
+}
+
+.search-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.search input[type="search"] {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--sidebar-field);
+  color: #fff;
+  font: inherit;
+  font-size: 0.875rem;
+  padding: 0.42rem 2.1rem 0.42rem 2.1rem;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.search input[type="search"]::-webkit-search-cancel-button {
+  display: none;
+}
+
+.search input[type="search"]::placeholder {
+  color: var(--sidebar-muted);
+}
+
+.search input[type="search"]:focus {
+  background: var(--sidebar-field-focus);
+  border-color: var(--sidebar-accent);
+  outline: none;
+}
+
+.search-kbd {
+  position: absolute;
+  right: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: inherit;
+  font-size: 0.68rem;
+  color: var(--sidebar-muted);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  pointer-events: none;
+}
+
+.search-results {
+  position: absolute;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  max-height: min(70vh, 480px);
+  overflow-y: auto;
+  padding: 0.35rem;
+  background: var(--content-bg);
+  color: var(--content-fg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+
+.search-group + .search-group {
+  border-top: 1px solid var(--border);
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+}
+
+.search-page {
+  display: block;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--content-fg);
+  text-decoration: none;
+}
+
+.search-page:hover,
+.search-page[data-active="true"] {
+  background: var(--code-bg);
+}
+
+.search-hit {
+  display: block;
+  padding: 0.3rem 0.5rem 0.3rem 1.35rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: var(--content-fg);
+  text-decoration: none;
+}
+
+.search-hit:hover,
+.search-hit[data-active="true"] {
+  background: var(--code-bg);
+}
+
+.search-hit-title {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.search-page .search-snippet,
+.search-hit-title .search-mark {
+  text-transform: none;
+}
+
+.search-snippet {
+  display: block;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.search-empty {
+  padding: 0.75rem 0.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+mark.search-mark {
+  background: var(--mark-bg);
+  color: var(--mark-fg);
+  border-radius: 2px;
+  padding: 0 0.1em;
 }
 
 .nav-tree,
@@ -71,7 +407,7 @@ body {
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #8fa3b8;
+  color: var(--sidebar-muted);
   padding: 0.35rem 0.5rem 0.2rem;
 }
 
@@ -85,12 +421,32 @@ body {
 }
 
 .nav-link:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--sidebar-hover);
   color: #fff;
 }
 
+/* Page titles in HTML contexts render Markdown inline code as <code>. */
+.nav-link code {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 0 0.3em;
+  font-size: 0.82em;
+  color: #e2e8f0;
+}
+
+.doc-index code,
+.search-page code,
+.search-hit-title code,
+.search-snippet code {
+  background: var(--code-bg);
+  border-radius: 3px;
+  padding: 0 0.3em;
+  font-size: 0.88em;
+  text-transform: none;
+}
+
 .nav-link.current {
-  background: rgba(125, 211, 252, 0.16);
+  background: var(--sidebar-active);
   color: var(--sidebar-accent);
   font-weight: 600;
 }
@@ -106,7 +462,7 @@ body {
 .content h3,
 .content h4 {
   line-height: 1.25;
-  color: #111827;
+  color: var(--heading);
 }
 
 .content h1 {
@@ -117,6 +473,10 @@ body {
 
 .content a {
   color: var(--accent);
+}
+
+.content a:hover {
+  color: var(--accent-hover);
 }
 
 .content code {
@@ -140,26 +500,85 @@ body {
 }
 
 .content pre.mermaid {
-  background: #fff;
+  background: var(--mermaid-bg);
   border: none;
   text-align: center;
   padding: 1rem 0;
+  overflow-x: auto;
+}
+
+/* Tables: sized by content, scroll horizontally inside their own
+   wrapper when they exceed the available width, and never able to
+   break the page layout. */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  margin: 1rem 0;
+  scrollbar-width: thin;
+}
+
+.table-scroll table {
+  margin: 0;
 }
 
 .content table {
   border-collapse: collapse;
   margin: 1rem 0;
+  width: auto;
+  max-width: none;
 }
 
 .content th,
 .content td {
   border: 1px solid var(--border);
   padding: 0.4rem 0.7rem;
+  overflow-wrap: break-word;
 }
 
 .content th {
   background: var(--code-bg);
   text-align: left;
+}
+
+.content caption {
+  caption-side: top;
+  text-align: left;
+  padding: 0 0 0.4rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* Figures: numbered, labelled, caption centred under the image. */
+.content figure.figure {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.content figure.figure img {
+  margin: 0 auto;
+}
+
+.content figcaption {
+  margin-top: 0.5rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.caption-label {
+  font-weight: 600;
+  color: var(--content-fg);
+}
+
+/* Cross-references read as ordinary links, slightly tighter. */
+.content a.xref {
+  text-decoration: none;
+  border-bottom: 1px dashed var(--accent);
+}
+
+.content a.xref:hover {
+  border-bottom-style: solid;
 }
 
 .content blockquote {
@@ -212,6 +631,14 @@ body {
   .sidebar {
     position: static;
     height: auto;
+    padding: 0.75rem 1rem;
+  }
+
+  .search-results {
+    position: static;
+    margin-top: 0.35rem;
+    max-height: none;
+    box-shadow: none;
   }
 
   .content {
@@ -233,4 +660,10 @@ body {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
 }

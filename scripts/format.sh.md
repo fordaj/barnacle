@@ -41,6 +41,8 @@ Formattington is pinned in `pyproject.toml` to a git commit (no PyPI release exi
 | Shell (`*.sh`, `*.bash`) | shfmt `-i 2` |
 | TOML (`*.toml`)          | taplo        |
 
+: File-kind to formatter mapping {#tbl:tools}
+
 Style for the JavaScript/Markdown/YAML/JSON formatter is configured by formattington's own defaults plus any `.prettierrc` present at the repository root (the `scripts/format.sh` header notes this; no `.prettierrc` is currently tracked). The bundled binaries under `tools/` and generated locations such as `dist/` are skipped.
 
 ## Prerequisites

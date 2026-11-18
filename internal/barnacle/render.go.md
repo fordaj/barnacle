@@ -3,20 +3,24 @@
 ```mermaid
 flowchart TD
     MD("<img src='barnacle:file-text.svg' width='20' alt=''/><br/>Markdown source") --> GM("<img src='barnacle:file-code.svg' width='20' alt=''/><br/>goldmark + GFM")
-    GM --> Links("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>RewriteDocLink pass<br/>href rewriting</u>")
-    Links --> Mermaid("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>Mermaid block pass<br/>fences become pre.mermaid</u>")
-    Mermaid --> HTML("<img src='barnacle:app-window.svg' width='20' alt=''/><br/>HTML fragment")
+    GM --> Mermaid("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>Mermaid block pass<br/>fences become pre.mermaid</u>")
+    Mermaid --> Links("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>RewriteDocLink pass<br/>href rewriting</u>")
+    Links --> Crossref("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>applyCrossrefs pass<br/>captions · @fig:/@tbl: links</u>")
+    Crossref --> SVG("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>inlineLocalSVGs<br/>images inline as svg</u>")
+    SVG --> HTML("<img src='barnacle:app-window.svg' width='20' alt=''/><br/>HTML fragment")
     click Links href "#link-rewriting"
     click Mermaid href "#mermaid"
+    click Crossref href "crossref.go.md"
+    click SVG href "#local-svg-inlining"
     class MD mdFile
-    class GM,Links,Mermaid goFile
+    class GM,Links,Mermaid,Crossref,SVG goFile
     class HTML htmlFile
     classDef mdFile fill:#dcd6ce,stroke:#6b6255,color:#292524
     classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
     classDef htmlFile fill:#ffc48a,stroke:#c2410c,color:#431407
 ```
 
-Markdown is rendered to HTML with [goldmark](https://github.com/yuin/goldmark) (GFM: tables, strikethrough, task lists, autolinked URLs), plus two post-processing passes.
+Markdown is rendered to HTML with [goldmark](https://github.com/yuin/goldmark) (GFM: tables, strikethrough, task lists, autolinked URLs), plus a series of post-processing passes. The order is deliberate: Mermaid conversion and link rewriting first, then [the caption/cross-reference pass](crossref.go.md) (`applyCrossrefs`), then SVG inlining — the caption pass is `<img>`-shaped, so it must see image tags before they become inline `<svg>`s.
 
 ## Link rewriting
 
@@ -48,6 +52,10 @@ Mechanics:
 - Mermaid's own quirks apply to the source syntax: state diagrams cannot contain `:` in transition text; flowchart labels with parentheses must be quoted (`-->|"<a href='x.md'>send(cmd)</a>"|`), using single quotes inside the double-quoted label.
 - Node `click` directives keep working; inline anchors are for transitions and inline marks.
 
+## Captions and cross-references
+
+Between link rewriting and SVG inlining, `applyCrossrefs` numbers captioned figures and tables pandoc-crossref style and rewrites `@fig:`/`@tbl:` references to the numbered captions; it also wraps every `<table>` in a `<div class="table-scroll">` so wide tables stay usable on narrow screens. Duplicate labels fail the page render. The full syntax and the pass's mechanics are documented in [crossref.go.md](crossref.go.md); per pandoc-crossref, figures need `{#fig:label}` (immediately after an image alone in its paragraph) and tables get their caption from the one-line `: Caption {#tbl:label}` paragraph that follows the table.
+
 ## Local SVG inlining
 
 Barnacle rewrites `<img>` tags whose destination is a relative `.svg` path to **inline `<svg>` markup** at generation time, so diagrams (and body content) can inline real icon files without any external requests — sites stay fully self-contained and work from any base URL. This repository references the embedded icons via `<img src="barnacle:<name>.svg">` in its own diagrams; the same set lives in `tools/lucide/` for refresh purposes.
@@ -68,6 +76,7 @@ This is how the icons in this repository's own diagrams appear in the browser wi
 
 ## Related pages
 
+- [Cross-references and captions](crossref.go.md) — the caption numbering and `@fig:`/`@tbl:` pass that runs inside `MarkdownToHTML`
 - [The scanner](scan.go.md) — finds the `.md`/`.mmd` files this renderer turns into pages
 - [The site generator](site.go.md) — calls `MarkdownToHTML` / `MermaidPageHTML` per page
 - [The page template](template.go.md) — injects the fragment and loads mermaid.js when needed

@@ -91,6 +91,8 @@ func TestGenerateSite(t *testing.T) {
 		"parser/parser.html",
 		"parser/grammar.html",
 		"assets/barnacle.css",
+		"assets/app.js",
+		"assets/search-index.js",
 		"assets/mermaid.min.js",
 		markerFile,
 	}
@@ -120,6 +122,32 @@ func TestGenerateSite(t *testing.T) {
 	}
 	if !strings.Contains(mainHTML, `mermaid.initialize`) {
 		t.Errorf("main.html missing mermaid bootstrap script")
+	}
+
+	// The page shell carries the sidebar toggle, the theme toggle and the
+	// search box on every page, plus the search index and app script.
+	if !strings.Contains(mainHTML, `id="sidebar-toggle"`) {
+		t.Errorf("main.html missing the sidebar toggle")
+	}
+	if !strings.Contains(mainHTML, `id="theme-toggle"`) {
+		t.Errorf("main.html missing the theme toggle")
+	}
+	if !strings.Contains(mainHTML, `id="barnacle-search"`) {
+		t.Errorf("main.html missing the search box")
+	}
+	if !strings.Contains(mainHTML, `localStorage.getItem('barnacle-theme')`) {
+		t.Errorf("main.html missing the theme preload script")
+	}
+	if !strings.Contains(mainHTML, `assets/search-index.js`) {
+		t.Errorf("main.html missing the search index script")
+	}
+
+	searchIndex := read("assets/search-index.js")
+	if !strings.Contains(searchIndex, "window.BARNACLE_SEARCH_INDEX") {
+		t.Errorf("search-index.js does not assign window.BARNACLE_SEARCH_INDEX")
+	}
+	if !strings.Contains(searchIndex, `"parser/parser.html"`) {
+		t.Errorf("search index missing parser/parser.html: %s", searchIndex)
 	}
 
 	nested := read("parser/parser.html")

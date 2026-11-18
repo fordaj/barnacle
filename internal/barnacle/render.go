@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"html"
+	"math"
 	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/yuin/goldmark"
@@ -43,7 +45,11 @@ type RenderContext struct {
 // blocks so they render in the browser. Local SVG references in <img> tags
 // are inlined as inline <svg> elements — both relative filesystem paths and
 // barnacle:<name>.svg references to the embedded Lucide set (unless the
-// context is the zero value).
+// context is the zero value). Captioned figures and tables are numbered
+// and labelled pandoc-crossref style, tables are wrapped in a scroll
+// container, and @fig:label / @tbl:label cross-references are replaced
+// with links to the numbered captions (see crossref.go). The caption pass
+// runs before SVG inlining, because figures are an <img>-shaped pattern.
 func MarkdownToHTML(ctx RenderContext, source []byte) (string, error) {
 	var buf bytes.Buffer
 	if err := markdown.Convert(source, &buf); err != nil {
@@ -55,6 +61,10 @@ func MarkdownToHTML(ctx RenderContext, source []byte) (string, error) {
 		return "", err
 	}
 	content = rewriteDocLinks(content)
+	content, err = applyCrossrefs(content)
+	if err != nil {
+		return "", err
+	}
 	content, err = inlineLocalSVGs(content, ctx)
 	if err != nil {
 		return "", err
@@ -398,10 +408,17 @@ var shapeRe = regexp.MustCompile(`<(?P<tag>path|circle|rect|line|polyline|polygo
 // mermaid's paint. When the file declares none, the lucide defaults apply.
 var visualProps = []string{"fill", "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin"}
 
-// displaySize picks the rendered size of an inlined icon: the <img>'s own
-// width and height win; either one alone squares the icon; otherwise the
-// house default is 20px square (the viewBox carries the aspect).
-func displaySize(imgAttrs map[string]string) (string, string) {
+// displayDimensions picks the rendered size of an inlined icon or diagram.
+// The <img>'s own width and height win (either one alone squares the
+// icon). Otherwise a file declaring both width and height keeps them
+// (CSS max-width keeps them inside the content column). Otherwise a
+// square viewBox keeps the 20px house default (icon-shaped files, the
+// common case for the embedded Lucide set), while a non-square viewBox
+// becomes a fluid width:100% / height:auto, so wide diagrams —
+// architecture drawings, timing charts — fill the column instead of
+// being squeezed into 20px squares. A missing viewBox also falls back
+// to the house default.
+func displayDimensions(imgAttrs, fileAttrs map[string]string) (string, string) {
 	width, hasW := imgAttrs["width"]
 	height, hasH := imgAttrs["height"]
 	switch {
@@ -411,9 +428,42 @@ func displaySize(imgAttrs map[string]string) (string, string) {
 		return width, width
 	case hasH:
 		return height, height
-	default:
-		return "20px", "20px"
 	}
+	fw, hasFW := fileAttrs["width"]
+	fh, hasFH := fileAttrs["height"]
+	if hasFW && hasFH && fw != "" && fh != "" {
+		return fw, fh
+	}
+	if viewBox, ok := fileAttrs["viewbox"]; ok {
+		if vbW, vbH, ok := parseViewBoxSize(viewBox); ok {
+			if math.Abs(vbW-vbH) < 1e-6 {
+				return "20px", "20px"
+			}
+			return "100%", "auto"
+		}
+	}
+	return "20px", "20px"
+}
+
+// parseViewBoxSize reads the width and height of a viewBox attribute
+// ("minx miny width height").
+func parseViewBoxSize(viewBox string) (float64, float64, bool) {
+	parts := strings.Fields(strings.ReplaceAll(viewBox, ",", " "))
+	if len(parts) != 4 {
+		return 0, 0, false
+	}
+	w, err := strconv.ParseFloat(parts[2], 64)
+	if err != nil {
+		return 0, 0, false
+	}
+	h, err := strconv.ParseFloat(parts[3], 64)
+	if err != nil {
+		return 0, 0, false
+	}
+	if w <= 0 || h <= 0 {
+		return 0, 0, false
+	}
+	return w, h, true
 }
 
 // svgToInline renders a file's bytes as an inline <svg> element. Display
@@ -449,7 +499,7 @@ func svgToInline(data []byte, imgAttrs map[string]string) (string, error) {
 	}
 
 	attrs := fileAttrs
-	attrs["width"], attrs["height"] = displaySize(imgAttrs)
+	attrs["width"], attrs["height"] = displayDimensions(imgAttrs, fileAttrs)
 	if attrs["viewbox"] == "" {
 		attrs["viewbox"] = "0 0 24 24" // sensible default for icon-shaped files
 	}

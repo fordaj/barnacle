@@ -3,6 +3,7 @@ package barnacle
 import (
 	"fmt"
 	"html"
+	"regexp"
 	"strings"
 )
 
@@ -44,9 +45,33 @@ func buildTree(docs []Document) *treeNode {
 	return root
 }
 
+var inlineCodeRe = regexp.MustCompile("`([^`\n]+)`")
+
+// renderInlineCode escapes s for HTML and turns single-backtick spans into
+// <code> elements. It is used for raw Markdown fragments that are shown as
+// HTML — page titles in the sidebar and the landing page — where backticks
+// would otherwise render literally. Only inline code is honored; anything
+// else (links, emphasis, …) stays escaped text.
+func renderInlineCode(s string) string {
+	var b strings.Builder
+	b.Grow(len(s) + 24)
+	last := 0
+	for _, loc := range inlineCodeRe.FindAllStringSubmatchIndex(s, -1) {
+		b.WriteString(html.EscapeString(s[last:loc[0]]))
+		b.WriteString("<code>")
+		b.WriteString(html.EscapeString(s[loc[2]:loc[3]]))
+		b.WriteString("</code>")
+		last = loc[1]
+	}
+	b.WriteString(html.EscapeString(s[last:]))
+	return b.String()
+}
+
 // renderNav renders the sidebar navigation as nested lists. Links are
 // relative to the page at currentOutRel (slash-separated path relative to
-// the site root).
+// the site root). Page titles render Markdown inline code as <code> —
+// they carry raw Markdown (see scan.go's extractTitle), and the sidebar
+// is an HTML context.
 func renderNav(root *treeNode, currentOutRel string) string {
 	var b strings.Builder
 	b.WriteString(`<ul class="nav-tree">`)
@@ -72,15 +97,16 @@ func renderNavNodes(b *strings.Builder, node *treeNode, currentOutRel string) {
 			class += " current"
 		}
 		fmt.Fprintf(b, `<li><a class="%s"%s href="%s">%s</a></li>`,
-			class, current, html.EscapeString(href), html.EscapeString(doc.Title))
+			class, current, html.EscapeString(href), renderInlineCode(doc.Title))
 	}
 }
 
 // renderIndex renders the body of the landing page: an overview of every
-// documented page.
+// documented page. The site title and page titles render inline code like
+// in the sidebar (HTML contexts); the browser tab keeps raw text.
 func renderIndex(title string, root *treeNode) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, `<h1>%s</h1>`, html.EscapeString(title))
+	fmt.Fprintf(&b, `<h1>%s</h1>`, renderInlineCode(title))
 	b.WriteString("<p>Documentation lives alongside the code it describes. Pick a page to explore, or follow the links between documents.</p>")
 	if len(root.children) == 0 {
 		b.WriteString(`<p class="empty-state">No documentation files found. Add <code>.md</code> or <code>.mmd</code> files next to your source code and run barnacle again.</p>`)
@@ -103,7 +129,7 @@ func renderIndexNodes(b *strings.Builder, node *treeNode, prefix string) {
 		doc := child.doc
 		fmt.Fprintf(b, `<li><a href="%s">%s</a> <span class="doc-path">%s</span></li>`,
 			html.EscapeString(relativeURL("index.html", doc.OutputRel)),
-			html.EscapeString(doc.Title),
+			renderInlineCode(doc.Title),
 			html.EscapeString(doc.RelPath))
 	}
 }

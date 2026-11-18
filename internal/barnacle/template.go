@@ -9,6 +9,16 @@ type pageData struct {
 	Nav        template.HTML
 	RelPrefix  string
 	HasMermaid bool
+	// Theme toggle icons, inlined from the embedded Lucide set by site.go.
+	// Each is shown for exactly one preference (System / Light / Dark);
+	// which one is visible is selected in pure CSS off <html data-theme>.
+	IconSystem template.HTML
+	IconLight  template.HTML
+	IconDark   template.HTML
+	// IconMenu is the Lucide "menu" glyph for the sidebar toggle.
+	IconMenu template.HTML
+	// SearchIcon is the inline Lucide "search" glyph shown inside the box.
+	SearchIcon template.HTML
 }
 
 var pageTemplate = template.Must(template.New("page").Parse(`<!DOCTYPE html>
@@ -17,17 +27,55 @@ var pageTemplate = template.Must(template.New("page").Parse(`<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="generator" content="barnacle">
+<script>
+// Apply the stored theme before first paint to avoid flashing the wrong
+// palette, and the stored sidebar state, so a collapsed sidebar never
+// flashes open. Theme values: "system" (default), "light", "dark".
+// Sidebar values: "open" (default), "collapsed".
+(function () {
+  var theme = 'system';
+  try {
+    var t = localStorage.getItem('barnacle-theme');
+    if (t === 'system' || t === 'light' || t === 'dark') { theme = t; }
+  } catch (e) { /* storage unavailable; keep system */ }
+  document.documentElement.setAttribute('data-theme', theme);
+  var sidebar = 'open';
+  try {
+    var s = localStorage.getItem('barnacle-sidebar');
+    if (s === 'collapsed') { sidebar = 'collapsed'; }
+  } catch (e) { /* storage unavailable; keep open */ }
+  document.documentElement.setAttribute('data-sidebar', sidebar);
+})();
+</script>
 <title>{{.PageTitle}}{{if ne .PageTitle .SiteTitle}} · {{.SiteTitle}}{{end}}</title>
 <link rel="stylesheet" href="{{.RelPrefix}}assets/barnacle.css">
+<script defer src="{{.RelPrefix}}assets/search-index.js"></script>
+<script defer src="{{.RelPrefix}}assets/app.js"></script>
 {{- if .HasMermaid}}
 <script src="{{.RelPrefix}}assets/mermaid.min.js"></script>
-<script>mermaid.initialize({ startOnLoad: true, securityLevel: 'strict' });</script>
+<script>mermaid.initialize({ startOnLoad: true, securityLevel: 'strict', theme: (document.documentElement.getAttribute('data-theme') === 'dark' || (document.documentElement.getAttribute('data-theme') !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)) ? 'dark' : 'default' });</script>
 {{- end}}
 </head>
 <body>
-<aside class="sidebar">
-  <a class="site-title" href="{{.RelPrefix}}index.html">{{.SiteTitle}}</a>
-  <nav aria-label="Documentation">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Toggle sidebar" aria-expanded="true" aria-controls="sidebar-nav" title="Toggle sidebar">
+      <span class="sidebar-toggle-icon" aria-hidden="true">{{.IconMenu}}</span>
+    </button>
+    <a class="site-title" href="{{.RelPrefix}}index.html">{{.SiteTitle}}</a>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Theme: System — activate to change" title="Theme: System">
+      <span class="theme-icon theme-icon-system" aria-hidden="true">{{.IconSystem}}</span>
+      <span class="theme-icon theme-icon-light" aria-hidden="true">{{.IconLight}}</span>
+      <span class="theme-icon theme-icon-dark" aria-hidden="true">{{.IconDark}}</span>
+    </button>
+  </div>
+  <div class="search" id="search" data-prefix="{{.RelPrefix}}" role="search">
+    <span class="search-icon" aria-hidden="true">{{.SearchIcon}}</span>
+    <input id="barnacle-search" type="search" placeholder="Search docs…" autocomplete="off" spellcheck="false" aria-label="Search documentation" aria-expanded="false" aria-controls="search-results">
+    <kbd class="search-kbd" aria-hidden="true">/</kbd>
+    <div class="search-results" id="search-results" role="listbox" aria-label="Search results" hidden></div>
+  </div>
+  <nav aria-label="Documentation" id="sidebar-nav">
     {{.Nav}}
   </nav>
 </aside>

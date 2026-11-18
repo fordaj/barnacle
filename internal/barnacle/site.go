@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/fordaj/barnacle/tools/lucide"
 )
 
 //go:embed assets
@@ -49,10 +51,24 @@ func Generate(root, siteDir string, cfg Config) (int, []string, error) {
 		return 0, nil, err
 	}
 
+	searchIndex := buildSearchIndex(docs, pageContents(pages))
+	searchIndexJS, err := renderSearchIndexJS(searchIndex)
+	if err != nil {
+		return 0, nil, err
+	}
+
 	if err := prepareSiteDir(siteAbs); err != nil {
 		return 0, nil, err
 	}
 	if err := writeAssets(siteAbs, needsMermaid); err != nil {
+		return 0, nil, err
+	}
+	if err := os.WriteFile(filepath.Join(siteAbs, "assets", "search-index.js"), searchIndexJS, 0o644); err != nil {
+		return 0, nil, err
+	}
+
+	shellIcons, err := loadShellIcons()
+	if err != nil {
 		return 0, nil, err
 	}
 
@@ -71,6 +87,11 @@ func Generate(root, siteDir string, cfg Config) (int, []string, error) {
 			Nav:        template.HTML(nav),
 			RelPrefix:  relPrefix(p.doc.OutputRel),
 			HasMermaid: p.hasMermaid,
+			IconMenu:   shellIcons.menu,
+			IconSystem: shellIcons.system,
+			IconLight:  shellIcons.light,
+			IconDark:   shellIcons.dark,
+			SearchIcon: shellIcons.search,
 		}
 		if err := renderPage(out, pageTemplate, data); err != nil {
 			return 0, nil, err
@@ -86,6 +107,11 @@ func Generate(root, siteDir string, cfg Config) (int, []string, error) {
 		Nav:        template.HTML(indexNav),
 		RelPrefix:  "",
 		HasMermaid: false,
+		IconMenu:   shellIcons.menu,
+		IconSystem: shellIcons.system,
+		IconLight:  shellIcons.light,
+		IconDark:   shellIcons.dark,
+		SearchIcon: shellIcons.search,
 	}
 	if err := renderPage(filepath.Join(siteAbs, "index.html"), pageTemplate, indexData); err != nil {
 		return 0, nil, err
@@ -95,6 +121,51 @@ func Generate(root, siteDir string, cfg Config) (int, []string, error) {
 		return 0, nil, err
 	}
 	return len(pages) + 1, missingMermaid, nil
+}
+
+// pageContents returns the rendered HTML of every page, in order, for the
+// search-index builder (which needs the same bodies the site ships).
+func pageContents(pages []page) []string {
+	contents := make([]string, 0, len(pages))
+	for _, p := range pages {
+		contents = append(contents, p.content)
+	}
+	return contents
+}
+
+// shellIcons carries the inline Lucide SVGs the page shell needs: the
+// sidebar toggle (menu), the theme toggle (sun-moon / sun / moon) and the
+// search glyph. They are inlined so the shell stays self-contained, exactly
+// like the icons the renderer inlines into diagrams.
+type shellIcons struct {
+	menu, system, light, dark, search template.HTML
+}
+
+func loadShellIcons() (shellIcons, error) {
+	icons := shellIcons{}
+	for _, entry := range []struct {
+		name string
+		dst  *template.HTML
+	}{
+		{"menu", &icons.menu},
+		{"sun-moon", &icons.system},
+		{"sun", &icons.light},
+		{"moon", &icons.dark},
+		{"search", &icons.search},
+	} {
+		data, err := lucide.Icon(entry.name)
+		if err != nil {
+			return shellIcons{}, err
+		}
+		*entry.dst = template.HTML(collapseWhitespace(string(data)))
+	}
+	return icons, nil
+}
+
+// collapseWhitespace flattens runs of whitespace to single spaces, which
+// keeps multi-line icon SVG bytes readable on one line in the output.
+func collapseWhitespace(s string) string {
+	return strings.Join(strings.Fields(s), " ")
 }
 
 // page is a rendered document ready to be written to the site.
@@ -166,6 +237,7 @@ func writeAssets(siteAbs string, includeMermaid bool) error {
 	}
 	writes := map[string]string{
 		"assets/barnacle.css": "assets/barnacle.css",
+		"assets/app.js":       "assets/app.js",
 	}
 	if includeMermaid {
 		writes["assets/mermaid.min.js"] = "assets/mermaid.min.js"

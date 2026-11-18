@@ -7,16 +7,19 @@ flowchart TD
     Scan --> Render("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>MarkdownToHTML</u>")
     Render --> Pages("<img src='barnacle:app-window.svg' width='20' alt=''/><br/>Per-page HTML<br/>+ list of pages without a diagram")
     Generate --> Index("<img src='barnacle:app-window.svg' width='20' alt=''/><br/><u>index.html<br/>landing page</u>")
-    Pages --> Assets("<img src='barnacle:folder.svg' width='20' alt=''/><br/>assets/<br/>barnacle.css · mermaid.min.js")
+    Generate --> Search("<img src='barnacle:file-code.svg' width='20' alt=''/><br/><u>buildSearchIndex<br/>search.go</u>")
+    Pages --> Assets("<img src='barnacle:folder.svg' width='20' alt=''/><br/>assets/<br/>barnacle.css · app.js · search-index.js")
+    Search --> Assets
     Pages --> Out("<img src='barnacle:folder.svg' width='20' alt=''/><br/>site/")
     Index --> Out
     Assets --> Out
     click Scan href "scan.go.md"
     click Render href "render.go.md"
+    click Search href "search.go.md"
     click Index href "nav.go.md"
     click Config href "config.go.md"
     class Config jsonFile
-    class Generate,Scan,Render goFile
+    class Generate,Scan,Render,Search goFile
     class Pages,Index htmlFile
     class Assets,Out folder
     classDef jsonFile fill:#cdb9f7,stroke:#6d28d9,color:#2e1065
@@ -32,7 +35,7 @@ flowchart TD
 1. **Scan** the root for documentation files (see [the scanner](scan.go.md)).
 2. **Render** each file — Markdown to HTML, or `.mmd` into a Mermaid block (see [the renderer](render.go.md)); `renderPages` renders every document body up front via `renderOne` (which dispatches on `.mmd` vs Markdown) and records whether each page contains a diagram exactly once. Pages that contain a Mermaid diagram pull in `assets/mermaid.min.js`. It also collects the relative paths of pages with **no** Mermaid diagram and returns them — the caller (`cmd/barnacle/main.go.md`) prints them as a non-fatal stderr note, never an error.
 3. **Prepare** the output directory. If it holds barnacle's `.barnacle-site` marker, it is wiped first so deleted pages disappear; otherwise it is created and barnacle's files are overwritten one by one.
-4. **Write** `assets/barnacle.css` (and `mermaid.min.js` when needed), every page, a landing `index.html`, and the marker file.
+4. **Write** `assets/barnacle.css` and `assets/app.js` (and `mermaid.min.js` when needed), plus `assets/search-index.js` (generated from the rendered pages — not embedded, see [search.go.md](search.go.md)), every page, a landing `index.html`, and the marker file. The page shell also needs the sidebar-toggle glyph (`menu`), the theme-toggle icons (`sun-moon`/`sun`/`moon`) and the search glyph, which are inlined per page from the embedded Lucide set ([icons.go.md](icons.go.md)) — see [template.go.md](template.go.md).
 
 ## Return value
 
@@ -40,7 +43,7 @@ flowchart TD
 
 ## Pages
 
-Every page is the same shell: a sidebar with a tree of all documented pages (links relative to the page; the current page is marked `aria-current="page"`) plus the page's content. The landing page lists every page with its source path.
+Every page is the same shell: a sidebar with the site title, a subtle theme toggle (System / Light / Dark, see [template.go.md](template.go.md)), a client-side search box (see [search.go.md](search.go.md)), and a tree of all documented pages (links relative to the page; the current page is marked `aria-current="page"`), plus the page's content. The landing page lists every page with its source path.
 
 Relative links between pages are just relative links between the mirrored directories, so the generated site works from any base URL — open it locally, publish it with GitHub Pages, or host it anywhere static files are served.
 
@@ -54,6 +57,8 @@ Called exactly once per run by `main` in [cmd/barnacle/main.go.md](../../cmd/bar
 
 - [The scanner](scan.go.md) — produces the document list
 - [The renderer](render.go.md) — renders each document's body
+- [Cross-references and captions](crossref.go.md) — numbers captions and rewrites `@fig:`/`@tbl:` links inside each rendered page
+- [Client-side search](search.go.md) — builds the `search-index.js` the shell loads
 - [Navigation and landing page](nav.go.md) — sidebar and `index.html` body
 - [The page template](template.go.md) — the HTML shell every page shares
 - [Configuration](config.go.md) — what `Generate` receives as `cfg`

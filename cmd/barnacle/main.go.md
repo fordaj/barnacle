@@ -22,13 +22,15 @@ flowchart LR
     classDef goFile fill:#8fd8ef,stroke:#0277a8,color:#08303d
 ```
 
-The `barnacle` command turns the Markdown and Mermaid files that live alongside source code into a static, interconnected website. It takes one subcommand: `barnacle list-icons`.
+The `barnacle` command turns the Markdown and Mermaid files that live alongside source code into a static, interconnected website. It takes one subcommand: `barnacle list-icons` (@tbl:subcommands).
 
 ## Subcommands
 
 | Subcommand   | Description                                                                                                                                                 |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `list-icons` | Print the Lucide icons embedded in the binary (one per line, with the Lucide attribution) and exit. See [icons.go.md](../../internal/barnacle/icons.go.md). |
+
+: The only subcommand: `barnacle list-icons` {#tbl:subcommands}
 
 `list-icons` is dispatched before flag parsing, takes no arguments (anything after it is exit code `2`), and reads nothing from the filesystem or the configuration.
 
@@ -40,6 +42,8 @@ The `barnacle` command turns the Markdown and Mermaid files that live alongside 
 | `--site <path>`   | Output directory. Defaults to `./site`.                       |
 | `--version`       | Print the version (stamped at build time) and exit.           |
 | `--help`          | Show usage and exit (exit code `2`, like other usage errors). |
+
+: The flags of the `barnacle` command {#tbl:flags}
 
 `--config` changes only where the configuration is read from; the repository root is always the current working directory, and the scan starts there. Relative `--config` and `--site` paths are resolved against it.
 

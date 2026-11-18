@@ -68,7 +68,7 @@ scripts/format.sh  formatter (formattington via uv)
 site/             generated documentation (git-ignored)
 ```
 
-Important files include `cmd/barnacle/main.go`, `internal/barnacle/{config,scan,render,nav,site,template,icons}.go`, `internal/barnacle/assets/{barnacle.css,mermaid.min.js}` (embedded), `tools/lucide/lucide.go` (embeds the icon set), and the scripts under `scripts/`.
+Important files include `cmd/barnacle/main.go`, `internal/barnacle/{config,scan,render,crossref,search,nav,site,template,icons}.go`, `internal/barnacle/assets/{barnacle.css,app.js,mermaid.min.js}` (embedded), `tools/lucide/lucide.go` (embeds the icon set), and the scripts under `scripts/`.
 
 ## Documentation files (barnacle)
 

@@ -69,6 +69,11 @@ The result is a visual map of your codebase that developers and coding agents ca
 - **Portable** — Generated sites can be hosted anywhere static files can be served.
 - **Cross-platform binaries** — Written in Go and distributed as precompiled binaries for major operating systems and architectures.
 - **Self-contained icons** — The [Lucide](https://lucide.dev) icon set (ISC-licensed) is embedded in every binary; `<img src="barnacle:directory.svg">` references it from your diagrams without any local path, and `barnacle list-icons` prints the embedded set with attribution.
+- **Color theme** — System (default), Light and Dark modes, stored in localStorage and cycled from a subtle Lucide toggle on every page. See [Color theme](#color-theme).
+- **Collapsible sidebar** — A hamburger toggle (Lucide `menu`) collapses the sidebar to a slim rail (a header row on mobile); the preference persists in localStorage.
+- **Figures, tables and cross-references** — pandoc-crossref style captions and numbering: `{#fig:label}` on a standalone image, `: Caption {#tbl:label}` under a table, and `@fig:`/`@tbl:` references that link to the numbered caption. See [Figures, tables and cross-references](#figures-tables-and-cross-references).
+- **Responsive tables** — Tables size themselves by content, cells wrap, and an unbreakable wide table scrolls inside its own container instead of breaking the page layout.
+- **Search** — Client-side search across every page and every section, prebuilt at generation time; no server or database required. See [Search](#search).
 
 ## Getting started
 
@@ -105,6 +110,8 @@ barnacle list-icons
 | `--config <path>` | Path to a Barnacle configuration file.                                                   |
 | `--site <path>`   | Output directory for the generated website. Defaults to `./site`.                        |
 | `list-icons`      | Print the Lucide icons embedded in the binary (one per line, with attribution) and exit. |
+
+: The options and subcommands of the `barnacle` command {#tbl:options}
 
 Examples:
 
@@ -247,6 +254,8 @@ Syntax notes (mermaid's own quirks, not barnacle's):
 | Markdown                                                 | Not interpreted in plain labels — `**bold**` prints literally; use HTML (`<br/>`, `<strong>`)       |
 | `click A callback`                                       | Still requires `securityLevel: 'loose'`, which barnacle does not enable                             |
 
+: Mermaid label constructs under `securityLevel: 'strict'` {#tbl:label-constructs}
+
 Rules for links inside labels (identical to node clicks and everything else):
 
 - `.md` / `.markdown` / `.mmd` targets rewrite to `.html` — fragments and queries preserved; relative paths resolve from the page URL.
@@ -255,6 +264,47 @@ Rules for links inside labels (identical to node clicks and everything else):
 - Standalone `.mmd` files are treated the same way.
 
 Node clicks (`click A href "target.md"`) remain the blessed way to make **nodes** navigable; inline anchors are the way to make **transitions** navigable. Both rely on the same label/SVG rendering under `securityLevel: 'strict'`: labels go through DOMPurify, which keeps relative URLs (and strips `javascript:`).
+
+### Figures, tables and cross-references
+
+Barnacle supports pandoc-crossref-style captions and numbering, so figures and tables get proper numbered captions — and stable references to them — with no manual bookkeeping.
+
+**Figures.** Append `{#fig:label}` immediately after an image that stands alone in its paragraph. The image becomes a numbered figure whose caption is the image alt text:
+
+```markdown
+![Compile pipeline](pipeline.png){#fig:pipeline}
+```
+
+generates:
+
+```text
+<figure class="figure" id="fig:pipeline"><img src="pipeline.png" alt="Compile pipeline"><figcaption><span class="caption-label">Figure 1:</span> Compile pipeline</figcaption></figure>
+```
+
+Only images tagged this way become figures — a plain standalone image renders exactly as it did before.
+
+**Tables.** A table immediately followed by a one-line paragraph that starts with `:` takes that line as its caption; `{#tbl:label}` at the end of the line makes the table referenceable. The caption renders as a native `<caption>` element:
+
+```markdown
+| Stage  | Time |
+| ------ | ---- |
+| scan   | 12ms |
+| render | 40ms |
+
+: Render timings {#tbl:timings}
+```
+
+generates `<table id="tbl:timings"><caption>Table 1: Render timings</caption>…</table>`, wrapped in a `<div class="table-scroll">` so wide tables scroll horizontally on small screens instead of breaking the page.
+
+**Numbering.** Figures and tables are numbered independently per page, in document order. A caption gets a number whether or not it carries a label; the label is only needed for cross-references. Labels must be unique per page — a duplicate is an error, never a silent mis-reference.
+
+**Cross-references.** Write `@fig:label` or `@tbl:label` (optionally bracketed, `[@fig:pipeline]`) to get a link to the numbered element:
+
+```markdown
+See @fig:pipeline for the full flow, and @tbl:timings for exact numbers.
+```
+
+renders as "See Figure 1 for the full flow, and Table 1 for exact numbers." References to unknown labels are left untouched, and references inside code are never rewritten.
 
 ### Diagram conventions
 
@@ -349,7 +399,7 @@ site/
 
 Mermaid diagrams are rendered in the browser. The generated website requires no backend service or application runtime.
 
-The site is fully self-contained: the stylesheet and the Mermaid renderer are copied into `assets/`, so generated sites work offline and can be hosted anywhere static files can be served.
+The site is fully self-contained: the stylesheet, the page-shell script (theme toggle and search UI), and the prebuilt search index are copied or written into `assets/` on every generation, and the Mermaid renderer joins them on pages that contain a diagram — so generated sites work offline and can be hosted anywhere static files can be served.
 
 The output can be:
 
@@ -357,6 +407,24 @@ The output can be:
 - Published using GitHub Pages.
 - Hosted on any static web server.
 - Distributed as part of a repository or project artifact.
+
+## Color theme
+
+Every generated page carries a theme toggle in the sidebar — a single icon button (Lucide `sun-moon` / `sun` / `moon`) that cycles **System → Light → Dark**. The default is **System**, which follows your OS preference. Your choice is stored in localStorage under `barnacle-theme`, so it survives navigation between pages and reloads.
+
+The stylesheet keys off the `<html data-theme="…">` attribute, which a tiny inline script in the page head applies before first paint — there is no flash of the wrong theme. Pages with a Mermaid diagram initialize Mermaid with the matching theme (`dark` on a dark page), so diagrams don't blind you at midnight. The sidebar stays dark in every theme by design; only the content area adapts. There is no configuration — the toggle is always there.
+
+## The sidebar toggle
+
+A hamburger button (Lucide `menu`) at the left of the sidebar header collapses the sidebar: on desktop it shrinks to a slim rail holding only the hamburger, on mobile to its header row (the hamburger and site title stay). The preference is stored in localStorage under `barnacle-sidebar` and applied pre-paint like the theme, so a collapsed sidebar never flashes open. `aria-expanded` and `title` track the state; `prefers-reduced-motion` disables the animation.
+
+## Search
+
+Barnacle builds a static search index at generation time (`assets/search-index.js`), and every page gains a search box pinned to the top of the sidebar. Search covers **every page in the site and every section of every page**: the page title, each heading and the text of the section below it (code included; Mermaid sources are excluded as noise). Terms are matched case-insensitively and all terms must appear; results are grouped by page and ranked title > heading > body. Each hit deep-links to its section — `page.html#anchor`.
+
+Keyboard: `/` or `Cmd/Ctrl+K` focuses the box, `↑`/`↓` move through results, `Enter` opens the highlighted hit, `Esc` clears and leaves the field.
+
+Everything runs in the browser against the prebuilt index — like the rest of the site it works offline, straight from `file://`, or on any static host. The index is an external `<script>` precisely so `file://` pages can load it (fetching JSON fails there). On a large repository the index grows with your content; each section's text is capped at 3000 characters to keep it reasonable.
 
 ## Configuration
 
@@ -391,6 +459,8 @@ Configuration allows repository-specific behavior without requiring developers t
 | `exclude`            | Additional directories or files to skip. Bare names match any path segment; entries with a slash match as globs against the path relative to the root. |
 | `includeHidden`      | Scan dot-directories and dot-files other than `.git` (always excluded). Defaults to `false`.                                                           |
 | `warnMissingMermaid` | Print a non-fatal note listing pages that contain no Mermaid diagram, as a nudge toward diagram-first pages. Defaults to `true`.                       |
+
+: The keys of `.barnacle.json` {#tbl:config}
 
 A few rules worth knowing:
 

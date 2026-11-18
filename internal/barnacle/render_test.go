@@ -389,3 +389,54 @@ func TestInlineBarnacleIconsMatchRelativeFileInlining(t *testing.T) {
 		}
 	}
 }
+
+func TestInlineLocalSVGWideViewBoxBecomesFluid(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "wide.svg", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 200"><rect width="1400" height="200"/></svg>`)
+	out, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: root}, []byte("<img src=\"wide.svg\">\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, `width="100%"`) {
+		t.Errorf("wide viewBox svg should be fluid width\n%s", out)
+	}
+	if !strings.Contains(out, `height="auto"`) {
+		t.Errorf("wide viewBox svg should have auto height\n%s", out)
+	}
+}
+
+func TestInlineLocalSVGFileDimensionsKept(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "fixed.svg", `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360"><rect width="640" height="360"/></svg>`)
+	out, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: root}, []byte("<img src=\"fixed.svg\">\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, `width="640"`) || !strings.Contains(out, `height="360"`) {
+		t.Errorf("file-declared dimensions should win over defaults\n%s", out)
+	}
+}
+
+func TestInlineLocalSVGSquareViewBoxKeepsHouseDefault(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "icon.svg", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48"/></svg>`)
+	out, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: root}, []byte("<img src=\"icon.svg\">\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, `width="20px"`) || !strings.Contains(out, `height="20px"`) {
+		t.Errorf("square viewBox should keep the 20px house default\n%s", out)
+	}
+}
+
+func TestInlineLocalSVGImgDimensionsWin(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "wide.svg", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 200"><rect width="1400" height="200"/></svg>`)
+	out, err := MarkdownToHTML(RenderContext{SourceDir: root, Root: root}, []byte("<img src=\"wide.svg\" width=\"320\">\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, `width="320"`) || !strings.Contains(out, `height="320"`) {
+		t.Errorf("img width alone should square the image\n%s", out)
+	}
+}

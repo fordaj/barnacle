@@ -27,6 +27,8 @@ flowchart LR
 
 Renders the sidebar as nested `<ul class="nav-tree">` lists. Links are relative to the page being rendered (`currentOutRel`, slash-separated from the site root), computed with `relativeURL` from [site.go.md](site.go.md). The link for the current page gets `aria-current="page"` and the `current` class; directory entries are plain `<span class="nav-dir-name">` labels, not links.
 
+Page titles carry raw Markdown (they come from the `#` heading, backticks and all — see [scan.go.md](scan.go.md)), so in HTML contexts they render single-backtick spans as `<code>` via `renderInlineCode`: everything is HTML-escaped first, then the spans are wrapped. Anything else (links, emphasis) stays literal text. The landing page links do the same (`renderIndexNodes`), and the site title as the page `<h1>` as well; the browser tab (`<title>`) keeps raw text.
+
 ## `renderIndex`
 
 Renders the landing page body: the site title as `<h1>`, a short explainer sentence, and a `<ul class="doc-index">` of every page — each with its source path as a `doc-path` span. With no documents it emits an `empty-state` paragraph telling the user to add `.md`/`.mmd` files and re-run barnacle.

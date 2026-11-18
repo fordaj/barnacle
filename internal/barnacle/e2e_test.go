@@ -90,6 +90,22 @@ Inline SVG icons work in body content too: <img src="../icons/upload.svg" alt=""
 The C++ variant of [usage](usage.md).
 `)
 
+	writeFile(t, root, "guide/captions.md", `# Captions
+
+`+"```mermaid\nflowchart LR\n  X[write] --> Y[ship]\n```"+`
+
+![Deployment architecture](../icons/upload.svg){#fig:arch}
+
+| Column A | Column B |
+|----------|----------|
+| one      | two      |
+| three    | four     |
+
+: A captioned table {#tbl:stages}
+
+Reference the figure with @fig:arch and the table with [@tbl:stages].
+`)
+
 	writeFile(t, root, "reference.mmd", "flowchart LR\n  R1[api] --> R2[usage]\n  click R1 href \"guide/api.go.md\"\n  click R2 href \"guide/usage.md\" _blank\n")
 
 	return root
